@@ -1,4 +1,4 @@
-# Tank Blog Build Plan
+# Blog Build Plan
 
 Astro 6 beta · Tailwind v4 · DaisyUI 5 · Oxlint · Oxfmt · Bun · Cloudflare Pages · SSG
 
