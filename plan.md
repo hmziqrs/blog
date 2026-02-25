@@ -109,7 +109,7 @@ bun add -D oxlint oxfmt
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "printWidth": 100,
   "singleQuote": false,
-  "semi": true
+  "semi": true,
 }
 ```
 
@@ -255,7 +255,7 @@ bun add @astrojs/rss
 bun add -D pagefind
 ```
 
-Create `src/pages/rss.xml.ts`. Add meta tags (title, description, og:*, twitter:card) to BaseLayout. Add canonical URLs. Add `postbuild` script: `"postbuild": "pagefind --site dist"`.
+Create `src/pages/rss.xml.ts`. Add meta tags (title, description, og:\*, twitter:card) to BaseLayout. Add canonical URLs. Add `postbuild` script: `"postbuild": "pagefind --site dist"`.
 
 `public/robots.txt`:
 
@@ -302,7 +302,7 @@ describe("Post Schema", () => {
 
   test("rejects missing title", () => {
     expect(() =>
-      postSchema.parse({ description: "x", date: "2026-01-01", category: "news", tags: [] })
+      postSchema.parse({ description: "x", date: "2026-01-01", category: "news", tags: [] }),
     ).toThrow();
   });
 
@@ -314,7 +314,7 @@ describe("Post Schema", () => {
         date: "2026-01-01",
         category: "invalid",
         tags: [],
-      })
+      }),
     ).toThrow();
   });
 
@@ -385,6 +385,7 @@ Lighthouse 90+ on all four categories. Mobile responsive at 375px.
 Push to GitHub. CF Dashboard → Pages → Connect repo.
 
 Build settings:
+
 - Command: `bun run build && bunx pagefind --site dist`
 - Output: `dist`
 - Env: `NODE_VERSION` = `22`
