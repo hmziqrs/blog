@@ -16,8 +16,8 @@ Astro 6 beta · Tailwind v4 · DaisyUI 5 · Oxlint · Oxfmt · Bun · Cloudflare
 
 ```bash
 node -v  # must be 22+
-bunx create-astro@latest tank-blog --ref next  # empty template, TS strict
-cd tank-blog && bun dev
+bunx create-astro@latest blog --ref next  # empty template, TS strict
+cd blog && bun dev
 ```
 
 Verify: `localhost:4321` loads. `package.json` shows `astro` 6.x.
@@ -53,15 +53,15 @@ export default defineConfig({
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-tank-olive: oklch(0.45 0.05 130);
-  --color-tank-steel: oklch(0.55 0.01 260);
-  --color-tank-sand: oklch(0.82 0.04 80);
+  --color-olive: oklch(0.45 0.05 130);
+  --color-steel: oklch(0.55 0.01 260);
+  --color-sand: oklch(0.82 0.04 80);
 }
 ```
 
 Import `../styles/global.css` in base layout. Set `data-theme="night"` on `<html>`.
 
-Verify: DaisyUI `btn btn-primary` renders styled. `text-tank-olive` applies. No `tailwind.config` file exists.
+Verify: DaisyUI `btn btn-primary` renders styled. `text-olive` applies. No `tailwind.config` file exists.
 
 ## Phase 3: Oxlint + Oxfmt
 
@@ -180,7 +180,7 @@ const posts = defineCollection({
     description: z.string(),
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
-    category: z.enum(["tank-reviews", "history", "modern-armor", "tactics", "news"]),
+    category: z.enum(["engineering", "tutorials", "opinions", "tools", "news"]),
     tags: z.array(z.string()),
     draft: z.boolean().default(false),
     cover: z.string().optional(),
@@ -194,7 +194,7 @@ Example post `src/content/posts/hello-world.md`:
 
 ```markdown
 ---
-title: "Welcome to the Tank Blog"
+title: "Welcome to the Blog"
 description: "First post. What this blog is about."
 date: 2026-01-01
 category: "news"
@@ -282,7 +282,7 @@ const postSchema = z.object({
   description: z.string(),
   date: z.coerce.date(),
   updated: z.coerce.date().optional(),
-  category: z.enum(["tank-reviews", "history", "modern-armor", "tactics", "news"]),
+  category: z.enum(["engineering", "tutorials", "opinions", "tools", "news"]),
   tags: z.array(z.string()),
   draft: z.boolean().default(false),
   cover: z.string().optional(),
@@ -291,11 +291,11 @@ const postSchema = z.object({
 describe("Post Schema", () => {
   test("accepts valid frontmatter", () => {
     const valid = {
-      title: "T-72B3 Analysis",
+      title: "Building a CLI with Bun",
       description: "Deep dive",
       date: "2026-01-01",
-      category: "tank-reviews",
-      tags: ["russian-armor"],
+      category: "tutorials",
+      tags: ["bun", "cli"],
     };
     expect(() => postSchema.parse(valid)).not.toThrow();
   });
@@ -354,10 +354,10 @@ function extractUniqueTags(posts: { data: { tags: string[] } }[]): string[] {
 describe("Tag Extraction", () => {
   test("extracts unique sorted tags", () => {
     const posts = [
-      { data: { tags: ["armor", "history"] } },
-      { data: { tags: ["armor", "tactics"] } },
+      { data: { tags: ["typescript", "tooling"] } },
+      { data: { tags: ["typescript", "testing"] } },
     ];
-    expect(extractUniqueTags(posts)).toEqual(["armor", "history", "tactics"]);
+    expect(extractUniqueTags(posts)).toEqual(["testing", "tooling", "typescript"]);
   });
 
   test("handles empty tags", () => {
