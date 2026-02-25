@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
-/* Add your theme customizations here. */
-/* See the TailwindCSS v4 docs for more info: https://tailwindcss.com/docs/v4-beta */
+@plugin "daisyui";
+@plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: "Inter", sans-serif;
+  --color-olive: oklch(0.45 0.05 130);
+  --color-steel: oklch(0.55 0.01 260);
+  --color-sand: oklch(0.82 0.04 80);
 }
