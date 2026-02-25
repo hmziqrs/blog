@@ -24,7 +24,14 @@
     "dev:web": "turbo -F web dev",
     "deploy": "turbo -F @blog/infra deploy",
     "destroy": "turbo -F @blog/infra destroy",
-    "check": "oxlint && oxfmt --write"
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt --write",
+    "fmt:check": "oxfmt --check",
+    "check": "oxlint && oxfmt --write",
+    "test": "turbo -F web test",
+    "test:coverage": "turbo -F web test -- --coverage",
+    "qa": "bun run lint && bun run fmt:check && turbo -F web check"
   },
   "dependencies": {
     "@blog/env": "workspace:*",

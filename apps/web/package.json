@@ -8,6 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
     "astro": "astro"
   },
   "dependencies": {
