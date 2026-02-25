@@ -1,11 +1,33 @@
 ---
+import { getCollection } from "astro:content";
+import PostCard from "../components/PostCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const posts = await getCollection("posts", ({ data }) => !data.draft);
+const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
 <BaseLayout title="hmziq.rs" description="A blog about software engineering.">
   <div class="container mx-auto max-w-3xl px-4 py-10">
     <h1 class="mb-2 text-3xl font-bold">hmziq.rs</h1>
     <p class="text-base-content/60 mb-10">Writing about software engineering, tools, and ideas.</p>
-    <p class="text-base-content/40 text-sm">No posts yet. Check back soon.</p>
+    {
+      sorted.length === 0 ? (
+        <p class="text-base-content/40 text-sm">No posts yet. Check back soon.</p>
+      ) : (
+        <div class="flex flex-col gap-4">
+          {sorted.map((post) => (
+            <PostCard
+              title={post.data.title}
+              description={post.data.description}
+              date={post.data.date}
+              slug={post.id}
+              tags={post.data.tags}
+              category={post.data.category}
+            />
+          ))}
+        </div>
+      )
+    }
   </div>
 </BaseLayout>
