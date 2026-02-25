@@ -1,0 +1,23 @@
+---
+interface Props {
+  active?: string;
+}
+
+const { active } = Astro.props;
+
+const categories = ["engineering", "tutorials", "opinions", "tools", "news"];
+---
+
+<nav class="flex flex-wrap gap-2">
+  <a href="/posts" class:list={["btn btn-sm", !active ? "btn-primary" : "btn-ghost"]}>All</a>
+  {
+    categories.map((cat) => (
+      <a
+        href={`/category/${cat}`}
+        class:list={["btn btn-sm capitalize", active === cat ? "btn-primary" : "btn-ghost"]}
+      >
+        {cat}
+      </a>
+    ))
+  }
+</nav>

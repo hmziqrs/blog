@@ -1,28 +1,11 @@
 ---
-import Layout from "../layouts/Layout.astro";
-
-const TITLE_TEXT = `
- ██████╗ ███████╗████████╗████████╗███████╗██████╗
- ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
- ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝
- ██╔══██╗██╔══╝     ██║      ██║   ██╔══╝  ██╔══██╗
- ██████╔╝███████╗   ██║      ██║   ███████╗██║  ██║
- ╚═════╝ ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝
-
- ████████╗    ███████╗████████╗ █████╗  ██████╗██╗  ██╗
- ╚══██╔══╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-    ██║       ███████╗   ██║   ███████║██║     █████╔╝
-    ██║       ╚════██║   ██║   ██╔══██║██║     ██╔═██╗
-    ██║       ███████║   ██║   ██║  ██║╚██████╗██║  ██╗
-    ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
- `;
+import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<Layout title="blog">
-  <div class="container mx-auto max-w-3xl px-4 py-2">
-    <pre class="overflow-x-auto font-mono text-sm text-white">{TITLE_TEXT}</pre>
-    <div class="grid gap-6">
-    </div>
+<BaseLayout title="hmziq.rs" description="A blog about software engineering.">
+  <div class="container mx-auto max-w-3xl px-4 py-10">
+    <h1 class="mb-2 text-3xl font-bold">hmziq.rs</h1>
+    <p class="text-base-content/60 mb-10">Writing about software engineering, tools, and ideas.</p>
+    <p class="text-base-content/40 text-sm">No posts yet. Check back soon.</p>
   </div>
-</Layout>
-
+</BaseLayout>

@@ -1,0 +1,64 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import TagBadge from "../components/TagBadge.astro";
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description: string;
+    date: Date;
+    updated?: Date;
+    category: string;
+    tags: string[];
+    cover?: string;
+  };
+  readingTime?: number;
+}
+
+const { frontmatter, readingTime } = Astro.props;
+
+const formattedDate = frontmatter.date.toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+const formattedUpdated = frontmatter.updated?.toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+---
+
+<BaseLayout title={`${frontmatter.title} — hmziq.rs`} description={frontmatter.description}>
+  <div class="container mx-auto max-w-3xl px-4 py-10">
+    <header class="mb-8">
+      <a
+        href={`/category/${frontmatter.category}`}
+        class="badge badge-outline badge-sm mb-4 capitalize"
+      >
+        {frontmatter.category}
+      </a>
+      <h1 class="mb-3 text-4xl font-bold">{frontmatter.title}</h1>
+      <p class="text-base-content/70 mb-4 text-lg">{frontmatter.description}</p>
+      <div class="text-base-content/50 flex flex-wrap items-center gap-3 text-sm">
+        <time datetime={frontmatter.date.toISOString()}>{formattedDate}</time>
+        {readingTime && <span>·</span>}
+        {readingTime && <span>{readingTime} min read</span>}
+        {formattedUpdated && <span>· Updated {formattedUpdated}</span>}
+      </div>
+      {
+        frontmatter.tags.length > 0 && (
+          <div class="mt-4 flex flex-wrap gap-2">
+            {frontmatter.tags.map((tag) => (
+              <TagBadge tag={tag} />
+            ))}
+          </div>
+        )
+      }
+    </header>
+    <article class="prose prose-invert max-w-none">
+      <slot />
+    </article>
+  </div>
+</BaseLayout>
