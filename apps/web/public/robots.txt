@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://hmziq.rs/sitemap-index.xml

@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Search — hmziq.rs" description="Search all posts.">
+  <div class="container mx-auto max-w-3xl px-4 py-10">
+    <h1 class="mb-8 text-3xl font-bold">Search</h1>
+    <div id="search"></div>
+  </div>
+</BaseLayout>
+
+<link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+<script is:inline>
+  window.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const { PagefindUI } = await import("/pagefind/pagefind-ui.js");
+      const _ui = new PagefindUI({ element: "#search", showSubResults: true });
+    } catch {
+      const el = document.getElementById("search");
+      if (el) el.textContent = "Search index not available in dev mode. Run bun run build first.";
+    }
+  });
+</script>

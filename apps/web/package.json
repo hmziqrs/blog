@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "postbuild": "pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
     "test": "bun test",
@@ -14,12 +15,14 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
+    "@astrojs/sitemap": "^3.7.0",
     "astro": "^6.0.0-beta.15",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@blog/config": "workspace:*",
     "@tailwindcss/vite": "^4.1.18",
+    "pagefind": "^1.4.0",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "^7.0.0"

@@ -7,9 +7,17 @@ import Header from "../components/Header.astro";
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
 }
 
-const { title = "hmziq.rs", description = "A blog about software engineering." } = Astro.props;
+const {
+  title = "hmziq.rs",
+  description = "A blog about software engineering.",
+  image,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ? new URL(image, Astro.site) : undefined;
 ---
 
 <!doctype html>
@@ -20,6 +28,24 @@ const { title = "hmziq.rs", description = "A blog about software engineering." }
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="hmziq.rs" href="/rss.xml" />
+
     <title>{title}</title>
     <slot name="head" />
     <ClientRouter />
