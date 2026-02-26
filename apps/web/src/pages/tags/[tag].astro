@@ -1,5 +1,46 @@
 ---
-export function getStaticPaths() {
-  return [];
+import { getCollection } from "astro:content";
+import PostCard from "../../components/PostCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts", ({ data }) => !data.draft);
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: { posts: posts.filter((p) => p.data.tags.includes(tag)) },
+  }));
 }
+
+interface Props {
+  posts: Awaited<ReturnType<typeof getCollection<"posts">>>;
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
+
+<BaseLayout title={`#${tag} — hmziq.rs`} description={`Posts tagged with #${tag}.`}>
+  <div class="container mx-auto max-w-3xl px-4 py-10">
+    <h1 class="mb-2 text-3xl font-bold">#{tag}</h1>
+    <p class="text-base-content/50 mb-8 text-sm">
+      {sorted.length}
+      {sorted.length === 1 ? "post" : "posts"}
+    </p>
+    <div class="flex flex-col gap-4">
+      {
+        sorted.map((post) => (
+          <PostCard
+            title={post.data.title}
+            description={post.data.description}
+            date={post.data.date}
+            slug={post.id}
+            tags={post.data.tags}
+            category={post.data.category}
+          />
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
