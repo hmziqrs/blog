@@ -1,12 +1,12 @@
 # Blog
 
-Bun monorepo. Astro 6 beta blog (SSG) + Expo native app. Cloudflare Pages.
+Bun monorepo. Astro 6 blog (SSG) + Expo native app. Cloudflare Pages.
 
 ## Stack
 
-- **Runtime:** Bun, Node 22+
+- **Runtime:** Bun, Node 22.12+
 - **Monorepo:** Turborepo
-- **Web:** Astro 6 beta, static output, `apps/web/`
+- **Web:** Astro 6, static output, `apps/web/`
 - **Native:** Expo, `apps/native/`
 - **CSS:** Tailwind v4 via `@tailwindcss/vite` — config lives in CSS only, no JS config file
 - **Lint/Fmt:** oxlint (`.oxlintrc.json`) + oxfmt (`.oxfmtrc.json`)
