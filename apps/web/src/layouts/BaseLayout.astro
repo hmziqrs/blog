@@ -46,6 +46,56 @@ const ogImage = new URL(image ?? "/og-default.svg", Astro.site);
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="hmziq.rs" href="/rss.xml" />
 
+    <script is:inline>
+      const themeKey = "theme";
+      const defaultTheme = "night";
+
+      function getTheme() {
+        try {
+          const savedTheme = window.localStorage.getItem(themeKey);
+          return savedTheme === "light" || savedTheme === "night" ? savedTheme : defaultTheme;
+        } catch {
+          return defaultTheme;
+        }
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme === "night" ? "dark" : "light";
+
+        document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
+          toggle.textContent = theme === "night" ? "Light mode" : "Dark mode";
+          toggle.setAttribute("aria-pressed", String(theme === "light"));
+        });
+      }
+
+      function setTheme(theme) {
+        applyTheme(theme);
+        try {
+          window.localStorage.setItem(themeKey, theme);
+        } catch {}
+      }
+
+      function syncThemeToggle() {
+        applyTheme(getTheme());
+      }
+
+      applyTheme(getTheme());
+
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const toggle = target.closest("[data-theme-toggle]");
+        if (!(toggle instanceof HTMLButtonElement)) return;
+
+        setTheme(document.documentElement.dataset.theme === "night" ? "light" : "night");
+      });
+
+      document.addEventListener("astro:page-load", syncThemeToggle);
+      document.addEventListener("DOMContentLoaded", syncThemeToggle);
+    </script>
+
     <title>{title}</title>
     <slot name="head" />
     <ClientRouter />

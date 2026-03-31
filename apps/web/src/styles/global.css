@@ -1,10 +1,35 @@
 @import "tailwindcss";
 
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes:
+    dark --default,
+    light;
+}
 @plugin "@tailwindcss/typography";
+@plugin "daisyui/theme" {
+  name: "dark";
+  default: true;
+  --depth: 0;
+}
+@plugin "daisyui/theme" {
+  name: "light";
+  --depth: 0;
+}
 
 @theme {
   --color-olive: oklch(0.45 0.05 130);
   --color-steel: oklch(0.55 0.01 260);
   --color-sand: oklch(0.82 0.04 80);
+}
+
+html {
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+:where(*, *::before, *::after) {
+  box-shadow: none !important;
 }

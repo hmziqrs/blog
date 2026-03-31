@@ -11,10 +11,18 @@ const links = [
     <div class="navbar-start">
       <a href="/" class="btn btn-ghost text-xl font-bold">hmziq.rs</a>
     </div>
-    <div class="navbar-end">
+    <div class="navbar-end gap-2">
       <nav class="flex gap-1">
         {links.map((link) => <a href={link.to} class="btn btn-ghost btn-sm">{link.label}</a>)}
       </nav>
+      <button
+        type="button"
+        class="btn btn-ghost btn-sm min-w-24"
+        data-theme-toggle
+        aria-label="Switch color theme"
+      >
+        Light mode
+      </button>
     </div>
   </div>
 </header>
