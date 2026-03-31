@@ -1,6 +1,6 @@
 # blog
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Astro, and more.
+Reusable blog monorepo with an Astro web app and an Expo native app.
 
 ## Features
 
@@ -11,6 +11,7 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 - **TailwindCSS** - Utility-first CSS for rapid UI development
 - **Turborepo** - Optimized monorepo build system
 - **Oxlint** - Oxlint + Oxfmt (linting & formatting)
+- **Shared Site Contract** - Typed routes and config helpers in `packages/site`
 
 ## Getting Started
 
@@ -40,9 +41,10 @@ blog/
 ├── apps/
 │   ├── web/         # Frontend application (Astro)
 │   ├── native/      # Mobile application (React Native, Expo)
+├── site.config.ts   # Concrete site copy, nav, URL, optional pages
 ├── packages/
 │   ├── config/      # Shared TypeScript config
-│   ├── site/        # Shared site metadata and navigation
+│   ├── site/        # Shared config types, routes, and helpers
 ```
 
 ## Available Scripts
@@ -53,3 +55,10 @@ blog/
 - `bun run check-types`: Check TypeScript types across all apps
 - `bun run dev:native`: Start the React Native/Expo development server
 - `bun run check`: Run Oxlint and Oxfmt
+- `bun run qa`: Run lint, format check, Astro checks, and tests
+
+## Reuse Notes
+
+- Update `site.config.ts` to change site identity, URLs, nav, and optional pages.
+- `packages/site` stays generic; concrete copy belongs in `site.config.ts`.
+- The web app supports a configurable `basePath`, so the blog can live at `/` or under a path such as `/blog`.

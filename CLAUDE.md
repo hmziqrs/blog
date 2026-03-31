@@ -17,8 +17,9 @@ Bun monorepo. Astro 6 blog (SSG) + Expo native app. Cloudflare Pages.
 ```
 apps/web/          Astro blog
 apps/native/       Expo app
+site.config.ts     Concrete site identity, nav, and optional page content
 packages/config/   Shared tsconfig
-packages/site/     Shared site metadata and navigation
+packages/site/     Shared config types, routes, and helpers
 ```
 
 ## Commands

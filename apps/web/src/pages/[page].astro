@@ -1,0 +1,104 @@
+---
+import type { AboutPageConfig, ContactPageConfig, LegalPageConfig } from "@blog/site";
+import { pageTitle, routes, siteConfig } from "../config/site";
+import PageContainer from "../components/PageContainer.astro";
+import PageHeader from "../components/PageHeader.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+type OptionalPageEntry =
+  | { page: "about"; config: AboutPageConfig }
+  | { page: "contact"; config: ContactPageConfig }
+  | { page: "privacy"; config: LegalPageConfig }
+  | { page: "terms"; config: LegalPageConfig };
+
+export function getStaticPaths() {
+  const optionalPages: OptionalPageEntry[] = [];
+
+  if (siteConfig.pages.about) {
+    optionalPages.push({ page: "about", config: siteConfig.pages.about });
+  }
+  if (siteConfig.pages.contact) {
+    optionalPages.push({ page: "contact", config: siteConfig.pages.contact });
+  }
+  if (siteConfig.pages.privacy) {
+    optionalPages.push({ page: "privacy", config: siteConfig.pages.privacy });
+  }
+  if (siteConfig.pages.terms) {
+    optionalPages.push({ page: "terms", config: siteConfig.pages.terms });
+  }
+
+  return optionalPages.map(({ page, config }) => ({
+    params: { page },
+    props: { page, config },
+  }));
+}
+
+const { page, config } = Astro.props as OptionalPageEntry;
+const aboutPage = page === "about" ? (config as AboutPageConfig) : null;
+const contactPage = page === "contact" ? (config as ContactPageConfig) : null;
+const legalPage =
+  page === "privacy" || page === "terms" ? (config as LegalPageConfig) : null;
+---
+
+<BaseLayout title={pageTitle(config.title)} description={config.description}>
+  <PageContainer>
+    <PageHeader title={config.title} description={config.description} class="mb-8" />
+    {
+      aboutPage ? (
+        <article class="prose max-w-2xl">
+          {aboutPage.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+        </article>
+      ) : contactPage ? (
+        <section class="grid max-w-3xl gap-4">
+          {
+            contactPage.sections.map((section) => (
+              <article
+                class:list={[
+                  "rounded-[1.25rem] border border-base-300 p-5 sm:p-6",
+                  section.tone === "subtle" ? "bg-base-200/55" : "bg-base-100/70",
+                ]}
+              >
+                <p class="mb-3 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-base-content/52">
+                  {section.label}
+                </p>
+                <p class="text-base leading-7 text-base-content/78">{section.body}</p>
+              </article>
+            ))
+          }
+        </section>
+      ) : legalPage ? (
+        <article class="prose legal-doc max-w-3xl">
+          <div class="not-prose mb-8 flex flex-wrap items-center gap-3">
+            <span class="rounded-full border border-base-300 bg-base-200 px-3 py-1 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/62">
+              {legalPage.badgeLabel}
+            </span>
+            <span class="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/48">
+              Effective {legalPage.effectiveDate}
+            </span>
+          </div>
+
+          <p>{legalPage.intro.replaceAll("this site", siteConfig.name)}</p>
+
+          {
+            legalPage.sections.map((section) => (
+              <>
+                <h2>{section.title}</h2>
+                {
+                  page === "privacy" && section.title === "Contact" && siteConfig.pages.contact ? (
+                    <p>
+                      If you have a privacy-related question about {siteConfig.name}, use the details
+                      listed on the <a href={routes.contact}>contact page</a>. Material changes to this
+                      page may be reflected here by updating the effective date.
+                    </p>
+                  ) : (
+                    <p>{section.body.replaceAll("this site", siteConfig.name)}</p>
+                  )
+                }
+              </>
+            ))
+          }
+        </article>
+      ) : null
+    }
+  </PageContainer>
+</BaseLayout>

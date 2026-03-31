@@ -110,6 +110,10 @@ export function toAbsoluteUrl(siteUrl: string, path: string) {
   return new URL(path, normalizedSiteUrl).toString();
 }
 
+export function encodeRouteSegment(value: string) {
+  return encodeURIComponent(value);
+}
+
 export function createRoutes(basePath = "/"): RoutesConfig {
   return {
     home: withBasePath(basePath, "/"),
@@ -125,8 +129,8 @@ export function createRoutes(basePath = "/"): RoutesConfig {
     ogDefault: withBasePath(basePath, "/og-default.svg"),
     sitemapIndex: withBasePath(basePath, "/sitemap-index.xml"),
     post: (slug) => withBasePath(basePath, `/posts/${slug}`),
-    tag: (tag) => withBasePath(basePath, `/tags/${tag}`),
-    category: (category) => withBasePath(basePath, `/category/${category}`),
+    tag: (tag) => withBasePath(basePath, `/tags/${encodeRouteSegment(tag)}`),
+    category: (category) => withBasePath(basePath, `/category/${encodeRouteSegment(category)}`),
   };
 }
 

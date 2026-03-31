@@ -6,7 +6,7 @@ const postSchema = z.object({
   description: z.string(),
   date: z.coerce.date(),
   updated: z.coerce.date().optional(),
-  category: z.enum(["engineering", "tutorials", "opinions", "tools", "news"]),
+  category: z.string().trim().min(1),
   tags: z.array(z.string()),
   draft: z.boolean().default(false),
   cover: z.string().optional(),
@@ -30,13 +30,25 @@ describe("Post Schema", () => {
     ).toThrow();
   });
 
-  test("rejects invalid category", () => {
+  test("accepts arbitrary category labels", () => {
     expect(() =>
       postSchema.parse({
         title: "x",
         description: "x",
         date: "2026-01-01",
-        category: "invalid",
+        category: "systems design",
+        tags: [],
+      }),
+    ).not.toThrow();
+  });
+
+  test("rejects empty category", () => {
+    expect(() =>
+      postSchema.parse({
+        title: "x",
+        description: "x",
+        date: "2026-01-01",
+        category: "   ",
         tags: [],
       }),
     ).toThrow();

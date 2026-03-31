@@ -10,17 +10,20 @@ export async function getStaticPaths() {
   const posts = await getCollection("posts", ({ data }) => !data.draft);
   const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
   return tags.map((tag) => ({
-    params: { tag },
-    props: { posts: posts.filter((p) => p.data.tags.includes(tag)) },
+    params: { tag: encodeURIComponent(tag) },
+    props: {
+      posts: posts.filter((p) => p.data.tags.includes(tag)),
+      tag,
+    },
   }));
 }
 
 interface Props {
   posts: Awaited<ReturnType<typeof getCollection<"posts">>>;
+  tag: string;
 }
 
-const { tag } = Astro.params;
-const { posts } = Astro.props;
+const { posts, tag } = Astro.props as Props;
 const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 

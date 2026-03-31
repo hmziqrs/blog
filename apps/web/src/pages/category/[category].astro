@@ -13,10 +13,11 @@ export async function getStaticPaths() {
     a.localeCompare(b)
   );
   return categories.map((category) => ({
-    params: { category },
+    params: { category: encodeURIComponent(category) },
     props: {
       posts: posts.filter((p) => p.data.category === category),
       categories,
+      category,
     },
   }));
 }
@@ -24,10 +25,10 @@ export async function getStaticPaths() {
 interface Props {
   posts: Awaited<ReturnType<typeof getCollection<"posts">>>;
   categories: string[];
+  category: string;
 }
 
-const { category } = Astro.params;
-const { posts, categories } = Astro.props;
+const { posts, categories, category } = Astro.props as Props;
 const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
