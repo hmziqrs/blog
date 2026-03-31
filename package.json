@@ -7,12 +7,10 @@
       "packages/*"
     ],
     "catalog": {
-      "dotenv": "^17.2.2",
       "zod": "^4.1.13",
       "typescript": "^5",
       "@cloudflare/workers-types": "^4.20251213.0",
-      "tailwindcss": "^4.1.18",
-      "alchemy": "^0.82.1"
+      "tailwindcss": "^4.1.18"
     }
   },
   "type": "module",
@@ -22,8 +20,6 @@
     "check-types": "turbo check-types",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
-    "deploy": "turbo -F @blog/infra deploy",
-    "destroy": "turbo -F @blog/infra destroy",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt --write",
@@ -33,11 +29,7 @@
     "test:coverage": "turbo -F web test -- --coverage",
     "qa": "bun run lint && bun run fmt:check && turbo -F web check && turbo -F web test"
   },
-  "dependencies": {
-    "@blog/env": "workspace:*",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@blog/config": "workspace:*",
     "@cloudflare/workers-types": "catalog:",

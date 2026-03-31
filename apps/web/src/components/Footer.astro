@@ -1,22 +1,16 @@
 ---
+import { siteConfig } from "@blog/site";
 import PageContainer from "./PageContainer.astro";
 
 const year = new Date().getFullYear();
-const links = [
-  { href: "/tags", label: "Tags" },
-  { href: "/categories", label: "Categories" },
-  { href: "/contact", label: "Contact" },
-  { href: "/privacy", label: "Privacy" },
-  { href: "/terms", label: "Terms" },
-];
 ---
 
 <footer class="border-base-300/80 mt-12 border-t">
   <PageContainer y="tight">
     <div class="flex flex-col gap-3 text-sm">
-      <p class="text-base-content/82 font-medium tracking-tight">hmziq.rs</p>
+      <p class="text-base-content/82 font-medium tracking-tight">{siteConfig.name}</p>
       <nav class="flex flex-wrap items-center gap-x-4 gap-y-2">
-        {links.map((link) => (
+        {siteConfig.footerNav.map((link) => (
           <a
             href={link.href}
             class="text-base-content/52 hover:text-primary font-mono text-[0.72rem] tracking-[0.14em] uppercase transition-colors duration-200"
@@ -26,7 +20,7 @@ const links = [
         ))}
       </nav>
       <p class="text-base-content/48">
-        © {year} hmziq.rs. Writing about software engineering, tools, and systems.
+        © {year} {siteConfig.name}. {siteConfig.footerDescription}
       </p>
     </div>
   </PageContainer>

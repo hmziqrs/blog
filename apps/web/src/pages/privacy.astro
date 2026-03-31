@@ -1,10 +1,11 @@
 ---
+import { pageTitle, siteConfig } from "@blog/site";
 import PageContainer from "../components/PageContainer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Privacy — hmziq.rs" description="Privacy policy for hmziq.rs.">
+<BaseLayout title={pageTitle("Privacy")} description={`Privacy policy for ${siteConfig.name}.`}>
   <PageContainer>
     <PageHeader
       title="Privacy"
@@ -22,9 +23,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </div>
 
       <p>
-        hmziq.rs is a read-only publication. It does not offer account creation, user logins, paid
-        memberships, comment systems, or email newsletters. In normal use, you can browse the site
-        without directly submitting personal profile information.
+        {siteConfig.name} is a read-only publication. It does not offer account creation, user
+        logins, paid memberships, comment systems, or email newsletters. In normal use, you can
+        browse the site without directly submitting personal profile information.
       </p>
 
       <h2>What this site collects</h2>
@@ -43,8 +44,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
       <h2>Advertising</h2>
       <p>
-        hmziq.rs may display static advertising or sponsorship placements alongside content. Those
-        placements are part of the page presentation and are not currently described here as
+        {siteConfig.name} may display static advertising or sponsorship placements alongside
+        content. Those placements are part of the page presentation and are not currently described
+        here as
         behaviorally targeted advertising based on reader profiles.
       </p>
 
@@ -66,9 +68,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
       <h2>Contact</h2>
       <p>
-        If you have a privacy-related question about hmziq.rs, use the details listed on the
-        <a href="/contact">contact page</a>. Material changes to this page may be reflected here by
-        updating the effective date.
+        If you have a privacy-related question about {siteConfig.name}, use the details listed on the
+        <a href={siteConfig.contactPath}>contact page</a>. Material changes to this page may be
+        reflected here by updating the effective date.
       </p>
     </article>
   </PageContainer>

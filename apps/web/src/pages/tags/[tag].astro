@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { pageTitle } from "@blog/site";
 import PageContainer from "../../components/PageContainer.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import PostCard from "../../components/PostCard.astro";
@@ -23,7 +24,7 @@ const { posts } = Astro.props;
 const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
-<BaseLayout title={`#${tag} — hmziq.rs`} description={`Posts tagged with #${tag}.`}>
+<BaseLayout title={pageTitle(`#${tag}`)} description={`Posts tagged with #${tag}.`}>
   <PageContainer>
     <PageHeader title={`#${tag}`} class="mb-8">
       <p class="text-base-content/48 text-sm leading-6">

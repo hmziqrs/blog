@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { siteConfig } from "@blog/site";
 import PageContainer from "../components/PageContainer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import PostCard from "../components/PostCard.astro";
@@ -9,11 +10,11 @@ const posts = await getCollection("posts", ({ data }) => !data.draft);
 const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
-<BaseLayout title="hmziq.rs" description="A blog about software engineering.">
+<BaseLayout title={siteConfig.name} description={siteConfig.description}>
   <PageContainer>
     <PageHeader
-      title="hmziq.rs"
-      description="Writing about software engineering, tools, and ideas."
+      title={siteConfig.name}
+      description={siteConfig.description}
       class="mb-10"
     />
     {

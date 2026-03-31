@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { pageTitle } from "@blog/site";
 import BadgeLink from "../components/BadgeLink.astro";
 import PageContainer from "../components/PageContainer.astro";
 import PageHeader from "../components/PageHeader.astro";
@@ -15,7 +16,7 @@ const categoryCounts = posts.reduce<Record<string, number>>((acc, post) => {
 const categories = Object.entries(categoryCounts).toSorted(([a], [b]) => a.localeCompare(b));
 ---
 
-<BaseLayout title="Categories — hmziq.rs" description="Browse posts by category.">
+<BaseLayout title={pageTitle("Categories")} description="Browse posts by category.">
   <PageContainer>
     <PageHeader
       title="Categories"

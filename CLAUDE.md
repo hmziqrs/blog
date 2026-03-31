@@ -18,8 +18,7 @@ Bun monorepo. Astro 6 blog (SSG) + Expo native app. Cloudflare Pages.
 apps/web/          Astro blog
 apps/native/       Expo app
 packages/config/   Shared tsconfig
-packages/env/      Typed env vars
-packages/infra/    Deploy config (Alchemy)
+packages/site/     Shared site metadata and navigation
 ```
 
 ## Commands
@@ -29,7 +28,6 @@ bun run dev          # all apps
 bun run dev:web      # astro only
 bun run dev:native   # expo only
 bun run build        # turbo build
-bun run deploy       # deploy to CF
 bun run check        # oxlint && oxfmt --write
 ```
 

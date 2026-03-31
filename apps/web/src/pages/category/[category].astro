@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { pageTitle } from "@blog/site";
 import CategoryNav from "../../components/CategoryNav.astro";
 import PageContainer from "../../components/PageContainer.astro";
 import PageHeader from "../../components/PageHeader.astro";
@@ -25,7 +26,7 @@ const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valu
 ---
 
 <BaseLayout
-  title={`${category} — hmziq.rs`}
+  title={pageTitle(category)}
   description={`Posts in the ${category} category.`}
 >
   <PageContainer>

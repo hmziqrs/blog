@@ -9,7 +9,6 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 - **React Native** - Build mobile apps using React
 - **Expo** - Tools for React Native development
 - **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
 - **Turborepo** - Optimized monorepo build system
 - **Oxlint** - Oxlint + Oxfmt (linting & formatting)
 
@@ -30,14 +29,6 @@ bun run dev
 Open [http://localhost:4321](http://localhost:4321) in your browser to see the web application.
 Use the Expo Go app to run the mobile application.
 
-## Deployment (Cloudflare via Alchemy)
-
-- Dev: cd apps/web && bun run alchemy dev
-- Deploy: cd apps/web && bun run deploy
-- Destroy: cd apps/web && bun run destroy
-
-For more details, see the guide on [Deploying to Cloudflare with Alchemy](https://www.better-t-stack.dev/docs/guides/cloudflare-alchemy).
-
 ## Git Hooks and Formatting
 
 - Format and lint fix: `bun run check`
@@ -49,6 +40,9 @@ blog/
 ├── apps/
 │   ├── web/         # Frontend application (Astro)
 │   ├── native/      # Mobile application (React Native, Expo)
+├── packages/
+│   ├── config/      # Shared TypeScript config
+│   ├── site/        # Shared site metadata and navigation
 ```
 
 ## Available Scripts

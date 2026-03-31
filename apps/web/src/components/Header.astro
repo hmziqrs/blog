@@ -1,12 +1,8 @@
 ---
 import { Icon } from "astro-icon/components";
+import { siteConfig } from "@blog/site";
 import PageContainer from "./PageContainer.astro";
 import ButtonLink from "./ButtonLink.astro";
-
-const links = [
-  { to: "/about", label: "About" },
-  { to: "/contact", label: "Contact" },
-];
 ---
 
 <header>
@@ -14,13 +10,13 @@ const links = [
     <PageContainer y="compact">
       <div class="flex items-center justify-between gap-3">
         <a href="/" class="py-1">
-          hmziq.rs
+          {siteConfig.name}
         </a>
         <div class="hidden items-center gap-1.5 sm:inline-flex">
           <nav class="flex flex-wrap items-end justify-end gap-1.5">
-            {links.map((link) => (
+            {siteConfig.primaryNav.map((link) => (
               <ButtonLink
-                href={link.to}
+                href={link.href}
                 variant="plain"
                 size="sm"
                 class="font-mono tracking-[0.14em] uppercase"

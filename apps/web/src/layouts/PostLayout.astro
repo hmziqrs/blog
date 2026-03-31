@@ -1,4 +1,5 @@
 ---
+import { pageTitle } from "@blog/site";
 import BaseLayout from "./BaseLayout.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
 import PageContainer from "../components/PageContainer.astro";
@@ -32,7 +33,7 @@ const formattedUpdated = frontmatter.updated?.toLocaleDateString("en-US", {
 });
 ---
 
-<BaseLayout title={`${frontmatter.title} — hmziq.rs`} description={frontmatter.description} image={frontmatter.cover}>
+<BaseLayout title={pageTitle(frontmatter.title)} description={frontmatter.description} image={frontmatter.cover}>
   <PageContainer>
     <div class="max-w-3xl">
       <header class="mb-8">
