@@ -43,8 +43,8 @@
     "@cloudflare/workers-types": "catalog:",
     "@tailwindcss/typography": "^0.5.19",
     "daisyui": "^5.5.19",
-    "oxfmt": "^0.26.0",
-    "oxlint": "^1.41.0",
+    "oxfmt": "^0.42.0",
+    "oxlint": "^1.57.0",
     "turbo": "^2.6.3",
     "typescript": "catalog:"
   },

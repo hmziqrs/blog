@@ -21,10 +21,10 @@
   },
   "devDependencies": {
     "@blog/config": "workspace:*",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.2.2",
     "bun-types": "^1.3.10",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "vite": "^7.0.0"
+    "vite": "^7.3.1"
   }
 }
