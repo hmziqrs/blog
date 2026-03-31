@@ -1,18 +1,18 @@
 ---
+import { routes } from "../config/site";
 import ButtonLink from "./ButtonLink.astro";
 
 interface Props {
+  categories: string[];
   active?: string;
 }
 
-const { active } = Astro.props;
-
-const categories = ["engineering", "tutorials", "opinions", "tools", "news"];
+const { categories, active } = Astro.props;
 ---
 
 <nav class="flex flex-wrap gap-2">
   <ButtonLink
-    href="/posts"
+    href={routes.home}
     size="sm"
     variant={!active ? "primary" : "ghost"}
     class="tracking-[0.12em] uppercase"
@@ -22,7 +22,7 @@ const categories = ["engineering", "tutorials", "opinions", "tools", "news"];
   {
     categories.map((cat) => (
       <ButtonLink
-        href={`/category/${cat}`}
+        href={routes.category(cat)}
         size="sm"
         variant={active === cat ? "primary" : "ghost"}
         class="tracking-[0.12em] capitalize"

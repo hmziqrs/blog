@@ -1,4 +1,5 @@
 ---
+import { routes } from "../config/site";
 import BadgeLink from "./BadgeLink.astro";
 
 interface Props {
@@ -17,7 +18,7 @@ const badgeClass = [
 ---
 
 <BadgeLink
-  href={`/tags/${tag}`}
+  href={routes.tag(tag)}
   size={size === "large" ? "lg" : "md"}
   class={badgeClass}
 >

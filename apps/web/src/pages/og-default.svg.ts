@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { siteConfig } from "@blog/site";
+import { siteConfig } from "../config/site";
 
 const width = 1200;
 const height = 630;

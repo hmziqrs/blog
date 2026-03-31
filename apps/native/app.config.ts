@@ -1,8 +1,9 @@
 import type { ExpoConfig } from "expo/config";
-import { siteConfig } from "@blog/site";
+import { routes, siteConfig } from "../../site.config.ts";
 
 const config: ExpoConfig = {
   name: siteConfig.name,
+  description: siteConfig.blog.homeDescription,
   slug: "blog",
   scheme: "blog",
   userInterfaceStyle: "automatic",
@@ -17,8 +18,8 @@ const config: ExpoConfig = {
   },
   extra: {
     siteName: siteConfig.name,
-    siteUrl: siteConfig.siteUrl,
-    contactPath: siteConfig.contactPath,
+    siteUrl: siteConfig.publicSiteUrl,
+    contactPath: routes.contact,
   },
 };
 

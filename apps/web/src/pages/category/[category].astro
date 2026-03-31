@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { pageTitle } from "@blog/site";
+import { pageTitle } from "../../config/site";
 import CategoryNav from "../../components/CategoryNav.astro";
 import PageContainer from "../../components/PageContainer.astro";
 import PageHeader from "../../components/PageHeader.astro";
@@ -9,19 +9,25 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts", ({ data }) => !data.draft);
-  const categories = [...new Set(posts.map((p) => p.data.category))];
+  const categories = [...new Set(posts.map((p) => p.data.category))].toSorted((a, b) =>
+    a.localeCompare(b)
+  );
   return categories.map((category) => ({
     params: { category },
-    props: { posts: posts.filter((p) => p.data.category === category) },
+    props: {
+      posts: posts.filter((p) => p.data.category === category),
+      categories,
+    },
   }));
 }
 
 interface Props {
   posts: Awaited<ReturnType<typeof getCollection<"posts">>>;
+  categories: string[];
 }
 
 const { category } = Astro.params;
-const { posts } = Astro.props;
+const { posts, categories } = Astro.props;
 const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
@@ -35,7 +41,7 @@ const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valu
       titleClass="mb-6 text-4xl font-semibold tracking-tight capitalize sm:text-5xl"
     />
     <div class="mb-8">
-      <CategoryNav active={category} />
+      <CategoryNav active={category} categories={categories} />
     </div>
     <div class="flex flex-col gap-5">
       {sorted.map((post) => (

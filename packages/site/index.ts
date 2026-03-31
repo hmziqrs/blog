@@ -3,35 +3,199 @@ export interface SiteNavItem {
   label: string;
 }
 
-export interface SiteConfig {
-  name: string;
-  siteUrl: string;
-  description: string;
-  footerDescription: string;
-  contactPath: string;
-  primaryNav: SiteNavItem[];
-  footerNav: SiteNavItem[];
+export interface SiteNavItemInput {
+  label: string;
+  href?: string;
+  page?: "about" | "contact" | "privacy" | "terms" | "tags" | "categories";
 }
 
-export const siteConfig: SiteConfig = {
-  name: "hmziq.rs",
-  siteUrl: "https://hmziq.rs",
-  description: "Writing about software engineering, tools, and ideas.",
-  footerDescription: "Writing about software engineering, tools, and systems.",
-  contactPath: "/contact",
-  primaryNav: [
-    { href: "/about", label: "About" },
-    { href: "/contact", label: "Contact" },
-  ],
-  footerNav: [
-    { href: "/tags", label: "Tags" },
-    { href: "/categories", label: "Categories" },
-    { href: "/contact", label: "Contact" },
-    { href: "/privacy", label: "Privacy" },
-    { href: "/terms", label: "Terms" },
-  ],
-};
+export interface ContentSection {
+  title: string;
+  body: string;
+}
 
-export function pageTitle(value?: string) {
-  return value ? `${value} — ${siteConfig.name}` : siteConfig.name;
+export interface ContactSection {
+  label: string;
+  body: string;
+  tone?: "subtle" | "default";
+}
+
+export interface AboutPageConfig {
+  title: string;
+  description: string;
+  paragraphs: string[];
+}
+
+export interface ContactPageConfig {
+  title: string;
+  description: string;
+  sections: ContactSection[];
+}
+
+export interface LegalPageConfig {
+  title: string;
+  description: string;
+  badgeLabel: string;
+  effectiveDate: string;
+  intro: string;
+  sections: ContentSection[];
+}
+
+export interface BlogConfig {
+  homeTitle: string;
+  homeDescription: string;
+}
+
+export interface SitePagesConfig {
+  about?: AboutPageConfig;
+  contact?: ContactPageConfig;
+  privacy?: LegalPageConfig;
+  terms?: LegalPageConfig;
+}
+
+export interface RoutesConfig {
+  home: string;
+  about: string;
+  contact: string;
+  privacy: string;
+  terms: string;
+  tags: string;
+  categories: string;
+  rss: string;
+  robots: string;
+  favicon: string;
+  ogDefault: string;
+  sitemapIndex: string;
+  post: (slug: string) => string;
+  tag: (tag: string) => string;
+  category: (category: string) => string;
+}
+
+export interface SiteConfigInput {
+  name: string;
+  siteUrl: string;
+  basePath?: string;
+  footerDescription: string;
+  blog: BlogConfig;
+  primaryNav: SiteNavItemInput[];
+  footerNav: SiteNavItemInput[];
+  pages: SitePagesConfig;
+}
+
+export interface SiteConfig extends Omit<SiteConfigInput, "primaryNav" | "footerNav"> {
+  basePath: string;
+  publicSiteUrl: string;
+  primaryNav: SiteNavItem[];
+  footerNav: SiteNavItem[];
+  routes: RoutesConfig;
+}
+
+export function normalizeBasePath(basePath = "/") {
+  if (!basePath || basePath === "/") return "/";
+  const withLeadingSlash = basePath.startsWith("/") ? basePath : `/${basePath}`;
+  return withLeadingSlash.endsWith("/")
+    ? withLeadingSlash.slice(0, Math.max(1, withLeadingSlash.length - 1))
+    : withLeadingSlash;
+}
+
+export function withBasePath(basePath: string, path: string) {
+  if (!path.startsWith("/")) return path;
+  const normalizedBasePath = normalizeBasePath(basePath);
+  if (path === "/") return normalizedBasePath;
+  return normalizedBasePath === "/" ? path : `${normalizedBasePath}${path}`;
+}
+
+export function toAbsoluteUrl(siteUrl: string, path: string) {
+  const normalizedSiteUrl = siteUrl.endsWith("/") ? siteUrl : `${siteUrl}/`;
+  return new URL(path, normalizedSiteUrl).toString();
+}
+
+export function createRoutes(basePath = "/"): RoutesConfig {
+  return {
+    home: withBasePath(basePath, "/"),
+    about: withBasePath(basePath, "/about"),
+    contact: withBasePath(basePath, "/contact"),
+    privacy: withBasePath(basePath, "/privacy"),
+    terms: withBasePath(basePath, "/terms"),
+    tags: withBasePath(basePath, "/tags"),
+    categories: withBasePath(basePath, "/categories"),
+    rss: withBasePath(basePath, "/rss.xml"),
+    robots: withBasePath(basePath, "/robots.txt"),
+    favicon: withBasePath(basePath, "/favicon.svg"),
+    ogDefault: withBasePath(basePath, "/og-default.svg"),
+    sitemapIndex: withBasePath(basePath, "/sitemap-index.xml"),
+    post: (slug) => withBasePath(basePath, `/posts/${slug}`),
+    tag: (tag) => withBasePath(basePath, `/tags/${tag}`),
+    category: (category) => withBasePath(basePath, `/category/${category}`),
+  };
+}
+
+function isOptionalPageEnabled(
+  pages: SitePagesConfig,
+  page: "about" | "contact" | "privacy" | "terms",
+) {
+  return Boolean(pages[page]);
+}
+
+function resolveNavItem(
+  item: SiteNavItemInput,
+  routes: RoutesConfig,
+  pages: SitePagesConfig,
+  basePath: string,
+): SiteNavItem | null {
+  if (item.page) {
+    if (
+      (item.page === "about" ||
+        item.page === "contact" ||
+        item.page === "privacy" ||
+        item.page === "terms") &&
+      !isOptionalPageEnabled(pages, item.page)
+    ) {
+      return null;
+    }
+
+    return {
+      label: item.label,
+      href: routes[item.page],
+    };
+  }
+
+  if (!item.href) return null;
+
+  return {
+    label: item.label,
+    href:
+      item.href.startsWith("http://") || item.href.startsWith("https://")
+        ? item.href
+        : withBasePath(basePath, item.href),
+  };
+}
+
+function resolveNav(
+  items: SiteNavItemInput[],
+  routes: RoutesConfig,
+  pages: SitePagesConfig,
+  basePath: string,
+) {
+  return items
+    .map((item) => resolveNavItem(item, routes, pages, basePath))
+    .filter((item): item is SiteNavItem => item !== null);
+}
+
+export function defineSiteConfig(input: SiteConfigInput): SiteConfig {
+  const basePath = normalizeBasePath(input.basePath);
+  const routes = createRoutes(basePath);
+
+  return {
+    ...input,
+    basePath,
+    publicSiteUrl: toAbsoluteUrl(input.siteUrl, routes.home),
+    primaryNav: resolveNav(input.primaryNav, routes, input.pages, basePath),
+    footerNav: resolveNav(input.footerNav, routes, input.pages, basePath),
+    routes,
+  };
+}
+
+export function formatPageTitle(siteName: string, value?: string) {
+  return value ? `${value} — ${siteName}` : siteName;
 }

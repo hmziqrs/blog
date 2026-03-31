@@ -1,5 +1,5 @@
 ---
-import { pageTitle } from "@blog/site";
+import { pageTitle, routes } from "../config/site";
 import ButtonLink from "../components/ButtonLink.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
@@ -11,6 +11,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <p class="text-base-content/60 mb-8">
       The page you're looking for doesn't exist or has been moved.
     </p>
-    <ButtonLink href="/" variant="primary">Back to home</ButtonLink>
+    <ButtonLink href={routes.home} variant="primary">Back to home</ButtonLink>
   </div>
 </BaseLayout>

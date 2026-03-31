@@ -1,22 +1,27 @@
 ---
-import { pageTitle, siteConfig } from "@blog/site";
+import { pageTitle, siteConfig } from "../config/site";
 import PageContainer from "../components/PageContainer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const aboutPage = siteConfig.pages.about;
 ---
 
-<BaseLayout title={pageTitle("About")} description={`About ${siteConfig.name}`}>
-  <PageContainer>
-    <PageHeader title="About" class="mb-6" />
-    <article class="prose max-w-2xl">
-      <p>
-        Software engineer focused on practical systems, product craft, and the tools that shape
-        how we build.
-      </p>
-      <p>
-        This site is where I write about implementation details, tradeoffs, and the small design
-        decisions that make software feel deliberate.
-      </p>
-    </article>
-  </PageContainer>
-</BaseLayout>
+{
+  aboutPage ? (
+    <BaseLayout title={pageTitle(aboutPage.title)} description={aboutPage.description}>
+      <PageContainer>
+        <PageHeader title={aboutPage.title} class="mb-6" />
+        <article class="prose max-w-2xl">
+          {aboutPage.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+        </article>
+      </PageContainer>
+    </BaseLayout>
+  ) : (
+    <BaseLayout title={pageTitle("404")} description="Page not found." noindex>
+      <PageContainer>
+        <PageHeader title="Page not found" description="This page is not enabled for this site." />
+      </PageContainer>
+    </BaseLayout>
+  )
+}

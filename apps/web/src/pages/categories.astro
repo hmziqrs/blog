@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { pageTitle } from "@blog/site";
+import { pageTitle, routes } from "../config/site";
 import BadgeLink from "../components/BadgeLink.astro";
 import PageContainer from "../components/PageContainer.astro";
 import PageHeader from "../components/PageHeader.astro";
@@ -30,7 +30,7 @@ const categories = Object.entries(categoryCounts).toSorted(([a], [b]) => a.local
         <div class="flex flex-wrap gap-3">
           {categories.map(([category, count]) => (
             <BadgeLink
-              href={`/category/${category}`}
+              href={routes.category(category)}
               variant="accent"
               size="lg"
               class="capitalize gap-2"

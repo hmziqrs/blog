@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import { siteConfig } from "@blog/site";
+import { routes, siteConfig } from "../config/site";
 import PageContainer from "./PageContainer.astro";
 import ButtonLink from "./ButtonLink.astro";
 ---
@@ -9,7 +9,7 @@ import ButtonLink from "./ButtonLink.astro";
   <div class="border-base-300/80 bg-base-100/92 border-b backdrop-blur-sm">
     <PageContainer y="compact">
       <div class="flex items-center justify-between gap-3">
-        <a href="/" class="py-1">
+        <a href={routes.home} class="py-1">
           {siteConfig.name}
         </a>
         <div class="hidden items-center gap-1.5 sm:inline-flex">

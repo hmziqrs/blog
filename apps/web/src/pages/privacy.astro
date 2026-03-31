@@ -1,77 +1,55 @@
 ---
-import { pageTitle, siteConfig } from "@blog/site";
+import { pageTitle, routes, siteConfig } from "../config/site";
 import PageContainer from "../components/PageContainer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const privacyPage = siteConfig.pages.privacy;
 ---
 
-<BaseLayout title={pageTitle("Privacy")} description={`Privacy policy for ${siteConfig.name}.`}>
-  <PageContainer>
-    <PageHeader
-      title="Privacy"
-      description="A concise explanation of what this site collects, what it does not collect, how analytics are used, and how advertising appears on the site."
-      class="mb-8"
-    />
-    <article class="prose legal-doc max-w-3xl">
-      <div class="not-prose mb-8 flex flex-wrap items-center gap-3">
-        <span class="rounded-full border border-base-300 bg-base-200 px-3 py-1 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/62">
-          Policy
-        </span>
-        <span class="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/48">
-          Effective March 31, 2026
-        </span>
-      </div>
+{
+  privacyPage ? (
+    <BaseLayout title={pageTitle(privacyPage.title)} description={`Privacy policy for ${siteConfig.name}.`}>
+      <PageContainer>
+        <PageHeader title={privacyPage.title} description={privacyPage.description} class="mb-8" />
+        <article class="prose legal-doc max-w-3xl">
+          <div class="not-prose mb-8 flex flex-wrap items-center gap-3">
+            <span class="rounded-full border border-base-300 bg-base-200 px-3 py-1 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/62">
+              {privacyPage.badgeLabel}
+            </span>
+            <span class="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/48">
+              Effective {privacyPage.effectiveDate}
+            </span>
+          </div>
 
-      <p>
-        {siteConfig.name} is a read-only publication. It does not offer account creation, user
-        logins, paid memberships, comment systems, or email newsletters. In normal use, you can
-        browse the site without directly submitting personal profile information.
-      </p>
+          <p>{privacyPage.intro.replaceAll("this site", siteConfig.name)}</p>
 
-      <h2>What this site collects</h2>
-      <p>
-        The site uses Firebase Analytics to understand overall traffic and general usage patterns.
-        Depending on Google&apos;s analytics processing, that may include information such as browser
-        type, device category, approximate location, referring source, page views, and interaction
-        events.
-      </p>
-
-      <h2>What this site does not collect</h2>
-      <p>
-        This site is not designed around user accounts or marketing funnels. It does not maintain
-        subscriber databases, authentication records, or profile dashboards for readers.
-      </p>
-
-      <h2>Advertising</h2>
-      <p>
-        {siteConfig.name} may display static advertising or sponsorship placements alongside
-        content. Those placements are part of the page presentation and are not currently described
-        here as
-        behaviorally targeted advertising based on reader profiles.
-      </p>
-
-      <h2>How analytics data is used</h2>
-      <p>
-        Analytics information is used to understand how the site is read and to improve content,
-        performance, and navigation. It is not used to build advertising profiles or to sell access
-        to reader data.
-      </p>
-
-      <h2>Third-party processing</h2>
-      <p>
-        Firebase Analytics is operated by Google, and its processing is subject to Google&apos;s own
-        terms and privacy documentation. Normal hosting, caching, and delivery infrastructure may
-        also process technical request data as part of serving the site. If the site later adopts a
-        third-party advertising network or ad-serving platform, this page may be updated to reflect
-        that change.
-      </p>
-
-      <h2>Contact</h2>
-      <p>
-        If you have a privacy-related question about {siteConfig.name}, use the details listed on the
-        <a href={siteConfig.contactPath}>contact page</a>. Material changes to this page may be
-        reflected here by updating the effective date.
-      </p>
-    </article>
-  </PageContainer>
-</BaseLayout>
+          {
+            privacyPage.sections.map((section) => (
+              <>
+                <h2>{section.title}</h2>
+                {
+                  section.title === "Contact" ? (
+                    <p>
+                      If you have a privacy-related question about {siteConfig.name}, use the details
+                      listed on the <a href={routes.contact}>contact page</a>. Material changes to this
+                      page may be reflected here by updating the effective date.
+                    </p>
+                  ) : (
+                    <p>{section.body.replaceAll("this site", siteConfig.name)}</p>
+                  )
+                }
+              </>
+            ))
+          }
+        </article>
+      </PageContainer>
+    </BaseLayout>
+  ) : (
+    <BaseLayout title={pageTitle("404")} description="Page not found." noindex>
+      <PageContainer>
+        <PageHeader title="Page not found" description="This page is not enabled for this site." />
+      </PageContainer>
+    </BaseLayout>
+  )
+}

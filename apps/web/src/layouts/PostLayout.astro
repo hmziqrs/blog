@@ -1,6 +1,5 @@
 ---
-import { pageTitle } from "@blog/site";
-import { siteConfig } from "@blog/site";
+import { pageTitle, routes, siteConfig, withBasePath } from "../config/site";
 import BaseLayout from "./BaseLayout.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
 import PageContainer from "../components/PageContainer.astro";
@@ -34,7 +33,11 @@ const formattedUpdated = frontmatter.updated?.toLocaleDateString("en-US", {
 });
 
 const canonicalUrl = Astro.url.href;
-const imageUrl = new URL(frontmatter.cover ?? "/og-default.svg", Astro.site ?? Astro.url).href;
+const coverPath =
+  frontmatter.cover && frontmatter.cover.startsWith("/")
+    ? withBasePath(siteConfig.basePath, frontmatter.cover)
+    : frontmatter.cover;
+const imageUrl = new URL(coverPath ?? routes.ogDefault, Astro.site ?? Astro.url).href;
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -49,12 +52,12 @@ const structuredData = {
   publisher: {
     "@type": "Organization",
     name: siteConfig.name,
-    url: siteConfig.siteUrl,
+    url: siteConfig.publicSiteUrl,
   },
   isPartOf: {
     "@type": "Blog",
     name: siteConfig.name,
-    url: siteConfig.siteUrl,
+    url: siteConfig.publicSiteUrl,
   },
 };
 ---
