@@ -12,14 +12,14 @@ const links = [
   <div class="border-base-300/80 bg-base-100/92 border-b backdrop-blur-sm">
     <PageContainer y="compact">
       <div class="flex items-center justify-between gap-3">
-        <ButtonLink
+        <a
           href="/"
-          variant="plain"
-          class="px-0 text-lg font-semibold tracking-tight sm:text-xl"
+          class="py-1"
         >
           hmziq.rs
-        </ButtonLink>
-        <nav class="flex flex-wrap items-center justify-end gap-1.5">
+        </a>
+        <div class="items-center gap-1.5 hidden sm:inline-flex">
+        <nav class="flex flex-wrap items-end justify-end gap-1.5">
           {links.map((link) => (
             <ButtonLink
               href={link.to}
@@ -71,6 +71,7 @@ const links = [
             <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
           </svg>
         </button>
+        </div>
       </div>
     </PageContainer>
   </div>

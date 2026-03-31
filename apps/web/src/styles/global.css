@@ -9,12 +9,12 @@
 @plugin "daisyui/theme" {
   name: "dark";
   default: true;
-  --color-base-100: oklch(0.18 0.01 255);
-  --color-base-200: oklch(0.22 0.01 255);
-  --color-base-300: oklch(0.29 0.01 255);
-  --color-base-content: oklch(0.94 0.01 255);
-  --color-primary: oklch(0.78 0.04 95);
-  --color-primary-content: oklch(0.2 0.01 255);
+  --color-base-100: oklch(0.17 0.012 255);
+  --color-base-200: oklch(0.21 0.012 255);
+  --color-base-300: oklch(0.29 0.014 255);
+  --color-base-content: oklch(0.94 0.006 255);
+  --color-primary: oklch(0.72 0.115 245);
+  --color-primary-content: oklch(0.2 0.015 255);
   --radius-box: 1.5rem;
   --radius-field: 999rem;
   --border: 1px;
@@ -22,22 +22,16 @@
 }
 @plugin "daisyui/theme" {
   name: "light";
-  --color-base-100: oklch(0.985 0.004 95);
-  --color-base-200: oklch(0.962 0.006 95);
-  --color-base-300: oklch(0.915 0.01 92);
-  --color-base-content: oklch(0.255 0.008 248);
-  --color-primary: oklch(0.52 0.055 145);
-  --color-primary-content: oklch(0.985 0.004 95);
+  --color-base-100: oklch(0.986 0.004 100);
+  --color-base-200: oklch(0.968 0.005 100);
+  --color-base-300: oklch(0.922 0.008 245);
+  --color-base-content: oklch(0.27 0.012 255);
+  --color-primary: oklch(0.57 0.125 250);
+  --color-primary-content: oklch(0.985 0.004 100);
   --radius-box: 1.5rem;
   --radius-field: 999rem;
   --border: 1px;
   --depth: 0;
-}
-
-@theme {
-  --color-olive: oklch(0.45 0.05 130);
-  --color-steel: oklch(0.55 0.01 260);
-  --color-sand: oklch(0.82 0.04 80);
 }
 
 html {
@@ -67,7 +61,7 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-primary) 28%, transparent);
+  background: color-mix(in oklab, var(--color-primary) 24%, transparent);
   color: var(--color-base-content);
 }
 
@@ -75,7 +69,7 @@ body {
   --tw-prose-body: color-mix(in oklab, var(--color-base-content) 76%, transparent);
   --tw-prose-headings: var(--color-base-content);
   --tw-prose-lead: color-mix(in oklab, var(--color-base-content) 70%, transparent);
-  --tw-prose-links: var(--color-base-content);
+  --tw-prose-links: var(--color-primary);
   --tw-prose-bold: var(--color-base-content);
   --tw-prose-counters: color-mix(in oklab, var(--color-base-content) 55%, transparent);
   --tw-prose-bullets: color-mix(in oklab, var(--color-base-content) 28%, transparent);
@@ -91,6 +85,10 @@ body {
 .prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
   text-decoration-thickness: 0.08em;
   text-underline-offset: 0.18em;
+}
+
+.prose :where(a:hover):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-base-content));
 }
 
 .prose :where(code):not(:where(pre code, [class~="not-prose"], [class~="not-prose"] *)) {
