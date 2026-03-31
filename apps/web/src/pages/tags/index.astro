@@ -1,5 +1,8 @@
 ---
 import { getCollection } from "astro:content";
+import PageContainer from "../../components/PageContainer.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import TagBadge from "../../components/TagBadge.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const posts = await getCollection("posts", ({ data }) => !data.draft);
@@ -13,24 +16,18 @@ const tags = Object.entries(tagCounts).toSorted(([a], [b]) => a.localeCompare(b)
 ---
 
 <BaseLayout title="Tags — hmziq.rs" description="Browse posts by tag.">
-  <div class="container mx-auto max-w-3xl px-4 py-10">
-    <h1 class="mb-8 text-3xl font-bold">Tags</h1>
+  <PageContainer>
+    <PageHeader title="Tags" class="mb-8" />
     {
       tags.length === 0 ? (
         <p class="text-base-content/40 text-sm">No tags yet.</p>
       ) : (
         <div class="flex flex-wrap gap-3">
           {tags.map(([tag, count]) => (
-            <a
-              href={`/tags/${tag}`}
-              class="badge badge-outline badge-lg hover:badge-primary gap-1.5 transition-colors"
-            >
-              #{tag}
-              <span class="opacity-50">{count}</span>
-            </a>
+            <TagBadge tag={tag} count={count} size="large" />
           ))}
         </div>
       )
     }
-  </div>
+  </PageContainer>
 </BaseLayout>

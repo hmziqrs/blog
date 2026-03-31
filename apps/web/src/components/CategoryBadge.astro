@@ -1,0 +1,19 @@
+---
+import BadgeLink from "./BadgeLink.astro";
+
+interface Props {
+  category: string;
+  class?: string;
+}
+
+const { category, class: className } = Astro.props;
+---
+
+<BadgeLink
+  href={`/category/${category}`}
+  variant="ghost"
+  size="sm"
+  class={className ? `capitalize ${className}` : "capitalize"}
+>
+  {category}
+</BadgeLink>

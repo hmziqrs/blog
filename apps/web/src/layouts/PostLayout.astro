@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
+import CategoryBadge from "../components/CategoryBadge.astro";
+import PageContainer from "../components/PageContainer.astro";
 import TagBadge from "../components/TagBadge.astro";
 
 interface Props {
@@ -31,14 +33,9 @@ const formattedUpdated = frontmatter.updated?.toLocaleDateString("en-US", {
 ---
 
 <BaseLayout title={`${frontmatter.title} — hmziq.rs`} description={frontmatter.description} image={frontmatter.cover}>
-  <div class="container mx-auto max-w-3xl px-4 py-10">
+  <PageContainer>
     <header class="mb-8">
-      <a
-        href={`/category/${frontmatter.category}`}
-        class="badge badge-outline badge-sm mb-4 capitalize"
-      >
-        {frontmatter.category}
-      </a>
+      <CategoryBadge category={frontmatter.category} class="badge-outline mb-4" />
       <h1 class="mb-3 text-4xl font-bold">{frontmatter.title}</h1>
       <p class="text-base-content/70 mb-4 text-lg">{frontmatter.description}</p>
       <div class="text-base-content/50 flex flex-wrap items-center gap-3 text-sm">
@@ -60,5 +57,5 @@ const formattedUpdated = frontmatter.updated?.toLocaleDateString("en-US", {
     <article class="prose prose-invert max-w-none">
       <slot />
     </article>
-  </div>
+  </PageContainer>
 </BaseLayout>

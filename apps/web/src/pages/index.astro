@@ -1,5 +1,7 @@
 ---
 import { getCollection } from "astro:content";
+import PageContainer from "../components/PageContainer.astro";
+import PageHeader from "../components/PageHeader.astro";
 import PostCard from "../components/PostCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
@@ -8,9 +10,12 @@ const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valu
 ---
 
 <BaseLayout title="hmziq.rs" description="A blog about software engineering.">
-  <div class="container mx-auto max-w-3xl px-4 py-10">
-    <h1 class="mb-2 text-3xl font-bold">hmziq.rs</h1>
-    <p class="text-base-content/60 mb-10">Writing about software engineering, tools, and ideas.</p>
+  <PageContainer>
+    <PageHeader
+      title="hmziq.rs"
+      description="Writing about software engineering, tools, and ideas."
+      class="mb-10"
+    />
     {
       sorted.length === 0 ? (
         <p class="text-base-content/40 text-sm">No posts yet. Check back soon.</p>
@@ -29,5 +34,5 @@ const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valu
         </div>
       )
     }
-  </div>
+  </PageContainer>
 </BaseLayout>

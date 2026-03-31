@@ -1,0 +1,23 @@
+---
+interface Props {
+  href: string;
+  variant?: "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
+  class?: string;
+}
+
+const {
+  href,
+  variant = "outline",
+  size = "md",
+  class: className,
+} = Astro.props;
+
+const variantClass = variant === "ghost" ? "badge-ghost" : "badge-outline";
+const sizeClass = size === "sm" ? "badge-sm" : size === "lg" ? "badge-lg" : "";
+const hoverClass = variant === "outline" ? "hover:badge-primary" : "";
+---
+
+<a href={href} class:list={["badge transition-colors", variantClass, sizeClass, hoverClass, className]}>
+  <slot />
+</a>

@@ -1,6 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 import CategoryNav from "../../components/CategoryNav.astro";
+import PageContainer from "../../components/PageContainer.astro";
+import PageHeader from "../../components/PageHeader.astro";
 import PostCard from "../../components/PostCard.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
@@ -26,24 +28,22 @@ const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valu
   title={`${category} — hmziq.rs`}
   description={`Posts in the ${category} category.`}
 >
-  <div class="container mx-auto max-w-3xl px-4 py-10">
-    <h1 class="mb-6 text-3xl font-bold capitalize">{category}</h1>
+  <PageContainer>
+    <PageHeader title={category} titleClass="mb-6 text-3xl font-bold capitalize" />
     <div class="mb-8">
       <CategoryNav active={category} />
     </div>
     <div class="flex flex-col gap-4">
-      {
-        sorted.map((post) => (
-          <PostCard
-            title={post.data.title}
-            description={post.data.description}
-            date={post.data.date}
-            slug={post.id}
-            tags={post.data.tags}
-            category={post.data.category}
-          />
-        ))
-      }
+      {sorted.map((post) => (
+        <PostCard
+          title={post.data.title}
+          description={post.data.description}
+          date={post.data.date}
+          slug={post.id}
+          tags={post.data.tags}
+          category={post.data.category}
+        />
+      ))}
     </div>
-  </div>
+  </PageContainer>
 </BaseLayout>

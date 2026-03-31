@@ -1,4 +1,6 @@
 ---
+import ButtonLink from "./ButtonLink.astro";
+
 const links = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
@@ -9,11 +11,11 @@ const links = [
 <header>
   <div class="navbar bg-base-100 border-base-300 border-b">
     <div class="navbar-start">
-      <a href="/" class="btn btn-ghost text-xl font-bold">hmziq.rs</a>
+      <ButtonLink href="/" class="text-xl font-bold">hmziq.rs</ButtonLink>
     </div>
     <div class="navbar-end gap-2">
       <nav class="flex gap-1">
-        {links.map((link) => <a href={link.to} class="btn btn-ghost btn-sm">{link.label}</a>)}
+        {links.map((link) => <ButtonLink href={link.to} size="sm">{link.label}</ButtonLink>)}
       </nav>
       <button
         type="button"

@@ -1,4 +1,6 @@
 ---
+import ButtonLink from "./ButtonLink.astro";
+
 interface Props {
   active?: string;
 }
@@ -9,15 +11,17 @@ const categories = ["engineering", "tutorials", "opinions", "tools", "news"];
 ---
 
 <nav class="flex flex-wrap gap-2">
-  <a href="/posts" class:list={["btn btn-sm", !active ? "btn-primary" : "btn-ghost"]}>All</a>
+  <ButtonLink href="/posts" size="sm" variant={!active ? "primary" : "ghost"}>All</ButtonLink>
   {
     categories.map((cat) => (
-      <a
+      <ButtonLink
         href={`/category/${cat}`}
-        class:list={["btn btn-sm capitalize", active === cat ? "btn-primary" : "btn-ghost"]}
+        size="sm"
+        variant={active === cat ? "primary" : "ghost"}
+        class="capitalize"
       >
         {cat}
-      </a>
+      </ButtonLink>
     ))
   }
 </nav>

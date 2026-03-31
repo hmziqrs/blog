@@ -1,11 +1,26 @@
 ---
+import BadgeLink from "./BadgeLink.astro";
+
 interface Props {
   tag: string;
+  count?: number;
+  size?: "default" | "large";
+  class?: string;
 }
 
-const { tag } = Astro.props;
+const { tag, count, size = "default", class: className } = Astro.props;
+
+const badgeClass = [
+  size === "large" ? "gap-1.5" : "",
+  className ?? "",
+].filter(Boolean).join(" ");
 ---
 
-<a href={`/tags/${tag}`} class="badge badge-outline hover:badge-primary transition-colors">
+<BadgeLink
+  href={`/tags/${tag}`}
+  size={size === "large" ? "lg" : "md"}
+  class={badgeClass}
+>
   #{tag}
-</a>
+  {typeof count === "number" && <span class="opacity-50">{count}</span>}
+</BadgeLink>
