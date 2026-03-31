@@ -13,11 +13,20 @@ const {
   class: className,
 } = Astro.props;
 
-const variantClass = variant === "ghost" ? "badge-ghost" : "badge-outline";
-const sizeClass = size === "sm" ? "badge-sm" : size === "lg" ? "badge-lg" : "";
-const hoverClass = variant === "outline" ? "hover:badge-primary" : "";
+const baseClass =
+  "inline-flex items-center rounded-full border font-mono font-medium tracking-[0.01em] transition-colors duration-200";
+const variantClass =
+  variant === "ghost"
+    ? "border-transparent bg-base-200 text-base-content/72 hover:bg-base-300 hover:text-base-content"
+    : "border-base-300 bg-base-100/80 text-base-content/72 hover:border-primary hover:text-primary";
+const sizeClass =
+  size === "sm"
+    ? "px-2.5 py-1 text-[0.68rem]"
+    : size === "lg"
+      ? "px-3.5 py-2 text-xs"
+      : "px-3 py-1.5 text-[0.72rem]";
 ---
 
-<a href={href} class:list={["badge transition-colors", variantClass, sizeClass, hoverClass, className]}>
+<a href={href} class:list={[baseClass, variantClass, sizeClass, className]}>
   <slot />
 </a>

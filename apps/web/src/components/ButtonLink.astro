@@ -1,7 +1,7 @@
 ---
 interface Props {
   href: string;
-  variant?: "ghost" | "primary";
+  variant?: "ghost" | "primary" | "plain";
   size?: "sm" | "md" | "lg";
   class?: string;
 }
@@ -13,10 +13,22 @@ const {
   class: className,
 } = Astro.props;
 
-const variantClass = variant === "primary" ? "btn-primary" : "btn-ghost";
-const sizeClass = size === "sm" ? "btn-sm" : size === "lg" ? "btn-lg" : "";
+const baseClass =
+  "inline-flex items-center justify-center rounded-full border font-medium transition-colors duration-200";
+const variantClass =
+  variant === "primary"
+    ? "border-base-content bg-base-content text-base-100 hover:border-primary hover:bg-primary hover:text-primary-content"
+    : variant === "plain"
+      ? "border-transparent bg-transparent text-base-content/62 hover:text-primary"
+      : "border-base-300 bg-base-100/80 text-base-content/72 hover:border-base-content/16 hover:bg-base-200 hover:text-base-content";
+const sizeClass =
+  size === "sm"
+    ? "h-8 px-3 text-xs"
+    : size === "lg"
+      ? "h-11 px-5 text-base"
+      : "h-10 px-4 text-sm";
 ---
 
-<a href={href} class:list={["btn", variantClass, sizeClass, className]}>
+<a href={href} class:list={[baseClass, variantClass, sizeClass, className]}>
   <slot />
 </a>

@@ -26,12 +26,12 @@ const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valu
 <BaseLayout title={`#${tag} — hmziq.rs`} description={`Posts tagged with #${tag}.`}>
   <PageContainer>
     <PageHeader title={`#${tag}`} class="mb-8">
-      <p class="text-base-content/50 text-sm">
+      <p class="text-base-content/48 text-sm leading-6">
         {sorted.length}
         {sorted.length === 1 ? "post" : "posts"}
       </p>
     </PageHeader>
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-5">
       {sorted.map((post) => (
         <PostCard
           title={post.data.title}

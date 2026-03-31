@@ -1,11 +1,21 @@
 ---
 interface Props {
   class?: string;
+  y?: "page" | "compact" | "tight" | "none";
 }
 
-const { class: className } = Astro.props;
+const { class: className, y = "page" } = Astro.props;
+
+const yClass =
+  y === "compact"
+    ? "py-3 sm:py-4"
+    : y === "tight"
+      ? "py-5 sm:py-6"
+      : y === "none"
+        ? ""
+        : "py-12 sm:py-16";
 ---
 
-<div class:list={["container mx-auto max-w-3xl px-4 py-10", className]}>
+<div class:list={["mx-auto w-full max-w-5xl px-4 sm:px-6", yClass, className]}>
   <slot />
 </div>

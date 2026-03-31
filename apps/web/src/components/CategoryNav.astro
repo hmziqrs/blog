@@ -11,14 +11,21 @@ const categories = ["engineering", "tutorials", "opinions", "tools", "news"];
 ---
 
 <nav class="flex flex-wrap gap-2">
-  <ButtonLink href="/posts" size="sm" variant={!active ? "primary" : "ghost"}>All</ButtonLink>
+  <ButtonLink
+    href="/posts"
+    size="sm"
+    variant={!active ? "primary" : "ghost"}
+    class="tracking-[0.12em] uppercase"
+  >
+    All
+  </ButtonLink>
   {
     categories.map((cat) => (
       <ButtonLink
         href={`/category/${cat}`}
         size="sm"
         variant={active === cat ? "primary" : "ghost"}
-        class="capitalize"
+        class="tracking-[0.12em] capitalize"
       >
         {cat}
       </ButtonLink>

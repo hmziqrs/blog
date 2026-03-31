@@ -34,28 +34,32 @@ const formattedUpdated = frontmatter.updated?.toLocaleDateString("en-US", {
 
 <BaseLayout title={`${frontmatter.title} — hmziq.rs`} description={frontmatter.description} image={frontmatter.cover}>
   <PageContainer>
-    <header class="mb-8">
-      <CategoryBadge category={frontmatter.category} class="badge-outline mb-4" />
-      <h1 class="mb-3 text-4xl font-bold">{frontmatter.title}</h1>
-      <p class="text-base-content/70 mb-4 text-lg">{frontmatter.description}</p>
-      <div class="text-base-content/50 flex flex-wrap items-center gap-3 text-sm">
-        <time datetime={frontmatter.date.toISOString()}>{formattedDate}</time>
-        {readingTime && <span>·</span>}
-        {readingTime && <span>{readingTime} min read</span>}
-        {formattedUpdated && <span>· Updated {formattedUpdated}</span>}
-      </div>
-      {
-        frontmatter.tags.length > 0 && (
-          <div class="mt-4 flex flex-wrap gap-2">
-            {frontmatter.tags.map((tag) => (
-              <TagBadge tag={tag} />
-            ))}
-          </div>
-        )
-      }
-    </header>
-    <article class="prose prose-invert max-w-none">
-      <slot />
-    </article>
+    <div class="max-w-3xl">
+      <header class="mb-8">
+        <CategoryBadge category={frontmatter.category} class="badge-outline mb-4" />
+        <h1 class="mb-4 text-4xl font-semibold tracking-tight sm:text-5xl">{frontmatter.title}</h1>
+        <p class="text-base-content/68 mb-5 max-w-2xl text-lg leading-8">
+          {frontmatter.description}
+        </p>
+        <div class="text-base-content/46 flex flex-wrap items-center gap-3 font-mono text-xs tracking-[0.08em] uppercase">
+          <time datetime={frontmatter.date.toISOString()}>{formattedDate}</time>
+          {readingTime && <span>·</span>}
+          {readingTime && <span>{readingTime} min read</span>}
+          {formattedUpdated && <span>· Updated {formattedUpdated}</span>}
+        </div>
+        {
+          frontmatter.tags.length > 0 && (
+            <div class="mt-5 flex flex-wrap gap-2">
+              {frontmatter.tags.map((tag) => (
+                <TagBadge tag={tag} />
+              ))}
+            </div>
+          )
+        }
+      </header>
+      <article class="prose max-w-none text-[1.03rem] leading-8">
+        <slot />
+      </article>
+    </div>
   </PageContainer>
 </BaseLayout>

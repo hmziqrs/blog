@@ -1,7 +1,16 @@
 ---
+import PageContainer from "./PageContainer.astro";
+
 const year = new Date().getFullYear();
 ---
 
-<footer class="footer footer-center bg-base-200 border-base-300 mt-16 border-t p-6">
-  <p class="text-base-content/50 text-sm">© {year} hmziq.rs · Built with Astro</p>
+<footer class="border-base-300/80 mt-12 border-t">
+  <PageContainer y="tight">
+    <div class="flex flex-col gap-2 text-sm">
+      <p class="text-base-content/82 font-medium tracking-tight">hmziq.rs</p>
+      <p class="text-base-content/48">
+        © {year} hmziq.rs. Writing about software engineering, tools, and systems.
+      </p>
+    </div>
+  </PageContainer>
 </footer>

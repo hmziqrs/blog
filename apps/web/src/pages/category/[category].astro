@@ -29,11 +29,14 @@ const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valu
   description={`Posts in the ${category} category.`}
 >
   <PageContainer>
-    <PageHeader title={category} titleClass="mb-6 text-3xl font-bold capitalize" />
+    <PageHeader
+      title={category}
+      titleClass="mb-6 text-4xl font-semibold tracking-tight capitalize sm:text-5xl"
+    />
     <div class="mb-8">
       <CategoryNav active={category} />
     </div>
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-5">
       {sorted.map((post) => (
         <PostCard
           title={post.data.title}

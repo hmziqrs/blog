@@ -17,7 +17,11 @@ const tags = Object.entries(tagCounts).toSorted(([a], [b]) => a.localeCompare(b)
 
 <BaseLayout title="Tags — hmziq.rs" description="Browse posts by tag.">
   <PageContainer>
-    <PageHeader title="Tags" class="mb-8" />
+    <PageHeader
+      title="Tags"
+      description="An index of recurring topics across the site."
+      class="mb-8"
+    />
     {
       tags.length === 0 ? (
         <p class="text-base-content/40 text-sm">No tags yet.</p>

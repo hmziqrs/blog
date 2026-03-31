@@ -1,30 +1,77 @@
 ---
+import PageContainer from "./PageContainer.astro";
 import ButtonLink from "./ButtonLink.astro";
 
 const links = [
-  { to: "/", label: "Home" },
   { to: "/about", label: "About" },
   { to: "/tags", label: "Tags" },
 ];
 ---
 
 <header>
-  <div class="navbar bg-base-100 border-base-300 border-b">
-    <div class="navbar-start">
-      <ButtonLink href="/" class="text-xl font-bold">hmziq.rs</ButtonLink>
-    </div>
-    <div class="navbar-end gap-2">
-      <nav class="flex gap-1">
-        {links.map((link) => <ButtonLink href={link.to} size="sm">{link.label}</ButtonLink>)}
-      </nav>
-      <button
-        type="button"
-        class="btn btn-ghost btn-sm min-w-24"
-        data-theme-toggle
-        aria-label="Switch color theme"
-      >
-        Light mode
-      </button>
-    </div>
+  <div class="border-base-300/80 bg-base-100/92 border-b backdrop-blur-sm">
+    <PageContainer y="compact">
+      <div class="flex items-center justify-between gap-3">
+        <ButtonLink
+          href="/"
+          variant="plain"
+          class="px-0 text-lg font-semibold tracking-tight sm:text-xl"
+        >
+          hmziq.rs
+        </ButtonLink>
+        <nav class="flex flex-wrap items-center justify-end gap-1.5">
+          {links.map((link) => (
+            <ButtonLink
+              href={link.to}
+              variant="plain"
+              size="sm"
+              class="font-mono tracking-[0.14em] uppercase"
+            >
+              {link.label}
+            </ButtonLink>
+          ))}
+        </nav>
+        <button
+          type="button"
+          class="text-base-content/62 hover:bg-base-200 hover:text-base-content inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200"
+          data-theme-toggle
+          aria-label="Switch color theme"
+          title="Switch color theme"
+        >
+          <svg
+            data-theme-icon="light"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            class="h-4 w-4"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2.5" />
+            <path d="M12 19.5V22" />
+            <path d="M4.93 4.93l1.77 1.77" />
+            <path d="M17.3 17.3l1.77 1.77" />
+            <path d="M2 12h2.5" />
+            <path d="M19.5 12H22" />
+            <path d="M4.93 19.07l1.77-1.77" />
+            <path d="M17.3 6.7l1.77-1.77" />
+          </svg>
+          <svg
+            data-theme-icon="dark"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            class="h-4 w-4"
+            aria-hidden="true"
+          >
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+          </svg>
+        </button>
+      </div>
+    </PageContainer>
   </div>
 </header>

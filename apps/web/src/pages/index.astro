@@ -20,7 +20,7 @@ const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valu
       sorted.length === 0 ? (
         <p class="text-base-content/40 text-sm">No posts yet. Check back soon.</p>
       ) : (
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-5">
           {sorted.map((post) => (
             <PostCard
               title={post.data.title}

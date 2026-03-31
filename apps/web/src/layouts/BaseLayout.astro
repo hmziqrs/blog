@@ -21,7 +21,7 @@ const ogImage = new URL(image ?? "/og-default.svg", Astro.site);
 ---
 
 <!doctype html>
-<html lang="en" data-theme="night">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -48,12 +48,12 @@ const ogImage = new URL(image ?? "/og-default.svg", Astro.site);
 
     <script is:inline>
       const themeKey = "theme";
-      const defaultTheme = "night";
+      const defaultTheme = "dark";
 
       function getTheme() {
         try {
           const savedTheme = window.localStorage.getItem(themeKey);
-          return savedTheme === "light" || savedTheme === "night" ? savedTheme : defaultTheme;
+          return savedTheme === "light" || savedTheme === "dark" ? savedTheme : defaultTheme;
         } catch {
           return defaultTheme;
         }
@@ -61,10 +61,12 @@ const ogImage = new URL(image ?? "/og-default.svg", Astro.site);
 
       function applyTheme(theme) {
         document.documentElement.dataset.theme = theme;
-        document.documentElement.style.colorScheme = theme === "night" ? "dark" : "light";
+        document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
 
         document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
-          toggle.textContent = theme === "night" ? "Light mode" : "Dark mode";
+          const label = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+          toggle.setAttribute("aria-label", label);
+          toggle.setAttribute("title", label);
           toggle.setAttribute("aria-pressed", String(theme === "light"));
         });
       }
@@ -89,7 +91,7 @@ const ogImage = new URL(image ?? "/og-default.svg", Astro.site);
         const toggle = target.closest("[data-theme-toggle]");
         if (!(toggle instanceof HTMLButtonElement)) return;
 
-        setTheme(document.documentElement.dataset.theme === "night" ? "light" : "night");
+        setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
       });
 
       document.addEventListener("astro:page-load", syncThemeToggle);
@@ -100,9 +102,9 @@ const ogImage = new URL(image ?? "/og-default.svg", Astro.site);
     <slot name="head" />
     <ClientRouter />
   </head>
-  <body class="min-h-screen bg-base-100 text-base-content">
+  <body class="bg-base-100 text-base-content antialiased">
     <Header />
-    <main>
+    <main class="pb-16">
       <slot />
     </main>
     <Footer />
