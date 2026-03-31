@@ -1,10 +1,11 @@
 ---
+import { Icon } from "astro-icon/components";
 import PageContainer from "./PageContainer.astro";
 import ButtonLink from "./ButtonLink.astro";
 
 const links = [
   { to: "/about", label: "About" },
-  { to: "/tags", label: "Tags" },
+  { to: "/contact", label: "Contact" },
 ];
 ---
 
@@ -12,65 +13,44 @@ const links = [
   <div class="border-base-300/80 bg-base-100/92 border-b backdrop-blur-sm">
     <PageContainer y="compact">
       <div class="flex items-center justify-between gap-3">
-        <a
-          href="/"
-          class="py-1"
-        >
+        <a href="/" class="py-1">
           hmziq.rs
         </a>
-        <div class="items-center gap-1.5 hidden sm:inline-flex">
-        <nav class="flex flex-wrap items-end justify-end gap-1.5">
-          {links.map((link) => (
-            <ButtonLink
-              href={link.to}
-              variant="plain"
-              size="sm"
-              class="font-mono tracking-[0.14em] uppercase"
-            >
-              {link.label}
-            </ButtonLink>
-          ))}
-        </nav>
-        <button
-          type="button"
-          class="text-base-content/62 hover:bg-base-200 hover:text-base-content inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200"
-          data-theme-toggle
-          aria-label="Switch color theme"
-          title="Switch color theme"
-        >
-          <svg
-            data-theme-icon="light"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-            class="h-4 w-4"
-            aria-hidden="true"
+        <div class="hidden items-center gap-1.5 sm:inline-flex">
+          <nav class="flex flex-wrap items-end justify-end gap-1.5">
+            {links.map((link) => (
+              <ButtonLink
+                href={link.to}
+                variant="plain"
+                size="sm"
+                class="font-mono tracking-[0.14em] uppercase"
+              >
+                {link.label}
+              </ButtonLink>
+            ))}
+          </nav>
+          <button
+            type="button"
+            class="text-base-content/62 hover:bg-base-200 hover:text-base-content inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200"
+            data-theme-toggle
+            aria-label="Switch color theme"
+            title="Switch color theme"
           >
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2.5" />
-            <path d="M12 19.5V22" />
-            <path d="M4.93 4.93l1.77 1.77" />
-            <path d="M17.3 17.3l1.77 1.77" />
-            <path d="M2 12h2.5" />
-            <path d="M19.5 12H22" />
-            <path d="M4.93 19.07l1.77-1.77" />
-            <path d="M17.3 6.7l1.77-1.77" />
-          </svg>
-          <svg
-            data-theme-icon="dark"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-            class="h-4 w-4"
-            aria-hidden="true"
-          >
-            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
-          </svg>
-        </button>
+            <Icon
+              name="sun"
+              data-theme-icon="light"
+              class="h-4 w-4"
+              aria-hidden="true"
+              stroke-width="1.75"
+            />
+            <Icon
+              name="moon"
+              data-theme-icon="dark"
+              class="h-4 w-4"
+              aria-hidden="true"
+              stroke-width="1.75"
+            />
+          </button>
         </div>
       </div>
     </PageContainer>
