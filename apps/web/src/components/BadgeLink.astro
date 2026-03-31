@@ -1,7 +1,7 @@
 ---
 interface Props {
   href: string;
-  variant?: "outline" | "ghost";
+  variant?: "outline" | "ghost" | "accent";
   size?: "sm" | "md" | "lg";
   class?: string;
 }
@@ -18,7 +18,9 @@ const baseClass =
 const variantClass =
   variant === "ghost"
     ? "border-transparent bg-base-200 text-base-content/72 hover:bg-base-300 hover:text-base-content"
-    : "border-base-300 bg-base-100/80 text-base-content/72 hover:border-primary hover:text-primary";
+    : variant === "accent"
+      ? "border-primary/18 bg-primary/12 text-primary hover:border-primary/28 hover:bg-primary/18"
+      : "border-base-300 bg-base-100/80 text-base-content/72 hover:border-primary hover:text-primary";
 const sizeClass =
   size === "sm"
     ? "px-2.5 py-1 text-[0.68rem]"
