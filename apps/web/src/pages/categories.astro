@@ -1,0 +1,45 @@
+---
+import { getCollection } from "astro:content";
+import BadgeLink from "../components/BadgeLink.astro";
+import PageContainer from "../components/PageContainer.astro";
+import PageHeader from "../components/PageHeader.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const posts = await getCollection("posts", ({ data }) => !data.draft);
+
+const categoryCounts = posts.reduce<Record<string, number>>((acc, post) => {
+  acc[post.data.category] = (acc[post.data.category] ?? 0) + 1;
+  return acc;
+}, {});
+
+const categories = Object.entries(categoryCounts).toSorted(([a], [b]) => a.localeCompare(b));
+---
+
+<BaseLayout title="Categories — hmziq.rs" description="Browse posts by category.">
+  <PageContainer>
+    <PageHeader
+      title="Categories"
+      description="Browse posts grouped by broad topic."
+      class="mb-8"
+    />
+    {
+      categories.length === 0 ? (
+        <p class="text-base-content/40 text-sm">No categories yet.</p>
+      ) : (
+        <div class="flex flex-wrap gap-3">
+          {categories.map(([category, count]) => (
+            <BadgeLink
+              href={`/category/${category}`}
+              variant="accent"
+              size="lg"
+              class="capitalize gap-2"
+            >
+              {category}
+              <span class="opacity-65">{count}</span>
+            </BadgeLink>
+          ))}
+        </div>
+      )
+    }
+  </PageContainer>
+</BaseLayout>

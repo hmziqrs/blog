@@ -1,0 +1,71 @@
+---
+import PageContainer from "../components/PageContainer.astro";
+import PageHeader from "../components/PageHeader.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Terms — hmziq.rs" description="Terms for using hmziq.rs.">
+  <PageContainer>
+    <PageHeader
+      title="Terms"
+      description="A straightforward set of conditions for reading, referencing, and using the site."
+      class="mb-8"
+    />
+    <article class="prose legal-doc max-w-3xl">
+      <div class="not-prose mb-8 flex flex-wrap items-center gap-3">
+        <span class="rounded-full border border-base-300 bg-base-200 px-3 py-1 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/62">
+          Terms Of Use
+        </span>
+        <span class="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/48">
+          Effective March 31, 2026
+        </span>
+      </div>
+
+      <p>
+        hmziq.rs publishes writing, notes, and references for general informational purposes. The
+        content is provided in good faith, but it may change over time and is offered without any
+        warranty of completeness, accuracy, availability, or fitness for a particular purpose.
+      </p>
+
+      <h2>Permitted use</h2>
+      <p>
+        You may read the site, reference it, and share links to its pages. Reasonable quotation
+        with proper attribution is generally acceptable. If a specific post or asset includes a
+        separate license, that license controls its use.
+      </p>
+
+      <h2>Content ownership</h2>
+      <p>
+        Unless otherwise stated, original writing and site materials remain the property of the site
+        owner. Reuse beyond normal quotation, citation, or linking should be done with permission.
+      </p>
+
+      <h2>External links</h2>
+      <p>
+        The site may link to third-party websites, tools, or references. Those resources are not
+        controlled by hmziq.rs and are governed by their own terms, policies, and availability.
+      </p>
+
+      <h2>Advertising and sponsorships</h2>
+      <p>
+        The site may include static advertisements, sponsorship placements, or promotional mentions.
+        Unless stated otherwise, those placements do not change the ownership of the site content or
+        the reader&apos;s responsibility to evaluate products, services, or external offers
+        independently.
+      </p>
+
+      <h2>Acceptable conduct</h2>
+      <p>
+        You agree not to misuse the site, attempt unauthorized access, interfere with its
+        infrastructure, or use the site in a way that could disrupt service for others.
+      </p>
+
+      <h2>Liability</h2>
+      <p>
+        To the fullest extent permitted by applicable law, hmziq.rs is provided on an &quot;as is&quot;
+        basis. The site owner is not liable for losses, interruptions, or decisions made in
+        reliance on the content published here.
+      </p>
+    </article>
+  </PageContainer>
+</BaseLayout>

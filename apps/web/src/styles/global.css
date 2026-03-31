@@ -100,6 +100,27 @@ body {
   font-weight: 500;
 }
 
+.legal-doc {
+  --tw-prose-headings: color-mix(in oklab, var(--color-base-content) 92%, transparent);
+  --tw-prose-body: color-mix(in oklab, var(--color-base-content) 78%, transparent);
+}
+
+.legal-doc :where(h2):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.82rem;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.legal-doc :where(p):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  max-width: 66ch;
+}
+
 :where(*, *::before, *::after) {
   box-shadow: none !important;
 }
