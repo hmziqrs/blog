@@ -8,9 +8,27 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 const posts = await getCollection("posts", ({ data }) => !data.draft);
 const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteConfig.name,
+    url: siteConfig.siteUrl,
+    description: siteConfig.description,
+    inLanguage: "en-US",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: siteConfig.name,
+    url: siteConfig.siteUrl,
+    description: siteConfig.description,
+    inLanguage: "en-US",
+  },
+];
 ---
 
-<BaseLayout title={siteConfig.name} description={siteConfig.description}>
+<BaseLayout title={siteConfig.name} description={siteConfig.description} structuredData={structuredData}>
   <PageContainer>
     <PageHeader
       title={siteConfig.name}

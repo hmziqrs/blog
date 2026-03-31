@@ -1,5 +1,6 @@
 ---
 import { pageTitle } from "@blog/site";
+import { siteConfig } from "@blog/site";
 import BaseLayout from "./BaseLayout.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
 import PageContainer from "../components/PageContainer.astro";
@@ -31,9 +32,39 @@ const formattedUpdated = frontmatter.updated?.toLocaleDateString("en-US", {
   month: "long",
   day: "numeric",
 });
+
+const canonicalUrl = Astro.url.href;
+const imageUrl = new URL(frontmatter.cover ?? "/og-default.svg", Astro.site ?? Astro.url).href;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: frontmatter.title,
+  description: frontmatter.description,
+  datePublished: frontmatter.date.toISOString(),
+  ...(frontmatter.updated ? { dateModified: frontmatter.updated.toISOString() } : {}),
+  mainEntityOfPage: canonicalUrl,
+  url: canonicalUrl,
+  image: imageUrl,
+  inLanguage: "en-US",
+  publisher: {
+    "@type": "Organization",
+    name: siteConfig.name,
+    url: siteConfig.siteUrl,
+  },
+  isPartOf: {
+    "@type": "Blog",
+    name: siteConfig.name,
+    url: siteConfig.siteUrl,
+  },
+};
 ---
 
-<BaseLayout title={pageTitle(frontmatter.title)} description={frontmatter.description} image={frontmatter.cover}>
+<BaseLayout
+  title={pageTitle(frontmatter.title)}
+  description={frontmatter.description}
+  image={frontmatter.cover}
+  structuredData={structuredData}
+>
   <PageContainer>
     <div class="max-w-3xl">
       <header class="mb-8">

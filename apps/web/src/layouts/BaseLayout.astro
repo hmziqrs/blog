@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import { siteConfig } from "@blog/site";
+import StructuredData from "../components/StructuredData.astro";
 import "../styles/global.css";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
@@ -9,12 +10,16 @@ interface Props {
   title?: string;
   description?: string;
   image?: string;
+  noindex?: boolean;
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
 const {
   title = siteConfig.name,
   description = siteConfig.description,
   image,
+  noindex = false,
+  structuredData,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -27,8 +32,10 @@ const ogImage = new URL(image ?? "/og-default.svg", Astro.site);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large"} />
     <link rel="canonical" href={canonical} />
 
     <!-- Open Graph -->
@@ -46,6 +53,7 @@ const ogImage = new URL(image ?? "/og-default.svg", Astro.site);
 
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title={siteConfig.name} href="/rss.xml" />
+    <StructuredData data={structuredData} />
 
     <script is:inline>
       const themeKey = "theme";
