@@ -53,6 +53,7 @@ const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valu
           slug={post.id}
           tags={post.data.tags}
           category={post.data.category}
+          cover={post.data.cover}
         />
       ))}
     </div>

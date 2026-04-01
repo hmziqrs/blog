@@ -1,4 +1,5 @@
 ---
+import type { ImageMetadata } from "astro";
 import { pageTitle, routes, siteConfig, withBasePath } from "../config/site";
 import BaseLayout from "./BaseLayout.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
@@ -13,7 +14,7 @@ interface Props {
     updated?: Date;
     category: string;
     tags: string[];
-    cover?: string;
+    cover?: ImageMetadata;
   };
   readingTime?: number;
 }
@@ -33,10 +34,9 @@ const formattedUpdated = frontmatter.updated?.toLocaleDateString("en-US", {
 });
 
 const canonicalUrl = Astro.url.href;
-const coverPath =
-  frontmatter.cover && frontmatter.cover.startsWith("/")
-    ? withBasePath(siteConfig.basePath, frontmatter.cover)
-    : frontmatter.cover;
+const coverPath = frontmatter.cover
+  ? withBasePath(siteConfig.basePath, frontmatter.cover.src)
+  : undefined;
 const imageUrl = new URL(coverPath ?? routes.ogDefault, Astro.site ?? Astro.url).href;
 const structuredData = {
   "@context": "https://schema.org",
@@ -82,6 +82,20 @@ const structuredData = {
           {readingTime && <span>{readingTime} min read</span>}
           {formattedUpdated && <span>· Updated {formattedUpdated}</span>}
         </div>
+        {
+          frontmatter.cover && (
+            <div class="border-base-300 bg-base-200/55 mt-6 overflow-hidden rounded-[1.75rem] border">
+              <img
+                src={coverPath}
+                alt={frontmatter.title}
+                width={frontmatter.cover.width}
+                height={frontmatter.cover.height}
+                loading="eager"
+                class="h-auto w-full object-cover"
+              />
+            </div>
+          )
+        }
         {
           frontmatter.tags.length > 0 && (
             <div class="mt-5 flex flex-wrap gap-2">

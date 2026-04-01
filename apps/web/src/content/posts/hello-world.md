@@ -4,6 +4,7 @@ description: "First post. What this blog is about."
 date: 2026-01-01
 category: "news"
 tags: ["meta", "introduction"]
+cover: "../media/media1.jpg"
 draft: false
 ---
 

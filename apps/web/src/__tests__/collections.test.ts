@@ -9,7 +9,7 @@ const postSchema = z.object({
   category: z.string().trim().min(1),
   tags: z.array(z.string()),
   draft: z.boolean().default(false),
-  cover: z.string().optional(),
+  cover: z.unknown().optional(),
 });
 
 describe("Post Schema", () => {

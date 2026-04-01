@@ -2,12 +2,12 @@
 
 @plugin "daisyui" {
   themes:
-    dark --default,
+    black --default,
     light;
 }
 @plugin "@tailwindcss/typography";
 @plugin "daisyui/theme" {
-  name: "dark";
+  name: "black";
   default: true;
   --color-base-100: oklch(0.17 0.012 255);
   --color-base-200: oklch(0.21 0.012 255);
