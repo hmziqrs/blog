@@ -102,9 +102,20 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
         if (!(target instanceof Element)) return;
 
         const toggle = target.closest("[data-theme-toggle]");
-        if (!(toggle instanceof HTMLButtonElement)) return;
+        if (toggle instanceof HTMLButtonElement) {
+          setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+          return;
+        }
 
-        setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+        const postCard = target.closest("[data-post-card]");
+        if (!(postCard instanceof HTMLElement)) return;
+        if (target.closest("a, button, input, textarea, select, summary")) return;
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+        const href = postCard.dataset.postUrl;
+        if (!href) return;
+
+        window.location.assign(href);
       });
 
       document.addEventListener("astro:page-load", syncThemeToggle);
