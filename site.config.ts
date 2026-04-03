@@ -25,7 +25,7 @@ export const siteConfig = defineSiteConfig({
       title: "About",
       description:
         "What hmziq.rs is for, what it pays attention to, and why the writing stays concrete.",
-      intro: [
+      paragraphs: [
         "I’m a software engineer interested in the parts of software that survive first launch: architecture, tooling, performance, and the decisions that quietly shape a product over time.",
         "hmziq.rs is where I write those decisions down. The point is not to posture about trends. It is to make tradeoffs visible, keep implementation details honest, and document what actually holds up in practice.",
         "Most of the writing sits at the intersection of systems thinking and product craft: clear boundaries, sharp tools, low-friction workflows, and interfaces that feel considered.",
@@ -91,8 +91,9 @@ export const siteConfig = defineSiteConfig({
         "A concise explanation of what this site collects, what it does not collect, how analytics are used, and how advertising appears on the site.",
       badgeLabel: "Policy",
       effectiveDate: "March 31, 2026",
-      intro:
+      preamble: [
         "This site is a read-only publication. It does not offer account creation, user logins, paid memberships, comment systems, or email newsletters. In normal use, you can browse the site without directly submitting personal profile information.",
+      ],
       sections: [
         {
           title: "What this site collects",
@@ -126,8 +127,9 @@ export const siteConfig = defineSiteConfig({
         "A straightforward set of conditions for reading, referencing, and using the site.",
       badgeLabel: "Terms Of Use",
       effectiveDate: "March 31, 2026",
-      intro:
+      preamble: [
         "This site publishes writing, notes, and references for general informational purposes. The content is provided in good faith, but it may change over time and is offered without any warranty of completeness, accuracy, availability, or fitness for a particular purpose.",
+      ],
       sections: [
         {
           title: "Permitted use",

@@ -23,7 +23,9 @@ export interface ContactMethod {
 export interface AboutPageConfig {
   title: string;
   description: string;
-  intro: string[];
+  paragraphs: string[];
+  // Legacy fallback during config transitions.
+  intro?: string[];
   focusAreas: ContentSection[];
   principles: string[];
 }
@@ -40,7 +42,9 @@ export interface LegalPageConfig {
   description: string;
   badgeLabel: string;
   effectiveDate: string;
-  intro: string;
+  preamble: string[];
+  // Legacy fallback during config transitions.
+  intro?: string;
   sections: ContentSection[];
 }
 

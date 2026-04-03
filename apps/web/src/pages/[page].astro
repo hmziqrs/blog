@@ -41,10 +41,24 @@ const contactPage = page === "contact" ? (config as ContactPageConfig) : null;
 const legalPage =
   page === "privacy" || page === "terms" ? (config as LegalPageConfig) : null;
 
+const aboutParagraphs =
+  aboutPage && Array.isArray(aboutPage.paragraphs)
+    ? aboutPage.paragraphs
+    : aboutPage && Array.isArray(aboutPage.intro)
+      ? aboutPage.intro
+      : [];
+
 const contactParagraphs =
   contactPage && "paragraphs" in contactPage && Array.isArray(contactPage.paragraphs)
     ? contactPage.paragraphs
     : [];
+
+const legalPreamble =
+  legalPage && Array.isArray(legalPage.preamble)
+    ? legalPage.preamble
+    : legalPage && typeof legalPage.intro === "string"
+      ? [legalPage.intro]
+      : [];
 
 const contactMethods =
   contactPage && "methods" in contactPage && Array.isArray(contactPage.methods)
@@ -68,7 +82,7 @@ const contactMethods =
                   {aboutPage.description}
                 </p>
                 <article class="prose mt-8 max-w-none sm:mt-10">
-                  {aboutPage.intro.map((paragraph) => <p>{paragraph}</p>)}
+                  {aboutParagraphs.map((paragraph) => <p>{paragraph}</p>)}
                 </article>
               </div>
 
@@ -174,7 +188,7 @@ const contactMethods =
               </span>
             </div>
 
-            <p>{legalPage.intro.replaceAll("this site", siteConfig.name)}</p>
+            {legalPreamble.map((paragraph) => <p>{paragraph.replaceAll("this site", siteConfig.name)}</p>)}
 
             {
               legalPage.sections.map((section) => (
