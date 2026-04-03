@@ -5,6 +5,7 @@ import BaseLayout from "./BaseLayout.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
 import PageContainer from "../components/PageContainer.astro";
 import TagBadge from "../components/TagBadge.astro";
+import ThemedImage from "../components/ThemedImage.astro";
 
 interface Props {
   frontmatter: {
@@ -15,6 +16,7 @@ interface Props {
     category: string;
     tags: string[];
     cover?: ImageMetadata;
+    cover_inv?: ImageMetadata;
   };
   readingTime?: number;
 }
@@ -85,11 +87,10 @@ const structuredData = {
         {
           frontmatter.cover && (
             <div class="border-base-300 bg-base-200/55 mt-6 overflow-hidden rounded-[1.75rem] border">
-              <img
-                src={coverPath}
+              <ThemedImage
+                dark={frontmatter.cover}
+                light={frontmatter.cover_inv}
                 alt={frontmatter.title}
-                width={frontmatter.cover.width}
-                height={frontmatter.cover.height}
                 loading="eager"
                 class="h-auto w-full object-cover"
               />

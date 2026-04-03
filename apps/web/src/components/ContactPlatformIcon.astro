@@ -1,0 +1,39 @@
+---
+interface Props {
+  platform: string;
+  class?: string;
+}
+
+const { platform, class: className } = Astro.props as Props;
+const name = platform.toLowerCase();
+---
+
+{
+  name === "email" ? (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class:list={["h-4 w-4", className]} aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M4 7.5 12 13l8-5.5" />
+    </svg>
+  ) : name === "telegram" ? (
+    <svg viewBox="0 0 24 24" fill="currentColor" class:list={["h-4 w-4", className]} aria-hidden="true">
+      <path d="M21.4 4.6c.3-.9-.6-1.7-1.4-1.4L3.8 9.2c-1 .4-.9 1.8.1 2l4.3 1.2 1.2 4.3c.3 1 1.6 1.1 2 .1L20.8 6c.2-.4.3-.9.2-1.4l-7.8 7.8a1 1 0 0 1-1.6-.3l-1-2.3 10.8-5.2Z" />
+    </svg>
+  ) : name === "x" ? (
+    <svg viewBox="0 0 24 24" fill="currentColor" class:list={["h-4 w-4", className]} aria-hidden="true">
+      <path d="M18.9 2H22l-6.8 7.8L23 22h-6.1l-4.8-6.4L6.5 22H3.4l7.3-8.4L1 2h6.3l4.3 5.8L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z" />
+    </svg>
+  ) : name === "github" ? (
+    <svg viewBox="0 0 24 24" fill="currentColor" class:list={["h-4 w-4", className]} aria-hidden="true">
+      <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.8 0-1.3.5-2.4 1.2-3.3-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6.2 0c2.3-1.5 3.4-1.2 3.4-1.2.6 1.6.2 2.8.1 3.1.8.9 1.2 2 1.2 3.3 0 4.5-2.8 5.5-5.5 5.8.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z" />
+    </svg>
+  ) : name === "linkedin" ? (
+    <svg viewBox="0 0 24 24" fill="currentColor" class:list={["h-4 w-4", className]} aria-hidden="true">
+      <path d="M4.98 3.5A2.48 2.48 0 1 0 5 8.46a2.48 2.48 0 0 0-.02-4.96ZM2.8 9.75h4.4V21H2.8V9.75Zm7.16 0h4.22v1.54h.06c.59-1.05 2.03-2.16 4.18-2.16 4.46 0 5.28 2.94 5.28 6.75V21h-4.4v-4.5c0-1.07-.02-2.45-1.5-2.45s-1.73 1.16-1.73 2.37V21h-4.4V9.75Z" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class:list={["h-4 w-4", className]} aria-hidden="true">
+      <path d="M10 13a5 5 0 0 1 0-7l1.5-1.5a5 5 0 1 1 7 7L17 13" />
+      <path d="M14 11a5 5 0 0 1 0 7l-1.5 1.5a5 5 0 1 1-7-7L7 11" />
+    </svg>
+  )
+}

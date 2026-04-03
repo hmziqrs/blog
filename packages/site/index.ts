@@ -14,22 +14,25 @@ export interface ContentSection {
   body: string;
 }
 
-export interface ContactSection {
+export interface ContactMethod {
   label: string;
-  body: string;
-  tone?: "subtle" | "default";
+  value: string;
+  href: string;
 }
 
 export interface AboutPageConfig {
   title: string;
   description: string;
-  paragraphs: string[];
+  intro: string[];
+  focusAreas: ContentSection[];
+  principles: string[];
 }
 
 export interface ContactPageConfig {
   title: string;
-  description: string;
-  sections: ContactSection[];
+  description?: string;
+  paragraphs: string[];
+  methods: ContactMethod[];
 }
 
 export interface LegalPageConfig {

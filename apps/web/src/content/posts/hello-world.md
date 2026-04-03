@@ -5,6 +5,7 @@ date: 2026-01-01
 category: "news"
 tags: ["meta", "introduction"]
 cover: "../media/media1.jpg"
+cover_inv: "../media/media1-inv.jpg"
 draft: false
 ---
 

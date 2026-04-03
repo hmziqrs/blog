@@ -73,7 +73,9 @@ describe("site config nav resolution", () => {
         about: {
           title: "About",
           description: "About page",
-          paragraphs: ["One paragraph."],
+          intro: ["One paragraph."],
+          focusAreas: [{ title: "Focus", body: "Area." }],
+          principles: ["One principle."],
         },
       },
     });

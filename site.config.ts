@@ -23,33 +23,66 @@ export const siteConfig = defineSiteConfig({
   pages: {
     about: {
       title: "About",
-      description: "About hmziq.rs",
-      paragraphs: [
-        "Software engineer focused on practical systems, product craft, and the tools that shape how we build.",
-        "This site is where I write about implementation details, tradeoffs, and the small design decisions that make software feel deliberate.",
+      description:
+        "What hmziq.rs is for, what it pays attention to, and why the writing stays concrete.",
+      intro: [
+        "I’m a software engineer interested in the parts of software that survive first launch: architecture, tooling, performance, and the decisions that quietly shape a product over time.",
+        "hmziq.rs is where I write those decisions down. The point is not to posture about trends. It is to make tradeoffs visible, keep implementation details honest, and document what actually holds up in practice.",
+        "Most of the writing sits at the intersection of systems thinking and product craft: clear boundaries, sharp tools, low-friction workflows, and interfaces that feel considered.",
+      ],
+      focusAreas: [
+        {
+          title: "Systems",
+          body: "Architecture, boundaries, data flow, and delivery decisions that keep products understandable as they grow.",
+        },
+        {
+          title: "Tools",
+          body: "Build pipelines, local workflow, automation, and the small utilities that save teams from repeat friction.",
+        },
+        {
+          title: "Craft",
+          body: "Interaction details and implementation choices that make software feel deliberate instead of merely functional.",
+        },
+      ],
+      principles: [
+        "Concrete implementation over vague advice.",
+        "Tradeoffs stated plainly instead of hidden behind abstractions.",
+        "Useful tools over fashionable ones.",
+        "Taste backed by working software.",
       ],
     },
     contact: {
       title: "Contact",
-      description:
-        "A basic contact page for questions, corrections, sponsorships, and site-related inquiries.",
-      sections: [
+      description: "A few simple ways to reach me.",
+      paragraphs: [
+        "If you want the fastest reply, message me on X. I check that more often than email or Telegram.",
+        "I’m also available to hire for freelance, contract, and full-time software work.",
+      ],
+      methods: [
         {
-          label: "Status",
-          body: "A direct public contact address is not published on the site yet. This page exists as the canonical place for contact details and inquiry guidance as they are added.",
-          tone: "subtle",
+          label: "Email",
+          value: "hmziqrs@gmail.com",
+          href: "mailto:hmziqrs@gmail.com",
         },
         {
-          label: "General",
-          body: "Use this page for general questions about posts, technical corrections, broken links, or requests related to published material.",
+          label: "Telegram",
+          value: "@hmziqrs",
+          href: "https://t.me/hmziqrs",
         },
         {
-          label: "Sponsorships",
-          body: "Static advertising, sponsorships, and related commercial inquiries should be routed through the contact details that will be listed here when they are made public.",
+          label: "X",
+          value: "@hmziqrs",
+          href: "https://x.com/hmziqrs",
         },
         {
-          label: "Note",
-          body: "Once a public email address or preferred contact channel is available, this page should be updated so the site has a clear single source of truth.",
+          label: "GitHub",
+          value: "hmziqrs",
+          href: "https://github.com/hmziqrs",
+        },
+        {
+          label: "LinkedIn",
+          value: "hmziqrs",
+          href: "https://www.linkedin.com/in/hmziqrs",
         },
       ],
     },
