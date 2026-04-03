@@ -41,6 +41,11 @@ const contactPage = page === "contact" ? (config as ContactPageConfig) : null;
 const legalPage =
   page === "privacy" || page === "terms" ? (config as LegalPageConfig) : null;
 
+const contactParagraphs =
+  contactPage && "paragraphs" in contactPage && Array.isArray(contactPage.paragraphs)
+    ? contactPage.paragraphs
+    : [];
+
 const contactMethods =
   contactPage && "methods" in contactPage && Array.isArray(contactPage.methods)
     ? contactPage.methods
@@ -121,40 +126,34 @@ const contactMethods =
       ) : contactPage ? (
         <>
           <section class="max-w-3xl">
-            <PageHeader
-              title={contactPage.title}
-              description={contactPage.description}
-              class="mb-8"
-            />
+            <PageHeader title={contactPage.title} class="mb-8" />
             <div class="max-w-2xl space-y-3 text-base leading-7 text-base-content/78 sm:text-[1.02rem]">
-              {contactPage.paragraphs.map((paragraph, index) => (
-                <p class:list={[index === contactPage.paragraphs.length - 1 && "text-base-content"]}>
+              {contactParagraphs.map((paragraph, index) => (
+                <p class:list={[index === contactParagraphs.length - 1 && "text-base-content"]}>
                   {paragraph}
                 </p>
               ))}
             </div>
 
-            <div class="mt-8 grid gap-3 sm:grid-cols-2">
+            <div class="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-2">
               {
                 contactMethods.map((method) => (
                   <a
                     href={method.href}
-                    class="contact-method group"
+                    class="group flex min-w-0 flex-col items-center justify-center gap-2 rounded-[1.1rem] border border-base-content/10 bg-base-200/60 px-3 py-3.5 text-center transition-[border-color,background-color,color,transform] duration-200 hover:-translate-y-px hover:border-primary/35 hover:bg-base-200/80 hover:text-primary sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-[0.95rem] sm:text-left"
                     target={method.href.startsWith("http") ? "_blank" : undefined}
                     rel={method.href.startsWith("http") ? "noreferrer" : undefined}
                   >
-                    <div class="flex min-w-0 items-center gap-3">
-                      <span class="contact-method-icon">
-                        <ContactPlatformIcon platform={method.label} />
-                      </span>
-                      <div class="min-w-0">
-                        <p class="contact-method-label">
-                          {method.label}
-                        </p>
-                        <p class="contact-method-value">
-                          {method.value}
-                        </p>
-                      </div>
+                    <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-base-content/10 bg-base-100/70 text-base-content/82 transition-[border-color,color,background-color] duration-200 group-hover:border-primary/35 group-hover:bg-primary/8 group-hover:text-primary sm:order-2 sm:h-10 sm:w-10">
+                      <ContactPlatformIcon platform={method.label} />
+                    </span>
+                    <div class="min-w-0 sm:order-1 sm:flex-1">
+                      <p class="hidden font-mono text-[0.68rem] font-semibold tracking-[0.16em] text-base-content/48 uppercase sm:block">
+                        {method.label}
+                      </p>
+                      <p class="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium tracking-[-0.02em] text-base-content sm:text-base">
+                        {method.value}
+                      </p>
                     </div>
                   </a>
                 ))

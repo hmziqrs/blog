@@ -53,12 +53,16 @@ export const siteConfig = defineSiteConfig({
     },
     contact: {
       title: "Contact",
-      description: "A few simple ways to reach me.",
       paragraphs: [
         "If you want the fastest reply, message me on X. I check that more often than email or Telegram.",
-        "I’m also available to hire for freelance, contract, and full-time software work.",
+        "I’m also available to hire for freelance, contract, consulting, and full-time software work.",
       ],
       methods: [
+        {
+          label: "X",
+          value: "@hmziqrs",
+          href: "https://x.com/hmziqrs",
+        },
         {
           label: "Email",
           value: "hmziqrs@gmail.com",
@@ -68,11 +72,6 @@ export const siteConfig = defineSiteConfig({
           label: "Telegram",
           value: "@hmziqrs",
           href: "https://t.me/hmziqrs",
-        },
-        {
-          label: "X",
-          value: "@hmziqrs",
-          href: "https://x.com/hmziqrs",
         },
         {
           label: "GitHub",
