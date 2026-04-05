@@ -10,7 +10,6 @@ const postSchema = z.object({
   tags: z.array(z.string()),
   draft: z.boolean().default(false),
   cover: z.unknown().optional(),
-  cover_inv: z.unknown().optional(),
 });
 
 describe("Post Schema", () => {

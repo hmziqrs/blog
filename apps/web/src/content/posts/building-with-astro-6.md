@@ -5,7 +5,6 @@ date: 2026-02-26
 category: "engineering"
 tags: ["astro", "tailwind", "cloudflare", "bun"]
 cover: "../media/media2.jpg"
-cover_inv: "../media/media2-inv.jpg"
 draft: false
 ---
 

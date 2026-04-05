@@ -54,6 +54,14 @@ html[data-theme="light"] [data-theme-toggle] [data-theme-icon="dark"] {
   display: block;
 }
 
+.theme-invert-light {
+  @apply transition-[filter] duration-200;
+}
+
+html[data-theme="light"] .theme-invert-light {
+  @apply invert;
+}
+
 body {
   min-height: 100vh;
   letter-spacing: -0.01em;

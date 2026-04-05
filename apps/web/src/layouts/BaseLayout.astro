@@ -79,18 +79,6 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
           toggle.setAttribute("title", label);
           toggle.setAttribute("aria-pressed", String(theme === "light"));
         });
-
-        document.querySelectorAll("img[data-theme-image]").forEach((image) => {
-          if (!(image instanceof HTMLImageElement)) return;
-
-          const darkSrc = image.dataset.darkSrc;
-          const lightSrc = image.dataset.lightSrc;
-          const nextSrc = theme === "light" && lightSrc ? lightSrc : darkSrc;
-
-          if (nextSrc && image.getAttribute("src") !== nextSrc) {
-            image.setAttribute("src", nextSrc);
-          }
-        });
       }
 
       function setTheme(theme) {

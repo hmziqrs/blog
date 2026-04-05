@@ -4,26 +4,21 @@ import { siteConfig, withBasePath } from "../config/site";
 
 interface Props {
   alt: string;
-  dark: ImageMetadata;
-  light?: ImageMetadata;
+  image: ImageMetadata;
   loading?: "eager" | "lazy";
   class?: string;
 }
 
-const { alt, dark, light, loading = "lazy", class: className } = Astro.props as Props;
+const { alt, image, loading = "lazy", class: className } = Astro.props as Props;
 
-const darkSrc = withBasePath(siteConfig.basePath, dark.src);
-const lightSrc = light ? withBasePath(siteConfig.basePath, light.src) : undefined;
+const src = withBasePath(siteConfig.basePath, image.src);
 ---
 
 <img
-  src={darkSrc}
+  src={src}
   alt={alt}
-  width={dark.width}
-  height={dark.height}
+  width={image.width}
+  height={image.height}
   loading={loading}
-  class={className}
-  data-theme-image
-  data-dark-src={darkSrc}
-  data-light-src={lightSrc}
+  class:list={[className, "theme-invert-light"]}
 />

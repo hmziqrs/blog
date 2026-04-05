@@ -16,7 +16,6 @@ interface Props {
     category: string;
     tags: string[];
     cover?: ImageMetadata;
-    cover_inv?: ImageMetadata;
   };
   readingTime?: number;
 }
@@ -88,8 +87,7 @@ const structuredData = {
           frontmatter.cover && (
             <div class="border-base-300 bg-base-200/55 mt-6 overflow-hidden rounded-[1.75rem] border">
               <ThemedImage
-                dark={frontmatter.cover}
-                light={frontmatter.cover_inv}
+                image={frontmatter.cover}
                 alt={frontmatter.title}
                 loading="eager"
                 class="h-auto w-full object-cover"
