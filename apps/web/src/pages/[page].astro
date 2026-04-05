@@ -41,29 +41,10 @@ const contactPage = page === "contact" ? (config as ContactPageConfig) : null;
 const legalPage =
   page === "privacy" || page === "terms" ? (config as LegalPageConfig) : null;
 
-const aboutParagraphs =
-  aboutPage && Array.isArray(aboutPage.paragraphs)
-    ? aboutPage.paragraphs
-    : aboutPage && Array.isArray(aboutPage.intro)
-      ? aboutPage.intro
-      : [];
-
-const contactParagraphs =
-  contactPage && "paragraphs" in contactPage && Array.isArray(contactPage.paragraphs)
-    ? contactPage.paragraphs
-    : [];
-
-const legalPreamble =
-  legalPage && Array.isArray(legalPage.preamble)
-    ? legalPage.preamble
-    : legalPage && typeof legalPage.intro === "string"
-      ? [legalPage.intro]
-      : [];
-
-const contactMethods =
-  contactPage && "methods" in contactPage && Array.isArray(contactPage.methods)
-    ? contactPage.methods
-    : [];
+const aboutParagraphs = aboutPage?.paragraphs ?? [];
+const contactParagraphs = contactPage?.paragraphs ?? [];
+const legalPreamble = legalPage?.preamble ?? [];
+const contactMethods = contactPage?.methods ?? [];
 ---
 
 <BaseLayout title={pageTitle(config.title)} description={config.description}>

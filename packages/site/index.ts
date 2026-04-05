@@ -24,8 +24,6 @@ export interface AboutPageConfig {
   title: string;
   description: string;
   paragraphs: string[];
-  // Legacy fallback during config transitions.
-  intro?: string[];
   focusAreas: ContentSection[];
   principles: string[];
 }
@@ -43,8 +41,6 @@ export interface LegalPageConfig {
   badgeLabel: string;
   effectiveDate: string;
   preamble: string[];
-  // Legacy fallback during config transitions.
-  intro?: string;
   sections: ContentSection[];
 }
 
