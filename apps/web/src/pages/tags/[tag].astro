@@ -3,12 +3,13 @@ import { getCollection } from "astro:content";
 import { pageTitle } from "../../config/site";
 import PageContainer from "../../components/PageContainer.astro";
 import PageHeader from "../../components/PageHeader.astro";
-import PostCard from "../../components/PostCard.astro";
+import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { collectSortedValues } from "../../utils/posts";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts", ({ data }) => !data.draft);
-  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  const tags = collectSortedValues(posts.flatMap((post) => post.data.tags));
   return tags.map((tag) => ({
     params: { tag: encodeURIComponent(tag) },
     props: {
@@ -24,30 +25,16 @@ interface Props {
 }
 
 const { posts, tag } = Astro.props as Props;
-const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
 <BaseLayout title={pageTitle(`#${tag}`)} description={`Posts tagged with #${tag}.`}>
   <PageContainer>
     <PageHeader title={`#${tag}`} class="mb-8">
       <p class="text-base-content/48 text-sm leading-6">
-        {sorted.length}
-        {sorted.length === 1 ? "post" : "posts"}
+        {posts.length}
+        {posts.length === 1 ? "post" : "posts"}
       </p>
     </PageHeader>
-    <div class="flex flex-col gap-5">
-      {sorted.map((post) => (
-        <PostCard
-          title={post.data.title}
-          description={post.data.description}
-          date={post.data.date}
-          slug={post.id}
-          tags={post.data.tags}
-          category={post.data.category}
-          cover={post.data.cover}
-          coverInv={post.data.cover_inv}
-        />
-      ))}
-    </div>
+    <PostList posts={posts} />
   </PageContainer>
 </BaseLayout>

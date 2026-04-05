@@ -3,11 +3,10 @@ import { getCollection } from "astro:content";
 import { siteConfig } from "../config/site";
 import PageContainer from "../components/PageContainer.astro";
 import PageHeader from "../components/PageHeader.astro";
-import PostCard from "../components/PostCard.astro";
+import PostList from "../components/PostList.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const posts = await getCollection("posts", ({ data }) => !data.draft);
-const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const structuredData = [
   {
     "@context": "https://schema.org",
@@ -39,25 +38,6 @@ const structuredData = [
       description={siteConfig.blog.homeDescription}
       class="mb-10"
     />
-    {
-      sorted.length === 0 ? (
-        <p class="text-base-content/40 text-sm">No posts yet. Check back soon.</p>
-      ) : (
-        <div class="flex flex-col gap-5">
-          {sorted.map((post) => (
-            <PostCard
-              title={post.data.title}
-              description={post.data.description}
-              date={post.data.date}
-              slug={post.id}
-              tags={post.data.tags}
-              category={post.data.category}
-              cover={post.data.cover}
-              coverInv={post.data.cover_inv}
-            />
-          ))}
-        </div>
-      )
-    }
+    <PostList posts={posts} emptyMessage="No posts yet. Check back soon." />
   </PageContainer>
 </BaseLayout>

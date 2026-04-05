@@ -1,0 +1,26 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { sortByDateDesc } from "../utils/posts";
+import PostCard from "./PostCard.astro";
+
+interface Props {
+  posts: CollectionEntry<"posts">[];
+  emptyMessage?: string;
+  class?: string;
+}
+
+const { posts, emptyMessage, class: className } = Astro.props as Props;
+const sortedPosts = sortByDateDesc(posts);
+---
+
+{
+  sortedPosts.length === 0 ? (
+    emptyMessage && <p class="text-base-content/40 text-sm">{emptyMessage}</p>
+  ) : (
+    <div class:list={["flex flex-col gap-5", className]}>
+      {sortedPosts.map((post) => (
+        <PostCard post={post} />
+      ))}
+    </div>
+  )
+}

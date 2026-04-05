@@ -5,15 +5,10 @@ import BadgeLink from "../components/BadgeLink.astro";
 import PageContainer from "../components/PageContainer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { countSortedValues } from "../utils/posts";
 
 const posts = await getCollection("posts", ({ data }) => !data.draft);
-
-const categoryCounts = posts.reduce<Record<string, number>>((acc, post) => {
-  acc[post.data.category] = (acc[post.data.category] ?? 0) + 1;
-  return acc;
-}, {});
-
-const categories = Object.entries(categoryCounts).toSorted(([a], [b]) => a.localeCompare(b));
+const categories = countSortedValues(posts.map((post) => post.data.category));
 ---
 
 <BaseLayout title={pageTitle("Categories")} description="Browse posts by category.">

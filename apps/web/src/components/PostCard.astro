@@ -1,22 +1,17 @@
 ---
-import type { ImageMetadata } from "astro";
+import type { CollectionEntry } from "astro:content";
 import { routes } from "../config/site";
 import CategoryBadge from "./CategoryBadge.astro";
 import TagBadge from "./TagBadge.astro";
 import ThemedImage from "./ThemedImage.astro";
 
 interface Props {
-  title: string;
-  description: string;
-  date: Date;
-  slug: string;
-  tags: string[];
-  category: string;
-  cover?: ImageMetadata;
-  coverInv?: ImageMetadata;
+  post: CollectionEntry<"posts">;
 }
 
-const { title, description, date, slug, tags, category, cover, coverInv } = Astro.props as Props;
+const { post } = Astro.props as Props;
+const { title, description, date, tags, category, cover, cover_inv: coverInv } = post.data;
+const postUrl = routes.post(post.id);
 
 const formattedDate = date.toLocaleDateString("en-US", {
   year: "numeric",
@@ -31,40 +26,35 @@ const formattedDate = date.toLocaleDateString("en-US", {
     cover ? "overflow-hidden" : "p-4 sm:p-5",
   ]}
   data-post-card
-  data-post-url={routes.post(slug)}
+  data-post-url={postUrl}
 >
   {
     cover && (
-      <div class="pointer-events-none relative z-10">
-        <div class="relative min-h-[22rem] overflow-hidden bg-base-100 sm:min-h-[26rem]">
-          <ThemedImage
-            dark={cover}
-            light={coverInv}
-            alt={title}
-            loading="lazy"
-            class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
-          />
-          <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-base-100 via-base-100/82 via-24% to-transparent transition-transform duration-300 ease-out will-change-transform group-hover:translate-y-24" />
-          <div class="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end px-4 pt-4 pb-3 sm:px-5 sm:pt-5 sm:pb-4">
-            <div class="text-base-content/56 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.7rem] tracking-[0.12em] uppercase">
-              <time class="shrink-0">{formattedDate}</time>
-              <span aria-hidden="true">/</span>
-              <CategoryBadge category={category} class="pointer-events-auto shrink-0" />
-            </div>
-            <h2 class="mt-3 max-w-2xl text-[1.36rem] leading-tight font-semibold tracking-tight text-base-content sm:text-[1.58rem]">
-              <a
-                href={routes.post(slug)}
-                class="pointer-events-auto group-hover:text-primary transition-colors"
-              >
-                {title}
-              </a>
-            </h2>
-            <p class="text-base-content/76 mt-2.5 max-w-2xl text-sm leading-6 sm:text-[0.95rem]">
-              {description}
-            </p>
-            <div class="mt-3 flex flex-wrap items-center gap-2">
-              {tags.map((tag) => <TagBadge tag={tag} class="pointer-events-auto" />)}
-            </div>
+      <div class="pointer-events-none relative z-10 min-h-[22rem] overflow-hidden bg-base-100 sm:min-h-[26rem]">
+        <ThemedImage
+          dark={cover}
+          light={coverInv}
+          alt={title}
+          loading="lazy"
+          class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+        />
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-base-100 via-base-100/82 via-24% to-transparent transition-transform duration-300 ease-out will-change-transform group-hover:translate-y-24" />
+        <div class="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end px-4 pt-4 pb-3 sm:px-5 sm:pt-5 sm:pb-4">
+          <div class="text-base-content/56 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.7rem] tracking-[0.12em] uppercase">
+            <time class="shrink-0">{formattedDate}</time>
+            <span aria-hidden="true">/</span>
+            <CategoryBadge category={category} class="pointer-events-auto shrink-0" />
+          </div>
+          <h2 class="mt-3 max-w-2xl text-[1.36rem] leading-tight font-semibold tracking-tight text-base-content sm:text-[1.58rem]">
+            <a href={postUrl} class="pointer-events-auto group-hover:text-primary transition-colors">
+              {title}
+            </a>
+          </h2>
+          <p class="text-base-content/76 mt-2.5 max-w-2xl text-sm leading-6 sm:text-[0.95rem]">
+            {description}
+          </p>
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            {tags.map((tag) => <TagBadge tag={tag} class="pointer-events-auto" />)}
           </div>
         </div>
       </div>
@@ -79,10 +69,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
           <CategoryBadge category={category} class="pointer-events-auto shrink-0" />
         </div>
         <h2 class="mt-3 text-[1.32rem] leading-tight font-semibold tracking-tight sm:text-[1.5rem]">
-          <a
-            href={routes.post(slug)}
-            class="pointer-events-auto group-hover:text-primary transition-colors"
-          >
+          <a href={postUrl} class="pointer-events-auto group-hover:text-primary transition-colors">
             {title}
           </a>
         </h2>

@@ -5,50 +5,48 @@ import PageContainer from "./PageContainer.astro";
 import ButtonLink from "./ButtonLink.astro";
 ---
 
-<header>
-  <div class="border-base-300/80 bg-base-100/92 border-b backdrop-blur-sm">
-    <PageContainer y="compact">
-      <div class="flex items-center justify-between gap-3">
-        <a href={routes.home} class="py-1">
-          {siteConfig.name}
-        </a>
-        <div class="hidden items-center gap-1.5 sm:inline-flex">
-          <nav class="flex flex-wrap items-end justify-end gap-1.5">
-            {siteConfig.primaryNav.map((link) => (
-              <ButtonLink
-                href={link.href}
-                variant="plain"
-                size="sm"
-                class="font-mono tracking-[0.14em] uppercase"
-              >
-                {link.label}
-              </ButtonLink>
-            ))}
-          </nav>
-          <button
-            type="button"
-            class="text-base-content/62 hover:bg-base-200 hover:text-base-content inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200"
-            data-theme-toggle
-            aria-label="Switch color theme"
-            title="Switch color theme"
-          >
-            <Icon
-              name="sun"
-              data-theme-icon="light"
-              class="h-4 w-4"
-              aria-hidden="true"
-              stroke-width="1.75"
-            />
-            <Icon
-              name="moon"
-              data-theme-icon="dark"
-              class="h-4 w-4"
-              aria-hidden="true"
-              stroke-width="1.75"
-            />
-          </button>
-        </div>
+<header class="border-base-300/80 bg-base-100/92 border-b backdrop-blur-sm">
+  <PageContainer y="compact">
+    <div class="flex items-center justify-between gap-3">
+      <a href={routes.home} class="py-1">
+        {siteConfig.name}
+      </a>
+      <div class="hidden items-center gap-1.5 sm:inline-flex">
+        <nav class="flex flex-wrap items-end justify-end gap-1.5">
+          {siteConfig.primaryNav.map((link) => (
+            <ButtonLink
+              href={link.href}
+              variant="plain"
+              size="sm"
+              class="font-mono tracking-[0.14em] uppercase"
+            >
+              {link.label}
+            </ButtonLink>
+          ))}
+        </nav>
+        <button
+          type="button"
+          class="text-base-content/62 hover:bg-base-200 hover:text-base-content inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200"
+          data-theme-toggle
+          aria-label="Switch color theme"
+          title="Switch color theme"
+        >
+          <Icon
+            name="sun"
+            data-theme-icon="light"
+            class="h-4 w-4"
+            aria-hidden="true"
+            stroke-width="1.75"
+          />
+          <Icon
+            name="moon"
+            data-theme-icon="dark"
+            class="h-4 w-4"
+            aria-hidden="true"
+            stroke-width="1.75"
+          />
+        </button>
       </div>
-    </PageContainer>
-  </div>
+    </div>
+  </PageContainer>
 </header>
