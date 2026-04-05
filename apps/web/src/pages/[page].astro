@@ -139,8 +139,8 @@ const contactMethods = contactPage?.methods ?? [];
                     target={method.href.startsWith("http") ? "_blank" : undefined}
                     rel={method.href.startsWith("http") ? "noreferrer" : undefined}
                   >
-                    <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-base-content/10 bg-base-100/70 text-base-content/82 transition-[border-color,color,background-color] duration-200 group-hover:border-primary/35 group-hover:bg-primary/8 group-hover:text-primary sm:order-2 sm:h-10 sm:w-10">
-                      <ContactPlatformIcon platform={method.label} />
+                    <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-base-content/12 bg-base-100 text-base-content/90 transition-[border-color,color,background-color,transform] duration-200 group-hover:border-primary/35 group-hover:bg-primary/8 group-hover:text-primary sm:order-2 sm:h-10 sm:w-10">
+                      <ContactPlatformIcon platform={method.label} class="h-5 w-5 sm:h-[1.05rem] sm:w-[1.05rem]" />
                     </span>
                     <div class="min-w-0 sm:order-1 sm:flex-1">
                       <p class="hidden font-mono text-[0.68rem] font-semibold tracking-[0.16em] text-base-content/48 uppercase sm:block">
