@@ -37,6 +37,9 @@ describe("route helpers", () => {
       name: "Example",
       siteUrl: "https://example.com",
       basePath: "/blog",
+      author: {
+        name: "Example Author",
+      },
       footerDescription: "Example blog",
       blog: {
         homeTitle: "Example",
@@ -56,6 +59,9 @@ describe("site config nav resolution", () => {
     const config = defineSiteConfig({
       name: "Example",
       siteUrl: "https://example.com",
+      author: {
+        name: "Example Author",
+      },
       footerDescription: "Example blog",
       blog: {
         homeTitle: "Example",

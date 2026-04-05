@@ -16,6 +16,7 @@ interface Props {
     category: string;
     tags: string[];
     cover?: ImageMetadata;
+    cover_alt?: string;
   };
   readingTime?: number;
 }
@@ -50,6 +51,11 @@ const structuredData = {
   url: canonicalUrl,
   image: imageUrl,
   inLanguage: "en-US",
+  author: {
+    "@type": "Person",
+    name: siteConfig.author.name,
+    ...(siteConfig.author.url ? { url: siteConfig.author.url } : {}),
+  },
   publisher: {
     "@type": "Organization",
     name: siteConfig.name,
@@ -67,6 +73,9 @@ const structuredData = {
   title={pageTitle(frontmatter.title)}
   description={frontmatter.description}
   image={frontmatter.cover}
+  ogType="article"
+  publishedTime={frontmatter.date.toISOString()}
+  modifiedTime={frontmatter.updated?.toISOString()}
   structuredData={structuredData}
 >
   <PageContainer>
@@ -88,7 +97,7 @@ const structuredData = {
             <div class="border-base-300 bg-base-200/55 mt-6 overflow-hidden rounded-[1.75rem] border">
               <ThemedImage
                 image={frontmatter.cover}
-                alt={frontmatter.title}
+                alt={frontmatter.cover_alt ?? frontmatter.title}
                 loading="eager"
                 class="h-auto w-full object-cover"
               />

@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { pageTitle } from "../../config/site";
+import { pageTitle, siteConfig } from "../../config/site";
 import PageContainer from "../../components/PageContainer.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import PostList from "../../components/PostList.astro";
@@ -25,15 +25,15 @@ interface Props {
 }
 
 const { posts, tag } = Astro.props as Props;
+const postLabel = `${posts.length} ${posts.length === 1 ? "post" : "posts"}`;
+const title = pageTitle(`${tag} posts`);
+const description = `${postLabel} tagged with ${tag} on ${siteConfig.name}.`;
 ---
 
-<BaseLayout title={pageTitle(`#${tag}`)} description={`Posts tagged with #${tag}.`}>
+<BaseLayout title={title} description={description}>
   <PageContainer>
-    <PageHeader title={`#${tag}`} class="mb-8">
-      <p class="text-base-content/48 text-sm leading-6">
-        {posts.length}
-        {posts.length === 1 ? "post" : "posts"}
-      </p>
+    <PageHeader title={`#${tag}`} description={description} class="mb-8">
+      <p class="text-base-content/48 text-sm leading-6">{postLabel}</p>
     </PageHeader>
     <PostList posts={posts} />
   </PageContainer>

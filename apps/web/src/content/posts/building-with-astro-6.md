@@ -4,7 +4,8 @@ description: "How I set up this blog using Astro 6 beta, Tailwind v4, DaisyUI 5,
 date: 2026-02-26
 category: "engineering"
 tags: ["astro", "tailwind", "cloudflare", "bun"]
-cover: "../media/media2.jpg"
+cover: "../media/building-a-static-blog-with-astro-6-cover.jpg"
+cover_alt: "Illustrated cover image for the Building a Static Blog with Astro 6 article"
 draft: false
 ---
 

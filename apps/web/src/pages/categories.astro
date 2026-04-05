@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { pageTitle, routes } from "../config/site";
+import { pageTitle, routes, siteConfig } from "../config/site";
 import BadgeLink from "../components/BadgeLink.astro";
 import PageContainer from "../components/PageContainer.astro";
 import PageHeader from "../components/PageHeader.astro";
@@ -11,11 +11,14 @@ const posts = await getCollection("posts", ({ data }) => !data.draft);
 const categories = countSortedValues(posts.map((post) => post.data.category));
 ---
 
-<BaseLayout title={pageTitle("Categories")} description="Browse posts by category.">
+<BaseLayout
+  title={pageTitle("Categories")}
+  description={`Browse ${categories.length} categories on ${siteConfig.name}.`}
+>
   <PageContainer>
     <PageHeader
       title="Categories"
-      description="Browse posts grouped by broad topic."
+      description="Browse posts grouped by broad topic and jump straight into the areas this site covers."
       class="mb-8"
     />
     {

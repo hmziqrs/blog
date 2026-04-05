@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { pageTitle } from "../../config/site";
+import { pageTitle, siteConfig } from "../../config/site";
 import CategoryNav from "../../components/CategoryNav.astro";
 import PageContainer from "../../components/PageContainer.astro";
 import PageHeader from "../../components/PageHeader.astro";
@@ -28,15 +28,16 @@ interface Props {
 }
 
 const { posts, categories, category } = Astro.props as Props;
+const postLabel = `${posts.length} ${posts.length === 1 ? "post" : "posts"}`;
+const title = pageTitle(`${category} articles`);
+const description = `${postLabel} in the ${category} category on ${siteConfig.name}.`;
 ---
 
-<BaseLayout
-  title={pageTitle(category)}
-  description={`Posts in the ${category} category.`}
->
+<BaseLayout title={title} description={description}>
   <PageContainer>
     <PageHeader
       title={category}
+      description={description}
       titleClass="mb-6 text-4xl font-semibold tracking-tight capitalize sm:text-5xl"
     />
     <div class="mb-8">

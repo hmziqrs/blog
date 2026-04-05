@@ -20,6 +20,11 @@ export interface ContactMethod {
   href: string;
 }
 
+export interface SiteAuthor {
+  name: string;
+  url?: string;
+}
+
 export interface AboutPageConfig {
   title: string;
   description: string;
@@ -78,6 +83,7 @@ export interface SiteConfigInput {
   name: string;
   siteUrl: string;
   basePath?: string;
+  author: SiteAuthor;
   footerDescription: string;
   blog: BlogConfig;
   primaryNav: SiteNavItemInput[];
