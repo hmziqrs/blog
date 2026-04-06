@@ -31,12 +31,14 @@ const formattedDate = date.toLocaleDateString("en-US", {
   {
     cover && (
       <div class="pointer-events-none relative z-10 min-h-[22rem] overflow-hidden bg-base-100 sm:min-h-[26rem]">
-        <ThemedImage
-          image={cover}
-          alt={coverAlt ?? title}
-          loading="lazy"
-          class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
-        />
+        <div class="h-full w-full transition-transform duration-300 ease-out will-change-transform group-hover:scale-[1.02]">
+          <ThemedImage
+            image={cover}
+            alt={coverAlt ?? title}
+            loading="lazy"
+            class="h-full w-full object-cover"
+          />
+        </div>
         <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-base-100 via-base-100/82 via-24% to-transparent transition-transform duration-300 ease-out will-change-transform group-hover:translate-y-24" />
         <div class="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end px-4 pt-4 pb-3 sm:px-5 sm:pt-5 sm:pb-4">
           <div class="text-base-content/56 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.7rem] tracking-[0.12em] uppercase">
