@@ -28,32 +28,13 @@ export const siteConfig = defineSiteConfig({
     about: {
       title: "About",
       description:
-        "What hmziq.rs is for, what it pays attention to, and why the writing stays concrete.",
+        "9 years building software. I write about my experiences in Programming, Technology and maybe self improvement.",
       paragraphs: [
-        "I’m a software engineer interested in the parts of software that survive first launch: architecture, tooling, performance, and the decisions that quietly shape a product over time.",
-        "hmziq.rs is where I write those decisions down. The point is not to posture about trends. It is to make tradeoffs visible, keep implementation details honest, and document what actually holds up in practice.",
-        "Most of the writing sits at the intersection of systems thinking and product craft: clear boundaries, sharp tools, low-friction workflows, and interfaces that feel considered.",
+        "Full-stack engineer with 9 years of experience. I care more about consistency and what works than conventional architecture.",
+        "I like to use typescript and rust since they be used in backend and cross platform development.",
       ],
-      focusAreas: [
-        {
-          title: "Systems",
-          body: "Architecture, boundaries, data flow, and delivery decisions that keep products understandable as they grow.",
-        },
-        {
-          title: "Tools",
-          body: "Build pipelines, local workflow, automation, and the small utilities that save teams from repeat friction.",
-        },
-        {
-          title: "Craft",
-          body: "Interaction details and implementation choices that make software feel deliberate instead of merely functional.",
-        },
-      ],
-      principles: [
-        "Concrete implementation over vague advice.",
-        "Tradeoffs stated plainly instead of hidden behind abstractions.",
-        "Useful tools over fashionable ones.",
-        "Taste backed by working software.",
-      ],
+      focusAreas: [],
+      principles: [],
     },
     contact: {
       title: "Contact",

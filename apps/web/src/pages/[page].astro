@@ -51,73 +51,29 @@ const contactMethods = contactPage?.methods ?? [];
   <PageContainer>
     {
       aboutPage ? (
-        <>
-          <section class="page-hero mb-10 overflow-hidden px-6 py-8 sm:px-8 sm:py-10">
-            <div class="grid gap-8 lg:grid-cols-[minmax(0,1.22fr)_minmax(18rem,0.88fr)] lg:items-start">
-              <div>
-                <p class="page-kicker mb-4">Profile</p>
-                <h1 class="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                  {aboutPage.title}
-                </h1>
-                <p class="mt-4 max-w-2xl text-base leading-7 text-base-content/68 sm:text-[1.05rem]">
-                  {aboutPage.description}
-                </p>
-                <article class="prose mt-8 max-w-none sm:mt-10">
-                  {aboutParagraphs.map((paragraph) => <p>{paragraph}</p>)}
-                </article>
-              </div>
+        <section class="max-w-3xl">
+          <PageHeader title={aboutPage.title} description={aboutPage.description} class="mb-8" />
 
-              <aside class="page-panel p-5 sm:p-6 lg:mt-1">
-                <p class="page-kicker mb-4">What this site optimizes for</p>
-                <ul class="page-list text-sm leading-6 sm:text-[0.95rem]">
-                  {aboutPage.principles.map((principle) => <li>{principle}</li>)}
-                </ul>
-              </aside>
-            </div>
-          </section>
+          <div class="max-w-2xl space-y-4 text-base leading-7 text-base-content sm:text-[1.02rem]">
+            {aboutParagraphs.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
 
-          <section class="grid gap-4 md:grid-cols-3">
-            {
-              aboutPage.focusAreas.map((section, index) => (
-                <article class:list={["page-panel h-full p-5 sm:p-6", index === 1 && "bg-base-200/80"]}>
-                  <p class="page-kicker mb-3">0{index + 1}</p>
-                  <h2 class="text-xl font-semibold tracking-tight">{section.title}</h2>
-                  <p class="mt-3 text-sm leading-6 text-base-content/74 sm:text-[0.95rem]">
-                    {section.body}
-                  </p>
-                </article>
-              ))
-            }
-          </section>
-
-          <section class="page-panel mt-6 flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-            <div class="max-w-2xl">
-              <p class="page-kicker mb-2">Explore the archive</p>
-              <p class="text-sm leading-6 text-base-content/72 sm:text-[0.95rem]">
-                Browse posts by topic or category if you want the fastest read on what the site is
-                covering right now.
-              </p>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-              <ButtonLink
-                href={routes.tags}
-                size="sm"
-                class="font-mono uppercase tracking-[0.14em]"
-              >
-                Tags
-              </ButtonLink>
-              <ButtonLink
-                href={routes.categories}
-                variant="primary"
-                size="sm"
-                class="font-mono uppercase tracking-[0.14em]"
-              >
-                Categories
-              </ButtonLink>
-            </div>
-          </section>
-        </>
+          <div class="mt-6 flex flex-wrap items-center gap-2">
+            <ButtonLink href={routes.tags} size="sm" class="font-mono uppercase tracking-[0.14em]">
+              Tags
+            </ButtonLink>
+            <ButtonLink
+              href={routes.categories}
+              variant="primary"
+              size="sm"
+              class="font-mono uppercase tracking-[0.14em]"
+            >
+              Categories
+            </ButtonLink>
+          </div>
+        </section>
       ) : contactPage ? (
         <>
           <section class="max-w-3xl">
