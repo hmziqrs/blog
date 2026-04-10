@@ -23,6 +23,8 @@ interface Props {
 
 const { frontmatter, readingTime } = Astro.props;
 
+const slug = Astro.params.slug;
+
 const formattedDate = frontmatter.date.toLocaleDateString("en-US", {
   year: "numeric",
   month: "long",
@@ -117,6 +119,29 @@ const structuredData = {
       <article class="prose max-w-none text-[1.03rem] leading-8">
         <slot />
       </article>
+
+      {slug && (
+        <div
+          data-analytics-post
+          data-slug={slug}
+          data-title={frontmatter.title}
+          aria-hidden="true"
+          class="hidden"
+        />
+      )}
+
+      {import.meta.env.PUBLIC_FIREBASE_MEASUREMENT_ID && (
+        <script>
+          import { trackPostView } from "../firebase/events";
+
+          const el = document.querySelector("[data-analytics-post]");
+          if (el instanceof HTMLElement) {
+            const slug = el.dataset.slug;
+            const title = el.dataset.title;
+            if (slug && title) trackPostView(slug, title);
+          }
+        </script>
+      )}
     </div>
   </PageContainer>
 </BaseLayout>

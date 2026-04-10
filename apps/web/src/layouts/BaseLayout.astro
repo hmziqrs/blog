@@ -132,6 +132,12 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
     <title>{title}</title>
     <slot name="head" />
     <ClientRouter />
+
+    {import.meta.env.PUBLIC_FIREBASE_MEASUREMENT_ID && (
+      <script>
+        import "../firebase/client";
+      </script>
+    )}
   </head>
   <body class="bg-base-100 text-base-content antialiased">
     <Header />
