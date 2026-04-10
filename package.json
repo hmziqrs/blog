@@ -27,10 +27,13 @@
     "check": "oxlint && oxfmt --write",
     "test": "turbo -F web test",
     "test:coverage": "turbo -F web test -- --coverage",
-    "qa": "bun run lint && bun run fmt:check && turbo -F web check && turbo -F web test"
+    "qa": "bun run lint && bun run fmt:check && turbo -F web check && turbo -F web test",
+    "media:upload": "bun run scripts/media-pipeline.ts upload",
+    "media:rewrite": "bun run scripts/media-pipeline.ts rewrite"
   },
   "dependencies": {},
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1028.0",
     "@blog/config": "workspace:*",
     "@cloudflare/workers-types": "catalog:",
     "@tailwindcss/typography": "^0.5.19",
