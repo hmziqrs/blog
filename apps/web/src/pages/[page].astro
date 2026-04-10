@@ -52,8 +52,6 @@ const contactMethods = contactPage?.methods ?? [];
     {
       aboutPage ? (
         <section class="max-w-3xl">
-          <PageHeader title={aboutPage.title} description={aboutPage.description} class="mb-8" />
-
           <div class="max-w-2xl space-y-4 text-base leading-7 text-base-content sm:text-[1.02rem]">
             {aboutParagraphs.map((paragraph) => (
               <p>{paragraph}</p>
@@ -77,7 +75,6 @@ const contactMethods = contactPage?.methods ?? [];
       ) : contactPage ? (
         <>
           <section class="max-w-3xl">
-            <PageHeader title={contactPage.title} class="mb-8" />
             <div class="max-w-2xl space-y-3 text-base leading-7 text-base-content/78 sm:text-[1.02rem]">
               {contactParagraphs.map((paragraph, index) => (
                 <p class:list={[index === contactParagraphs.length - 1 && "text-base-content"]}>

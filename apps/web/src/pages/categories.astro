@@ -16,11 +16,7 @@ const categories = countSortedValues(posts.map((post) => post.data.category));
   description={`Browse ${categories.length} categories on ${siteConfig.name}.`}
 >
   <PageContainer>
-    <PageHeader
-      title="Categories"
-      description="Browse posts grouped by broad topic and jump straight into the areas this site covers."
-      class="mb-8"
-    />
+    <PageHeader title="Categories" class="mb-8" />
     {
       categories.length === 0 ? (
         <p class="text-base-content/40 text-sm">No categories yet.</p>

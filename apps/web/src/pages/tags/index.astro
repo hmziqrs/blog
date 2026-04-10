@@ -16,11 +16,7 @@ const tags = countSortedValues(posts.flatMap((post) => post.data.tags));
   description={`Browse ${tags.length} recurring topics on ${siteConfig.name}.`}
 >
   <PageContainer>
-    <PageHeader
-      title="Tags"
-      description="An index of recurring topics across the site, from tools and systems to product and writing."
-      class="mb-8"
-    />
+    <PageHeader title="Tags" class="mb-8" />
     {
       tags.length === 0 ? (
         <p class="text-base-content/40 text-sm">No tags yet.</p>
