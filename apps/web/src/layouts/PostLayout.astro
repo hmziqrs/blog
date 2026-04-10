@@ -95,18 +95,6 @@ const structuredData = {
           {formattedUpdated && <span>· Updated {formattedUpdated}</span>}
         </div>
         {
-          frontmatter.cover && (
-            <div class="border-base-300 bg-base-200/55 mt-6 overflow-hidden rounded-[1.75rem] border">
-              <ThemedImage
-                image={frontmatter.cover}
-                alt={frontmatter.cover_alt ?? frontmatter.title}
-                loading="eager"
-                class="h-auto w-full object-cover"
-              />
-            </div>
-          )
-        }
-        {
           frontmatter.tags.length > 0 && (
             <div class="mt-5 flex flex-wrap gap-2">
               {frontmatter.tags.map((tag) => (
@@ -116,6 +104,24 @@ const structuredData = {
           )
         }
       </header>
+    </div>
+  </PageContainer>
+
+  {
+    frontmatter.cover && (
+      <div class="bg-base-200/55 overflow-hidden">
+        <ThemedImage
+          image={frontmatter.cover}
+          alt={frontmatter.cover_alt ?? frontmatter.title}
+          loading="eager"
+          class="h-auto w-full object-cover"
+        />
+      </div>
+    )
+  }
+
+  <PageContainer>
+    <div class="max-w-3xl">
       <article class="prose max-w-none text-[1.03rem] leading-8">
         <slot />
       </article>
