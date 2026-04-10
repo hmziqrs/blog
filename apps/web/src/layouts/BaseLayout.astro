@@ -67,6 +67,7 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
 
     <script is:inline>
       const themeKey = "theme";
+      const lightWarningKey = "theme-light-warning-dismissed";
       const defaultTheme = "dark";
 
       function getTheme() {
@@ -101,6 +102,22 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
         applyTheme(getTheme());
       }
 
+      function isLightWarningDismissed() {
+        try {
+          return window.localStorage.getItem(lightWarningKey) === "true";
+        } catch {
+          return false;
+        }
+      }
+
+      function showLightModeWarning() {
+        const dialog = document.getElementById("light-mode-warning");
+        if (!dialog) return;
+        const checkbox = document.getElementById("dismiss-light-warning");
+        if (checkbox instanceof HTMLInputElement) checkbox.checked = false;
+        dialog.showModal();
+      }
+
       applyTheme(getTheme());
 
       document.addEventListener("click", (event) => {
@@ -109,7 +126,16 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
 
         const toggle = target.closest("[data-theme-toggle]");
         if (toggle instanceof HTMLButtonElement) {
-          setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+          const currentTheme = document.documentElement.dataset.theme;
+          if (currentTheme === "dark") {
+            if (isLightWarningDismissed()) {
+              setTheme("light");
+            } else {
+              showLightModeWarning();
+            }
+          } else {
+            setTheme("dark");
+          }
           return;
         }
 
@@ -122,6 +148,28 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
         if (!href) return;
 
         window.location.assign(href);
+      });
+
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        if (target.id === "light-mode-confirm" || target.closest("#light-mode-confirm")) {
+          const checkbox = document.getElementById("dismiss-light-warning");
+          if (checkbox instanceof HTMLInputElement && checkbox.checked) {
+            try { window.localStorage.setItem(lightWarningKey, "true"); } catch {}
+          }
+          setTheme("light");
+          const dialog = document.getElementById("light-mode-warning");
+          if (dialog) dialog.close();
+          return;
+        }
+
+        if (target.id === "light-mode-stay" || target.closest("#light-mode-stay")) {
+          const dialog = document.getElementById("light-mode-warning");
+          if (dialog) dialog.close();
+          return;
+        }
       });
 
       document.addEventListener("astro:after-swap", syncThemeToggle);
@@ -144,6 +192,25 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
     <main class="pb-16">
       <slot />
     </main>
+
+    <dialog id="light-mode-warning" class="modal">
+      <div class="modal-box max-w-md">
+        <h3 class="text-lg font-semibold">Switch to light mode?</h3>
+        <p class="text-base-content/70 mt-2 text-sm leading-relaxed">
+          Light mode can cause eye strain in dark environments. The change is instant and may feel jarring.
+        </p>
+        <div class="mt-4 flex items-center gap-2">
+          <input type="checkbox" id="dismiss-light-warning" class="checkbox checkbox-sm checkbox-primary" />
+          <label for="dismiss-light-warning" class="text-base-content/60 cursor-pointer text-sm">Don't show this again</label>
+        </div>
+        <div class="modal-action">
+          <button type="button" id="light-mode-stay" class="btn btn-ghost btn-sm">Stay in dark</button>
+          <button type="button" id="light-mode-confirm" class="btn btn-primary btn-sm">Switch to light</button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
     <Footer />
   </body>
 </html>
