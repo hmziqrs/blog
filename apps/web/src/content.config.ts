@@ -1,9 +1,13 @@
 import { defineCollection } from "astro:content";
 import { z } from "zod";
 import { glob } from "astro/loaders";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const monorepoRoot = path.resolve(fileURLToPath(import.meta.url), "../../../../");
 
 const posts = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/content/posts" }),
+  loader: glob({ pattern: "**/*.md", base: path.join(monorepoRoot, "content/posts") }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
