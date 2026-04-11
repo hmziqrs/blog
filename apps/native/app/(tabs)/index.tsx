@@ -1,4 +1,5 @@
 import { FlatList, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Container } from "@/components/container";
 import { PostCard } from "@/components/post-card";
@@ -9,6 +10,7 @@ import { useApi } from "@/lib/hooks";
 export default function HomeScreen() {
   const { data, loading, error } = useApi(() => getPosts());
   const posts = data?.posts ?? [];
+  const insets = useSafeAreaInsets();
 
   if (loading) {
     return (
@@ -53,7 +55,11 @@ export default function HomeScreen() {
             </Text>
           </View>
         }
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: insets.bottom + 24,
+          gap: 16,
+        }}
       />
     </Container>
   );

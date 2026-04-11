@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { Chip } from "heroui-native/chip";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Container } from "@/components/container";
 import { PageHeader } from "@/components/page-header";
@@ -11,6 +12,7 @@ import type { AboutPageConfig } from "@/lib/types";
 
 export default function AboutScreen() {
   const { data, loading, error } = useApi(() => getPageConfig("about"));
+  const insets = useSafeAreaInsets();
 
   if (loading) {
     return (
@@ -36,7 +38,12 @@ export default function AboutScreen() {
   return (
     <Container isScrollable={false}>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24, paddingBottom: 32, gap: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 24,
+          paddingBottom: insets.bottom + 24,
+          gap: 16,
+        }}
         keyboardShouldPersistTaps="handled"
       >
         <PageHeader title={config.title} description={config.description} />

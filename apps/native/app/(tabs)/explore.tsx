@@ -1,4 +1,5 @@
 import { ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CategoryBadge } from "@/components/category-badge";
 import { Container } from "@/components/container";
@@ -11,6 +12,7 @@ import { useApi } from "@/lib/hooks";
 export default function ExploreScreen() {
   const tags = useApi(() => getTags());
   const categories = useApi(() => getCategories());
+  const insets = useSafeAreaInsets();
 
   const isLoading = tags.loading || categories.loading;
 
@@ -22,7 +24,12 @@ export default function ExploreScreen() {
         </View>
       ) : (
         <ScrollView
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24, paddingBottom: 32, gap: 28 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingTop: 24,
+            paddingBottom: insets.bottom + 24,
+            gap: 28,
+          }}
           keyboardShouldPersistTaps="handled"
         >
           <PageHeader title="Explore" />
