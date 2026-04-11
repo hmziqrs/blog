@@ -1,4 +1,4 @@
-import { defineSiteConfig, formatPageTitle } from "./packages/site";
+import { defineSiteConfig, formatPageTitle } from "./packages/site/index.ts";
 
 export const siteConfig = defineSiteConfig({
   name: "hmziq.rs",
