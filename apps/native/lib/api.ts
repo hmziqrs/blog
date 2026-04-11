@@ -2,8 +2,9 @@ import type {
   CategoriesResponse,
   CategoryPostsResponse,
   PageConfigResponse,
-  PostsResponse,
   PostDetail,
+  PostSummary,
+  PostsResponse,
   TagsResponse,
   TagPostsResponse,
 } from "./types";
@@ -16,12 +17,22 @@ async function fetchApi<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+function resolveCover(post: PostSummary): PostSummary {
+  if (!post.cover || post.cover.startsWith("http")) return post;
+  return { ...post, cover: `${BASE}${post.cover}` };
+}
+
 export function getPosts() {
-  return fetchApi<PostsResponse>("/api/index.json");
+  return fetchApi<PostsResponse>("/api/index.json").then((r) => ({
+    posts: r.posts.map(resolveCover),
+  }));
 }
 
 export function getPost(slug: string) {
-  return fetchApi<PostDetail>(`/api/posts/${slug}.json`);
+  return fetchApi<PostDetail>(`/api/posts/${slug}.json`).then((post) => {
+    if (!post.cover || post.cover.startsWith("http")) return post;
+    return { ...post, cover: `${BASE}${post.cover}` };
+  });
 }
 
 export function getTags() {
@@ -29,7 +40,9 @@ export function getTags() {
 }
 
 export function getTagPosts(tag: string) {
-  return fetchApi<TagPostsResponse>(`/api/tags/${encodeURIComponent(tag)}.json`);
+  return fetchApi<TagPostsResponse>(`/api/tags/${encodeURIComponent(tag)}.json`).then(
+    (r) => ({ tag: r.tag, posts: r.posts.map(resolveCover) }),
+  );
 }
 
 export function getCategories() {
@@ -39,7 +52,7 @@ export function getCategories() {
 export function getCategoryPosts(category: string) {
   return fetchApi<CategoryPostsResponse>(
     `/api/category/${encodeURIComponent(category)}.json`,
-  );
+  ).then((r) => ({ category: r.category, posts: r.posts.map(resolveCover) }));
 }
 
 export function getPageConfig(page: "about" | "contact" | "privacy" | "terms") {
