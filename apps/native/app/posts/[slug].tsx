@@ -26,8 +26,11 @@ function estimateReadingTime(text: string) {
 export default function PostDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { data: post, loading, error } = useApi(() => getPost(slug!), [slug]);
-  const foreground = useThemeColor("foreground");
-  const muted = useThemeColor("muted");
+  const [foreground, surfaceTertiary, separator] = useThemeColor([
+    "foreground",
+    "surface-tertiary",
+    "separator",
+  ] as const);
 
   if (loading || !post) {
     return (
@@ -147,7 +150,7 @@ export default function PostDetailScreen() {
                 fontSize: 14,
                 color: foreground,
                 borderWidth: 0,
-                backgroundColor: muted,
+                backgroundColor: surfaceTertiary,
                 padding: 4,
                 borderRadius: 4,
               },
@@ -156,7 +159,7 @@ export default function PostDetailScreen() {
                 fontSize: 14,
                 color: foreground,
                 borderWidth: 0,
-                backgroundColor: muted,
+                backgroundColor: surfaceTertiary,
                 padding: 12,
                 borderRadius: 8,
                 marginTop: 8,
@@ -167,7 +170,7 @@ export default function PostDetailScreen() {
                 fontSize: 14,
                 color: foreground,
                 borderWidth: 0,
-                backgroundColor: muted,
+                backgroundColor: surfaceTertiary,
                 padding: 12,
                 borderRadius: 8,
                 marginTop: 8,
@@ -175,7 +178,7 @@ export default function PostDetailScreen() {
               },
               blockquote: {
                 borderLeftWidth: 3,
-                borderLeftColor: muted,
+                borderLeftColor: separator,
                 paddingLeft: 12,
                 marginTop: 8,
                 marginBottom: 8,
