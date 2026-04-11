@@ -50,7 +50,7 @@ function PostCardInfo({ post }: PostCardProps) {
   return (
     <View>
       <View className="flex-row items-center gap-2">
-        <Text className="font-mono text-[0.68rem] tracking-[0.12em] uppercase text-base-content/56">
+        <Text className="font-mono text-[0.68rem] font-semibold tracking-[0.12em] uppercase text-base-content/56">
           {formatDate(post.date)}
         </Text>
         <Text className="text-base-content/30">/</Text>

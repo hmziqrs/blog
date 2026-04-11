@@ -13,7 +13,7 @@ export default function NotFoundScreen() {
           <Surface variant="secondary" className="items-center p-6 max-w-sm rounded-lg">
             <Text className="text-4xl mb-3">🤔</Text>
             <Text className="text-foreground font-medium text-lg mb-1">Page Not Found</Text>
-            <Text className="text-muted text-sm text-center mb-4">
+            <Text className="text-base-content/56 text-sm text-center mb-4">
               The page you're looking for doesn't exist.
             </Text>
             <Link href="/" asChild>

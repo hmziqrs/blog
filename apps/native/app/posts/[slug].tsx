@@ -1,4 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
+import { useThemeColor } from "heroui-native";
 import { Image, ScrollView, Text, View } from "react-native";
 import Markdown from "react-native-markdown-display";
 
@@ -25,6 +26,8 @@ function estimateReadingTime(text: string) {
 export default function PostDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { data: post, loading, error } = useApi(() => getPost(slug!), [slug]);
+  const foreground = useThemeColor("foreground");
+  const muted = useThemeColor("muted");
 
   if (loading || !post) {
     return (
@@ -102,23 +105,26 @@ export default function PostDetailScreen() {
           <Markdown
             style={{
               body: {
-                color: undefined,
+                color: foreground,
                 fontSize: 16,
                 lineHeight: 28,
               },
               heading1: {
+                color: foreground,
                 fontSize: 28,
                 fontWeight: "600" as const,
                 marginTop: 24,
                 marginBottom: 8,
               },
               heading2: {
+                color: foreground,
                 fontSize: 22,
                 fontWeight: "600" as const,
                 marginTop: 20,
                 marginBottom: 8,
               },
               heading3: {
+                color: foreground,
                 fontSize: 18,
                 fontWeight: "600" as const,
                 marginTop: 16,
@@ -139,11 +145,29 @@ export default function PostDetailScreen() {
               code_inline: {
                 fontFamily: "monospace",
                 fontSize: 14,
+                color: foreground,
+                borderWidth: 0,
+                backgroundColor: muted,
+                padding: 4,
+                borderRadius: 4,
               },
               code_block: {
                 fontFamily: "monospace",
                 fontSize: 14,
-                backgroundColor: "rgba(128,128,128,0.1)",
+                color: foreground,
+                borderWidth: 0,
+                backgroundColor: muted,
+                padding: 12,
+                borderRadius: 8,
+                marginTop: 8,
+                marginBottom: 8,
+              },
+              fence: {
+                fontFamily: "monospace",
+                fontSize: 14,
+                color: foreground,
+                borderWidth: 0,
+                backgroundColor: muted,
                 padding: 12,
                 borderRadius: 8,
                 marginTop: 8,
@@ -151,7 +175,7 @@ export default function PostDetailScreen() {
               },
               blockquote: {
                 borderLeftWidth: 3,
-                borderLeftColor: "rgba(128,128,128,0.3)",
+                borderLeftColor: muted,
                 paddingLeft: 12,
                 marginTop: 8,
                 marginBottom: 8,

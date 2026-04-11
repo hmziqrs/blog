@@ -2,7 +2,6 @@ import { ScrollView, Text, View } from "react-native";
 
 import { Container } from "@/components/container";
 import { PageHeader } from "@/components/page-header";
-import { Chip } from "heroui-native/chip";
 import { ActivityIndicator } from "react-native";
 import { getPageConfig } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
@@ -41,9 +40,11 @@ export default function PrivacyScreen() {
         <PageHeader title={config.title} description={config.description} />
 
         <View className="flex-row items-center gap-3">
-          <Chip variant="secondary" size="sm">
-            <Chip.Label>{config.badgeLabel}</Chip.Label>
-          </Chip>
+          <View className="rounded-full border border-base-content/12 bg-base-200/60 px-3 py-1">
+            <Text className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/62">
+              {config.badgeLabel}
+            </Text>
+          </View>
           <Text className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/48">
             Effective {config.effectiveDate}
           </Text>

@@ -43,7 +43,7 @@ export default function HomeScreen() {
             <Text className="text-3xl font-semibold tracking-tight text-foreground">
               hmziq.rs
             </Text>
-            <Text className="mt-1 text-sm text-muted">
+            <Text className="mt-1 text-sm text-base-content/56">
               Writing about software engineering, tools, and ideas.
             </Text>
           </View>

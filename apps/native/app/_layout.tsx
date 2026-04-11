@@ -1,6 +1,6 @@
 import "@/global.css";
 import { Stack } from "expo-router";
-import { HeroUINativeProvider } from "heroui-native";
+import { HeroUINativeProvider, useThemeColor } from "heroui-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
@@ -12,10 +12,22 @@ export const unstable_settings = {
 };
 
 function StackLayout() {
+  const background = useThemeColor("background");
+  const foreground = useThemeColor("foreground");
+
   return (
     <Stack
       screenOptions={{
         headerRight: () => <ThemeToggle />,
+        headerStyle: { backgroundColor: background },
+        headerTintColor: foreground,
+        headerTitleStyle: {
+          fontWeight: "600",
+          color: foreground,
+        },
+        headerBackTitleStyle: {
+          fontFamily: undefined,
+        },
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
