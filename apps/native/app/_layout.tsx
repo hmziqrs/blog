@@ -5,16 +5,44 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { AppThemeProvider } from "@/contexts/app-theme-context";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const unstable_settings = {
-  initialRouteName: "(drawer)",
+  initialRouteName: "(tabs)",
 };
 
 function StackLayout() {
   return (
-    <Stack screenOptions={{}}>
-      <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-      <Stack.Screen name="modal" options={{ title: "Modal", presentation: "modal" }} />
+    <Stack
+      screenOptions={{
+        headerRight: () => <ThemeToggle />,
+      }}
+    >
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="posts/[slug]"
+        options={{ title: "Post", headerBackTitle: "Back" }}
+      />
+      <Stack.Screen
+        name="tags/[tag]"
+        options={{ title: "Tag", headerBackTitle: "Back" }}
+      />
+      <Stack.Screen
+        name="category/[category]"
+        options={{ title: "Category", headerBackTitle: "Back" }}
+      />
+      <Stack.Screen
+        name="contact"
+        options={{ title: "Contact", headerBackTitle: "Back" }}
+      />
+      <Stack.Screen
+        name="privacy"
+        options={{ title: "Privacy", headerBackTitle: "Back" }}
+      />
+      <Stack.Screen
+        name="terms"
+        options={{ title: "Terms", headerBackTitle: "Back" }}
+      />
     </Stack>
   );
 }
