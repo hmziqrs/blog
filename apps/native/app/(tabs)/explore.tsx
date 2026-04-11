@@ -1,9 +1,10 @@
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 import { CategoryBadge } from "@/components/category-badge";
 import { Container } from "@/components/container";
 import { PageHeader } from "@/components/page-header";
 import { TagBadge } from "@/components/tag-badge";
+import { ActivityIndicator } from "react-native";
 import { getCategories, getTags } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 
@@ -14,17 +15,18 @@ export default function ExploreScreen() {
   const isLoading = tags.loading || categories.loading;
 
   return (
-    <Container className="px-4 pb-4">
-      <PageHeader title="Explore" />
+    <Container isScrollable={false}>
       {isLoading ? (
-        <View className="flex-1 items-center justify-center py-12">
+        <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" />
         </View>
       ) : (
         <ScrollView
-          contentContainerStyle={{ gap: 32 }}
-          scrollEnabled={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24, paddingBottom: 32, gap: 28 }}
+          keyboardShouldPersistTaps="handled"
         >
+          <PageHeader title="Explore" />
+
           <View>
             <Text className="mb-3 text-lg font-semibold text-foreground">
               Tags
@@ -35,7 +37,7 @@ export default function ExploreScreen() {
             {tags.data && tags.data.tags.length === 0 && (
               <Text className="text-sm text-base-content/40">No tags yet.</Text>
             )}
-            <View className="flex-row flex-wrap gap-3">
+            <View className="flex-row flex-wrap gap-2">
               {tags.data?.tags.map((t) => (
                 <TagBadge key={t.tag} tag={t.tag} count={t.count} />
               ))}
@@ -47,16 +49,12 @@ export default function ExploreScreen() {
               Categories
             </Text>
             {categories.error && (
-              <Text className="text-sm text-red-500">
-                {categories.error}
-              </Text>
+              <Text className="text-sm text-red-500">{categories.error}</Text>
             )}
             {categories.data && categories.data.categories.length === 0 && (
-              <Text className="text-sm text-base-content/40">
-                No categories yet.
-              </Text>
+              <Text className="text-sm text-base-content/40">No categories yet.</Text>
             )}
-            <View className="flex-row flex-wrap gap-3">
+            <View className="flex-row flex-wrap gap-2">
               {categories.data?.categories.map((c) => (
                 <CategoryBadge
                   key={c.category}

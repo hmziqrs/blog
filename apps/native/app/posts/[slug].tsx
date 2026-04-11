@@ -5,6 +5,7 @@ import Markdown from "react-native-markdown-display";
 import { CategoryBadge } from "@/components/category-badge";
 import { Container } from "@/components/container";
 import { TagBadge } from "@/components/tag-badge";
+import { ActivityIndicator } from "react-native";
 import { getPost } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 
@@ -27,11 +28,19 @@ export default function PostDetailScreen() {
 
   if (loading || !post) {
     return (
-      <Container className="px-4 pb-4">
-        <View className="flex-1 items-center justify-center py-12">
-          <Text className="text-sm text-base-content/40">
-            {error ?? "Loading..."}
-          </Text>
+      <Container isScrollable={false}>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" />
+        </View>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container isScrollable={false} className="px-4">
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-sm text-red-500">{error}</Text>
         </View>
       </Container>
     );
@@ -40,14 +49,13 @@ export default function PostDetailScreen() {
   const readingTime = estimateReadingTime(post.body ?? "");
 
   return (
-    <Container className="pb-0">
+    <Container isScrollable={false}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 32 }}
         keyboardShouldPersistTaps="handled"
       >
         <View className="px-4 pt-4">
           <CategoryBadge category={post.category} />
-          <Text className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <Text className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
             {post.title}
           </Text>
           <Text className="mt-3 max-w-2xl text-base leading-7 text-base-content/68">
@@ -80,7 +88,7 @@ export default function PostDetailScreen() {
         </View>
 
         {post.cover && (
-          <View className="mt-6 overflow-hidden">
+          <View className="mt-6">
             <Image
               source={{ uri: post.cover }}
               alt={post.cover_alt ?? post.title}
@@ -90,7 +98,7 @@ export default function PostDetailScreen() {
           </View>
         )}
 
-        <View className="px-4 pt-6">
+        <View className="px-4 pt-6 pb-8">
           <Markdown
             style={{
               body: {

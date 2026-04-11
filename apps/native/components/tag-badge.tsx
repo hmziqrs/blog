@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Pressable, Text } from "react-native";
+import { Chip } from "heroui-native/chip";
 
 interface TagBadgeProps {
   tag: string;
@@ -8,14 +8,15 @@ interface TagBadgeProps {
 
 export function TagBadge({ tag, count }: TagBadgeProps) {
   return (
-    <Pressable
+    <Chip
+      variant="secondary"
+      size="sm"
       onPress={() => router.push(`/tags/${encodeURIComponent(tag)}`)}
-      className="rounded-full border border-base-content/12 bg-base-200/60 px-3 py-1.5 active:opacity-70"
     >
-      <Text className="font-mono text-[0.72rem] tracking-[0.08em] uppercase text-base-content/72">
+      <Chip.Label>
         {tag}
-        {count != null && <Text className="opacity-60"> {count}</Text>}
-      </Text>
-    </Pressable>
+        {count != null ? ` ${count}` : ""}
+      </Chip.Label>
+    </Chip>
   );
 }

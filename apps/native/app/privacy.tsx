@@ -1,7 +1,9 @@
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 import { Container } from "@/components/container";
 import { PageHeader } from "@/components/page-header";
+import { Chip } from "heroui-native/chip";
+import { ActivityIndicator } from "react-native";
 import { getPageConfig } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import type { LegalPageConfig } from "@/lib/types";
@@ -11,8 +13,8 @@ export default function PrivacyScreen() {
 
   if (loading) {
     return (
-      <Container className="px-4 pb-4">
-        <View className="flex-1 items-center justify-center py-12">
+      <Container isScrollable={false}>
+        <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" />
         </View>
       </Container>
@@ -21,11 +23,9 @@ export default function PrivacyScreen() {
 
   if (error || !data) {
     return (
-      <Container className="px-4 pb-4">
+      <Container isScrollable={false} className="px-4">
         <PageHeader title="Privacy" />
-        <Text className="text-sm text-red-500">
-          {error ?? "Failed to load page"}
-        </Text>
+        <Text className="text-sm text-red-500">{error ?? "Failed to load page"}</Text>
       </Container>
     );
   }
@@ -33,24 +33,22 @@ export default function PrivacyScreen() {
   const config = data.config as LegalPageConfig;
 
   return (
-    <Container className="px-4 pb-4">
-      <PageHeader title={config.title} description={config.description} />
+    <Container isScrollable={false}>
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 20 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <PageHeader title={config.title} description={config.description} />
 
-      <View className="mb-6 flex-row flex-wrap items-center gap-3">
-        <View className="rounded-full border border-base-content/12 bg-base-200 px-3 py-1">
-          <Text className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/62">
-            {config.badgeLabel}
+        <View className="flex-row items-center gap-3">
+          <Chip variant="secondary" size="sm">
+            <Chip.Label>{config.badgeLabel}</Chip.Label>
+          </Chip>
+          <Text className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/48">
+            Effective {config.effectiveDate}
           </Text>
         </View>
-        <Text className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/48">
-          Effective {config.effectiveDate}
-        </Text>
-      </View>
 
-      <ScrollView
-        contentContainerStyle={{ gap: 20 }}
-        scrollEnabled={false}
-      >
         {config.preamble.map((paragraph, i) => (
           <Text key={i} className="text-base leading-7 text-base-content/80">
             {paragraph}
@@ -58,7 +56,7 @@ export default function PrivacyScreen() {
         ))}
 
         {config.sections.map((section, i) => (
-          <View key={i} className="mt-2">
+          <View key={i}>
             <Text className="mb-2 text-lg font-semibold text-foreground">
               {section.title}
             </Text>

@@ -1,8 +1,10 @@
 import { router } from "expo-router";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { Chip } from "heroui-native/chip";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { Container } from "@/components/container";
 import { PageHeader } from "@/components/page-header";
+import { ActivityIndicator } from "react-native";
 import { getPageConfig } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import type { AboutPageConfig } from "@/lib/types";
@@ -12,8 +14,8 @@ export default function AboutScreen() {
 
   if (loading) {
     return (
-      <Container className="px-4 pb-4">
-        <View className="flex-1 items-center justify-center py-12">
+      <Container isScrollable={false}>
+        <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" />
         </View>
       </Container>
@@ -22,11 +24,9 @@ export default function AboutScreen() {
 
   if (error || !data) {
     return (
-      <Container className="px-4 pb-4">
+      <Container isScrollable={false} className="px-4">
         <PageHeader title="About" />
-        <Text className="text-sm text-red-500">
-          {error ?? "Failed to load page"}
-        </Text>
+        <Text className="text-sm text-red-500">{error ?? "Failed to load page"}</Text>
       </Container>
     );
   }
@@ -34,46 +34,45 @@ export default function AboutScreen() {
   const config = data.config as AboutPageConfig;
 
   return (
-    <Container className="px-4 pb-4">
-      <PageHeader title={config.title} description={config.description} />
+    <Container isScrollable={false}>
       <ScrollView
-        contentContainerStyle={{ gap: 16 }}
-        scrollEnabled={false}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24, paddingBottom: 32, gap: 16 }}
+        keyboardShouldPersistTaps="handled"
       >
+        <PageHeader title={config.title} description={config.description} />
+
         {config.paragraphs.map((paragraph, i) => (
           <Text key={i} className="text-base leading-7 text-base-content/80">
             {paragraph}
           </Text>
         ))}
 
-        <View className="mt-4 flex-row flex-wrap gap-3">
-          <Pressable
+        <View className="mt-2 flex-row flex-wrap gap-2">
+          <Chip
+            variant="secondary"
+            size="md"
             onPress={() => router.push("/(tabs)/explore")}
-            className="rounded-full border border-base-content/12 bg-base-200/60 px-4 py-2 active:opacity-70"
           >
-            <Text className="font-mono text-[0.72rem] tracking-[0.14em] uppercase text-base-content/72">
-              Tags
-            </Text>
-          </Pressable>
-          <Pressable
+            <Chip.Label>Tags</Chip.Label>
+          </Chip>
+          <Chip
+            variant="primary"
+            size="md"
             onPress={() => router.push("/(tabs)/explore")}
-            className="rounded-full border border-primary/25 bg-primary/8 px-4 py-2 active:opacity-70"
           >
-            <Text className="font-mono text-[0.72rem] tracking-[0.14em] uppercase text-primary">
-              Categories
-            </Text>
-          </Pressable>
+            <Chip.Label>Categories</Chip.Label>
+          </Chip>
         </View>
 
-        <View className="mt-4 border-t border-base-content/10 pt-4">
-          <Pressable onPress={() => router.push("/contact")} className="mb-3">
-            <Text className="text-sm font-medium text-primary">Contact</Text>
+        <View className="mt-4 border-t border-base-content/10 pt-4 gap-1">
+          <Pressable onPress={() => router.push("/contact")}>
+            <Text className="py-1.5 text-sm font-medium text-primary">Contact</Text>
           </Pressable>
-          <Pressable onPress={() => router.push("/privacy")} className="mb-3">
-            <Text className="text-sm font-medium text-primary">Privacy</Text>
+          <Pressable onPress={() => router.push("/privacy")}>
+            <Text className="py-1.5 text-sm font-medium text-primary">Privacy</Text>
           </Pressable>
           <Pressable onPress={() => router.push("/terms")}>
-            <Text className="text-sm font-medium text-primary">Terms</Text>
+            <Text className="py-1.5 text-sm font-medium text-primary">Terms</Text>
           </Pressable>
         </View>
       </ScrollView>
