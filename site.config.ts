@@ -1,8 +1,8 @@
 import { defineSiteConfig, formatPageTitle } from "./packages/site/index.ts";
 
 export const siteConfig = defineSiteConfig({
-  name: "hmziq.rs",
-  siteUrl: "https://hmziq.rs",
+  name: "Hmziq blog",
+  siteUrl: "https://blog.hmziq.rs",
   basePath: "/",
   author: {
     name: "hmziqrs",
@@ -20,7 +20,7 @@ export const siteConfig = defineSiteConfig({
     { page: "terms", label: "Terms" },
   ],
   blog: {
-    homeTitle: "hmziq.rs",
+    homeTitle: "Hmziq blog",
     homeDescription: "Writing about software engineering, tools, and ideas.",
   },
   pages: {
