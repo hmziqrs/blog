@@ -82,6 +82,8 @@ export interface RoutesConfig {
 export interface SiteConfigInput {
   name: string;
   siteUrl: string;
+  copyrightSiteURL: string;
+  copyrightSiteName: string;
   basePath?: string;
   author: SiteAuthor;
   footerDescription?: string;

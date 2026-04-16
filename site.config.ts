@@ -3,6 +3,8 @@ import { defineSiteConfig, formatPageTitle } from "./packages/site/index.ts";
 export const siteConfig = defineSiteConfig({
   name: "Hmziq blog",
   siteUrl: "https://blog.hmziq.rs",
+  copyrightSiteName: "hmziq.rs",
+  copyrightSiteURL: "https://hmziq.rs",
   basePath: "/",
   author: {
     name: "hmziqrs",

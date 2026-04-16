@@ -21,12 +21,12 @@ const year = new Date().getFullYear();
       <p class="text-base-content/48">
         © {year}{" "}
         <a
-          href="https://hmziq.rs"
+          href={siteConfig.copyrightSiteURL}
           target="_blank"
           rel="noopener noreferrer"
           class="hover:text-primary transition-colors duration-200"
         >
-          {siteConfig.name}
+          {siteConfig.copyrightSiteName}
         </a>
         . Built with{" "}
         <a
