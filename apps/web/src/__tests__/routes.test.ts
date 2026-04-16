@@ -40,7 +40,6 @@ describe("route helpers", () => {
       author: {
         name: "Example Author",
       },
-      footerDescription: "Example blog",
       blog: {
         homeTitle: "Example",
         homeDescription: "Example description",
@@ -62,7 +61,6 @@ describe("site config nav resolution", () => {
       author: {
         name: "Example Author",
       },
-      footerDescription: "Example blog",
       blog: {
         homeTitle: "Example",
         homeDescription: "Example description",

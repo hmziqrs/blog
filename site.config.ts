@@ -8,7 +8,6 @@ export const siteConfig = defineSiteConfig({
     name: "hmziqrs",
     url: "https://hmziq.rs/about/",
   },
-  footerDescription: "Writing about software engineering, tools, and systems.",
   primaryNav: [
     { page: "about", label: "About" },
     { page: "contact", label: "Contact" },

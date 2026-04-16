@@ -84,7 +84,7 @@ export interface SiteConfigInput {
   siteUrl: string;
   basePath?: string;
   author: SiteAuthor;
-  footerDescription: string;
+  footerDescription?: string;
   blog: BlogConfig;
   primaryNav: SiteNavItemInput[];
   footerNav: SiteNavItemInput[];
