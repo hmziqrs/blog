@@ -1,0 +1,212 @@
+---
+interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+const { title = "Interactive Banner", subtitle = "Hover to interact" } = Astro.props;
+---
+
+<div class="relative w-full overflow-hidden rounded-xl bg-linear-to-br from-slate-900 via-purple-900 to-slate-900">
+  <canvas id="interactive-canvas" class="block w-full h-80 cursor-pointer"></canvas>
+</div>
+
+<script define:vars={{ title, subtitle }}>
+  const canvas = document.getElementById('interactive-canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!canvas || !ctx) return;
+
+  let snowflakes = [];
+  let animationId;
+  let width = 0;
+  let height = 0;
+  let mouse = { x: -1000, y: -1000 };
+  
+  // Text animation state
+  let charIndex = 0;
+  let lastCharTime = 0;
+  const charDelay = 50; // ms between characters
+  let characters = [];
+
+  function resize() {
+    width = canvas.offsetWidth;
+    height = canvas.offsetHeight;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+
+  class Snowflake {
+    constructor() {
+      this.reset();
+      this.y = Math.random() * height;
+    }
+
+    reset() {
+      this.x = Math.random() * width;
+      this.y = -10;
+      this.size = Math.random() * 3 + 1;
+      this.speed = Math.random() * 1 + 0.5;
+      this.wind = Math.random() * 0.5 - 0.25;
+      this.opacity = Math.random() * 0.5 + 0.5;
+    }
+
+    update() {
+      // Mouse interaction
+      const dx = mouse.x - this.x;
+      const dy = mouse.y - this.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const maxDist = 80;
+
+      if (dist < maxDist) {
+        const force = (maxDist - dist) / maxDist;
+        this.x -= (dx / dist) * force * 3;
+        this.y -= (dy / dist) * force * 3;
+      }
+
+      this.y += this.speed;
+      this.x += this.wind;
+
+      if (this.y > height + 10) {
+        this.reset();
+      }
+      if (this.x > width) this.x = 0;
+      if (this.x < 0) this.x = width;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+      ctx.fill();
+    }
+  }
+
+  function init() {
+    snowflakes = [];
+    const flakeCount = 100;
+    for (let i = 0; i < flakeCount; i++) {
+      snowflakes.push(new Snowflake());
+    }
+    initText();
+  }
+
+  function initText() {
+    characters = [];
+    const fullText = title + '\n' + subtitle;
+    const lines = fullText.split('\n');
+    
+    ctx.font = 'bold 32px system-ui, -apple-system, sans-serif';
+    const titleWidth = ctx.measureText(title).width;
+    const titleX = (width - titleWidth) / 2;
+    const titleY = height / 2 - 15;
+    
+    ctx.font = '16px system-ui, -apple-system, sans-serif';
+    const subtitleWidth = ctx.measureText(subtitle).width;
+    const subtitleX = (width - subtitleWidth) / 2;
+    const subtitleY = height / 2 + 20;
+    
+    // Initialize title characters
+    ctx.font = 'bold 32px system-ui, -apple-system, sans-serif';
+    let currentX = titleX;
+    for (let i = 0; i < title.length; i++) {
+      const charWidth = ctx.measureText(title[i]).width;
+      characters.push({
+        char: title[i],
+        x: currentX,
+        y: titleY,
+        baseX: currentX,
+        baseY: titleY,
+        scale: 3,
+        animTime: 0
+      });
+      currentX += charWidth;
+    }
+    
+    // Initialize subtitle characters
+    ctx.font = '16px system-ui, -apple-system, sans-serif';
+    currentX = subtitleX;
+    for (let i = 0; i < subtitle.length; i++) {
+      const charWidth = ctx.measureText(subtitle[i]).width;
+      characters.push({
+        char: subtitle[i],
+        x: currentX,
+        y: subtitleY,
+        baseX: currentX,
+        baseY: subtitleY,
+        scale: 3,
+        animTime: 0
+      });
+      currentX += charWidth;
+    }
+  }
+
+  function drawText(timestamp) {
+    // Typewriter phase
+    if (timestamp - lastCharTime > charDelay) {
+      charIndex++;
+      lastCharTime = timestamp;
+    }
+    
+    // Draw characters
+    characters.forEach((char, index) => {
+      if (index >= charIndex) return; // Don't draw yet
+      
+      // Scale-in animation
+      if (char.scale > 1) {
+        char.scale -= 0.1;
+        if (char.scale < 1) char.scale = 1;
+      }
+      
+      ctx.save();
+      ctx.translate(char.x, char.y);
+      ctx.scale(char.scale, char.scale);
+      
+      const isTitle = index < title.length;
+      ctx.font = isTitle ? 'bold 32px system-ui, -apple-system, sans-serif' : '16px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = `rgba(255, 255, 255, ${isTitle ? 1 : 0.7})`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(char.char, 0, 0);
+      
+      ctx.restore();
+    });
+  }
+
+  function animate(timestamp) {
+    ctx.clearRect(0, 0, width, height);
+
+    snowflakes.forEach(flake => {
+      flake.update();
+      flake.draw();
+    });
+
+    drawText(timestamp);
+    animationId = requestAnimationFrame(animate);
+  }
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    mouse.x = -1000;
+    mouse.y = -1000;
+  });
+
+  resize();
+  init();
+  animate();
+
+  window.addEventListener('resize', () => {
+    resize();
+    initText();
+  });
+
+  return () => {
+    cancelAnimationFrame(animationId);
+  };
+</script>

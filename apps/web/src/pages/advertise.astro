@@ -2,6 +2,7 @@
 import { pageTitle, siteConfig } from "../config/site";
 import PageContainer from "../components/PageContainer.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import InteractiveCanvasBanner from "../components/InteractiveCanvasBanner.astro";
 ---
 
 <BaseLayout
@@ -15,6 +16,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
       <h2 class="text-xl font-semibold">Banner Types</h2>
       <p>We offer three levels of interactive banners: Static simple image banners, Minimal Canvas with subtle animations and interactivity, Complex Canvas with rich immersive interactive experiences.</p>
+
+      <h2 class="text-xl font-semibold">Interactive Canvas Example</h2>
+      <p>Here's an example of a beautiful interactive canvas banner with particle effects and mouse interaction:</p>
+      
+      <InteractiveCanvasBanner 
+        title="Your Brand Here" 
+        subtitle="Interactive Canvas Banner" 
+      />
 
       <h2 class="text-xl font-semibold">Payment</h2>
       <p>We accept payments in Fiat and cryptocurrencies as well.</p>
