@@ -3,6 +3,7 @@ import { pageTitle, siteConfig } from "../config/site";
 import PageContainer from "../components/PageContainer.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import InteractiveCanvasBanner from "../components/InteractiveCanvasBanner.astro";
+import ThreeJSBanner from "../components/ThreeJSBanner.astro";
 ---
 
 <BaseLayout
@@ -15,7 +16,7 @@ import InteractiveCanvasBanner from "../components/InteractiveCanvasBanner.astro
       <p>Gambling and betting, Abusive substances or addictive products, Scams or fraudulent schemes, Misleading or deceptive content.</p>
 
       <h2 class="text-xl font-semibold">Banner Types</h2>
-      <p>We offer three levels of interactive banners: Static simple image banners, Minimal Canvas with subtle animations and interactivity, Complex Canvas with rich immersive interactive experiences.</p>
+      <p>We offer three levels of interactive banners: Static simple image banners, Minimal Canvas with subtle animations and interactivity, Complex Canvas with rich immersive interactive experiences, and 3D Web Component banners with Three.js for advanced interactive 3D effects.</p>
 
       <h2 class="text-xl font-semibold">Interactive Canvas Example</h2>
       <p>Here's an example of a beautiful interactive canvas banner with particle effects and mouse interaction:</p>
@@ -23,6 +24,17 @@ import InteractiveCanvasBanner from "../components/InteractiveCanvasBanner.astro
       <InteractiveCanvasBanner 
         title="Your Brand Here" 
         subtitle="Interactive Canvas Banner" 
+      />
+
+      <h2 class="text-xl font-semibold">3D Web Component Example</h2>
+      <p>Here's an example of a 3D interactive banner with Three.js, featuring floating particles, interactive 3D shapes, and mouse interactions:</p>
+      
+      <ThreeJSBanner 
+        brandName="Your Brand Here"
+        ctaText="Learn More"
+        ctaUrl="/contact"
+        modelType="cube"
+        particleCount={150}
       />
 
       <h2 class="text-xl font-semibold">Payment</h2>

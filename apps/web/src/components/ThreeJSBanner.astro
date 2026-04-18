@@ -1,0 +1,40 @@
+---
+interface Props {
+  brandName?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  modelType?: 'cube' | 'sphere' | 'torus';
+  particleCount?: number;
+}
+
+const {
+  brandName = 'Your Brand',
+  ctaText = 'Learn More',
+  ctaUrl = '#',
+  modelType = 'cube',
+  particleCount = 150
+} = Astro.props;
+---
+
+<ad-banner-3d
+  brand-name={brandName}
+  cta-text={ctaText}
+  cta-url={ctaUrl}
+  model-type={modelType}
+  particle-count={particleCount.toString()}
+></ad-banner-3d>
+
+<script>
+  // Load the web component script
+  const script = document.createElement('script');
+  script.src = '/web-components/three-js-banner.es.js';
+  script.type = 'module';
+  document.head.appendChild(script);
+</script>
+
+<style>
+  ad-banner-3d {
+    display: block;
+    width: 100%;
+  }
+</style>
