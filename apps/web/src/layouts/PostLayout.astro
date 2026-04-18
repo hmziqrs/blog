@@ -1,6 +1,7 @@
 ---
 import type { ImageMetadata } from "astro";
 import { pageTitle, routes, siteConfig, withBasePath } from "../config/site";
+import AdvertisementBanner from "../components/AdvertisementBanner.astro";
 import BaseLayout from "./BaseLayout.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
 import PageContainer from "../components/PageContainer.astro";
@@ -81,6 +82,13 @@ const structuredData = {
   structuredData={structuredData}
 >
   <PageContainer>
+    <AdvertisementBanner
+      href={siteConfig.advertisement?.href || ""}
+      imageUrl={siteConfig.advertisement?.imageUrl}
+      alt={siteConfig.advertisement?.alt}
+      title={siteConfig.advertisement?.title}
+      description={siteConfig.advertisement?.description}
+    />
     <div class="max-w-3xl">
       <header class="mb-8">
         <CategoryBadge category={frontmatter.category} class="mb-4" />

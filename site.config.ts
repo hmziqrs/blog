@@ -25,6 +25,13 @@ export const siteConfig = defineSiteConfig({
     homeTitle: "Hmziq blog",
     homeDescription: "Writing about software engineering, tools, and ideas.",
   },
+  advertisement: {
+    href: "",
+    imageUrl: "",
+    alt: "",
+    title: "",
+    description: "",
+  },
   pages: {
     about: {
       title: "About",

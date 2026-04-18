@@ -54,6 +54,14 @@ export interface BlogConfig {
   homeDescription: string;
 }
 
+export interface AdvertisementConfig {
+  href: string;
+  imageUrl: string;
+  alt: string;
+  title: string;
+  description: string;
+}
+
 export interface SitePagesConfig {
   about?: AboutPageConfig;
   contact?: ContactPageConfig;
@@ -88,6 +96,7 @@ export interface SiteConfigInput {
   author: SiteAuthor;
   footerDescription?: string;
   blog: BlogConfig;
+  advertisement?: AdvertisementConfig;
   primaryNav: SiteNavItemInput[];
   footerNav: SiteNavItemInput[];
   pages: SitePagesConfig;

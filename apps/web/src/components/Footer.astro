@@ -3,6 +3,9 @@ import { siteConfig } from "../config/site";
 import PageContainer from "./PageContainer.astro";
 
 const year = new Date().getFullYear();
+const hasSponsor = siteConfig.advertisement?.href ? true : false;
+const sponsorName = hasSponsor ? "SPONSOR" : '"your brand"';
+const sponsorHref = hasSponsor ? siteConfig.advertisement?.href : "/contact";
 ---
 
 <footer class="border-base-300/80 mt-12 border-t">
@@ -45,6 +48,18 @@ const year = new Date().getFullYear();
           class="hover:text-primary transition-colors duration-200"
         >
           Cloudflare
+        </a>
+        .
+      </p>
+      <p class="text-base-content/48">
+        Powered by{" "}
+        <a
+          href={sponsorHref}
+          target={hasSponsor ? "_blank" : undefined}
+          rel={hasSponsor ? "noopener noreferrer sponsored" : undefined}
+          class="hover:text-primary transition-colors duration-200"
+        >
+          {sponsorName}
         </a>
         .
       </p>
