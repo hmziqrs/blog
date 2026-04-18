@@ -1,0 +1,29 @@
+---
+import { pageTitle, siteConfig } from "../config/site";
+import PageContainer from "../components/PageContainer.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title={pageTitle("Advertise")}
+  description="Advertising guidelines and sponsorship opportunities."
+>
+  <PageContainer>
+    <div class="max-w-3xl space-y-6">
+      <h2 class="text-xl font-semibold">What We Don't Accept</h2>
+      <p>Gambling and betting, Abusive substances or addictive products, Scams or fraudulent schemes, Misleading or deceptive content.</p>
+
+      <h2 class="text-xl font-semibold">Banner Types</h2>
+      <p>We offer three levels of interactive banners: Static simple image banners, Minimal Canvas with subtle animations and interactivity, Complex Canvas with rich immersive interactive experiences.</p>
+
+      <h2 class="text-xl font-semibold">Payment</h2>
+      <p>We accept payments in Fiat and cryptocurrencies as well.</p>
+
+      <h2 class="text-xl font-semibold">Get Started</h2>
+      <p>
+        <a href="/contact" class="text-primary hover:underline">Contact us</a> to discuss
+        advertising opportunities.
+      </p>
+    </div>
+  </PageContainer>
+</BaseLayout>

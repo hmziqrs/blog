@@ -6,7 +6,7 @@ export interface SiteNavItem {
 export interface SiteNavItemInput {
   label: string;
   href?: string;
-  page?: "about" | "contact" | "privacy" | "terms" | "tags" | "categories";
+  page?: "about" | "contact" | "privacy" | "terms" | "tags" | "categories" | "advertise";
 }
 
 export interface ContentSection {
@@ -77,6 +77,7 @@ export interface RoutesConfig {
   terms: string;
   tags: string;
   categories: string;
+  advertise: string;
   rss: string;
   robots: string;
   favicon: string;
@@ -143,6 +144,7 @@ export function createRoutes(basePath = "/"): RoutesConfig {
     terms: withBasePath(basePath, "/terms"),
     tags: withBasePath(basePath, "/tags"),
     categories: withBasePath(basePath, "/categories"),
+    advertise: withBasePath(basePath, "/advertise"),
     rss: withBasePath(basePath, "/rss.xml"),
     robots: withBasePath(basePath, "/robots.txt"),
     favicon: withBasePath(basePath, "/favicon.svg"),

@@ -17,6 +17,7 @@ export const siteConfig = defineSiteConfig({
   footerNav: [
     { page: "tags", label: "Tags" },
     { page: "categories", label: "Categories" },
+    { page: "advertise", label: "Advertise" },
     { page: "contact", label: "Contact" },
     { page: "privacy", label: "Privacy" },
     { page: "terms", label: "Terms" },
