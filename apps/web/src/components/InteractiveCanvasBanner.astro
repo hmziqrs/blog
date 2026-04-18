@@ -118,8 +118,7 @@ const { title = "Interactive Banner", subtitle = "Hover to interact" } = Astro.p
         y: titleY,
         baseX: currentX,
         baseY: titleY,
-        scale: 3,
-        animTime: 0
+        initialScale: 3
       });
       currentX += charWidth;
     }
@@ -135,8 +134,7 @@ const { title = "Interactive Banner", subtitle = "Hover to interact" } = Astro.p
         y: subtitleY,
         baseX: currentX,
         baseY: subtitleY,
-        scale: 3,
-        animTime: 0
+        initialScale: 3
       });
       currentX += charWidth;
     }
@@ -153,17 +151,17 @@ const { title = "Interactive Banner", subtitle = "Hover to interact" } = Astro.p
     characters.forEach((char, index) => {
       if (index >= charIndex) return; // Don't draw yet
       
-      // Scale-in animation
-      if (char.scale > 1) {
-        char.scale -= 0.1;
-        if (char.scale < 1) char.scale = 1;
+      // Scale-in animation from initial appearance
+      if (char.initialScale > 1) {
+        char.initialScale -= 0.1;
+        if (char.initialScale < 1) char.initialScale = 1;
       }
       
+      const isTitle = index < title.length;
       ctx.save();
       ctx.translate(char.x, char.y);
-      ctx.scale(char.scale, char.scale);
+      ctx.scale(char.initialScale, char.initialScale);
       
-      const isTitle = index < title.length;
       ctx.font = isTitle ? 'bold 32px system-ui, -apple-system, sans-serif' : '16px system-ui, -apple-system, sans-serif';
       ctx.fillStyle = `rgba(255, 255, 255, ${isTitle ? 1 : 0.7})`;
       ctx.textAlign = 'left';
