@@ -1,0 +1,51 @@
+---
+import { pageTitle, siteConfig } from "../config/site";
+import NewsletterForm from "../components/NewsletterForm.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageContainer from "../components/PageContainer.astro";
+
+const title = pageTitle("Newsletter");
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+---
+
+<BaseLayout title={title} description="Subscribe to the Hmziq blog newsletter">
+  <PageContainer>
+    <main class="max-w-2xl mx-auto px-4 py-12">
+      <h1 class="text-3xl font-bold mb-6">Newsletter</h1>
+
+      <div class="bg-base-100 rounded-lg shadow p-6 mb-8 border border-base-content/10">
+        <h2 class="text-xl font-semibold mb-4">Subscribe to the Newsletter</h2>
+        <p class="text-base-content/70 mb-6">
+          Get notified when new posts are published. No spam, unsubscribe anytime.
+        </p>
+
+        <NewsletterForm siteKey={siteKey} />
+      </div>
+
+      <div class="bg-base-200/60 rounded-lg p-6 border border-base-content/10">
+        <h3 class="font-semibold mb-2">What you'll receive:</h3>
+        <ul class="list-disc list-inside text-base-content/70 space-y-1">
+          <li>New post notifications</li>
+          <li>Curated content summaries</li>
+          <li>Occasional updates</li>
+        </ul>
+
+        <p class="text-sm text-base-content/50 mt-4">
+          By subscribing, you agree to our
+          <a href="/privacy" class="text-primary hover:underline"
+            >Privacy Policy</a
+          >.
+        </p>
+      </div>
+    </main>
+  </PageContainer>
+</BaseLayout>
+
+<script is:inline>
+  // Load Cloudflare Turnstile script
+  const script = document.createElement("script");
+  script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+</script>

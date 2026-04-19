@@ -4,6 +4,7 @@ import { pageTitle, routes, siteConfig, withBasePath } from "../config/site";
 import AdvertisementBanner from "../components/AdvertisementBanner.astro";
 import BaseLayout from "./BaseLayout.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
+import NewsletterForm from "../components/NewsletterForm.astro";
 import PageContainer from "../components/PageContainer.astro";
 import TagBadge from "../components/TagBadge.astro";
 import ThemedImage from "../components/ThemedImage.astro";
@@ -156,6 +157,14 @@ const structuredData = {
           }
         </script>
       )}
+
+      <div class="mt-12 rounded-lg border border-base-content/10 bg-base-200/60 p-6">
+        <h3 class="text-lg font-semibold mb-2">Subscribe to the Newsletter</h3>
+        <p class="text-sm text-base-content/70 mb-4">
+          Get notified when new posts are published. No spam, unsubscribe anytime.
+        </p>
+        <NewsletterForm siteKey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} />
+      </div>
     </div>
   </PageContainer>
 </BaseLayout>

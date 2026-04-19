@@ -17,6 +17,7 @@ export const siteConfig = defineSiteConfig({
   footerNav: [
     { page: "tags", label: "Tags" },
     { page: "categories", label: "Categories" },
+    { href: "/newsletter", label: "Newsletter" },
     { page: "advertise", label: "Advertise" },
     { page: "contact", label: "Contact" },
     { page: "privacy", label: "Privacy" },
@@ -86,18 +87,18 @@ export const siteConfig = defineSiteConfig({
       description:
         "A concise explanation of what this site collects, what it does not collect, how analytics are used, and how advertising appears on the site.",
       badgeLabel: "Policy",
-      effectiveDate: "March 31, 2026",
+      effectiveDate: "April 19, 2026",
       preamble: [
-        "This site is a read-only publication. It does not offer account creation, user logins, paid memberships, comment systems, or email newsletters. In normal use, you can browse the site without directly submitting personal profile information.",
+        "This site is a read-only publication. It does not offer account creation, user logins, paid memberships, or comment systems. It does offer an optional email newsletter for readers who choose to subscribe. In normal use, you can browse the site without directly submitting personal profile information.",
       ],
       sections: [
         {
           title: "What this site collects",
-          body: "The site uses Firebase Analytics to understand overall traffic and general usage patterns. Depending on Google's analytics processing, that may include information such as browser type, device category, approximate location, referring source, page views, and interaction events.",
+          body: "The site uses Firebase Analytics to understand overall traffic and general usage patterns. Depending on Google's analytics processing, that may include information such as browser type, device category, approximate location, referring source, page views, and interaction events. If you subscribe to the newsletter, the site collects your email address for the purpose of sending newsletter updates.",
         },
         {
           title: "What this site does not collect",
-          body: "This site is not designed around user accounts or marketing funnels. It does not maintain subscriber databases, authentication records, or profile dashboards for readers.",
+          body: "This site is not designed around user accounts or marketing funnels. It does not maintain authentication records or profile dashboards for readers. Newsletter subscriber email addresses are stored solely for sending newsletter updates and can be removed at any time via the unsubscribe link.",
         },
         {
           title: "Advertising",
@@ -106,6 +107,10 @@ export const siteConfig = defineSiteConfig({
         {
           title: "How analytics data is used",
           body: "Analytics information is used to understand how the site is read and to improve content, performance, and navigation. It is not used to build advertising profiles or to sell access to reader data.",
+        },
+        {
+          title: "Email newsletters",
+          body: "The site offers an optional newsletter that sends notifications when new blog posts are published. Subscriptions require a single opt-in with CAPTCHA verification. You can unsubscribe at any time using the link provided in each email. Newsletter emails are sent via Cloudflare Email Sending. Your email address is stored securely and is never shared with third parties.",
         },
         {
           title: "Third-party processing",

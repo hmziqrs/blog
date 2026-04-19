@@ -1,0 +1,189 @@
+---
+const { siteKey = "" } = Astro.props;
+---
+
+<div id="newsletter-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-base-100 rounded-lg shadow-xl max-w-md w-full relative border border-base-content/10">
+    <button
+      id="close-modal"
+      class="absolute top-4 right-4 text-base-content/40 hover:text-base-content/70 text-2xl leading-none"
+      aria-label="Close"
+    >
+      &times;
+    </button>
+
+    <div class="p-6">
+      <h2 class="text-2xl font-bold mb-2">Subscribe to the Newsletter</h2>
+      <p class="text-base-content/70 mb-6">
+        Get notified when new posts are published. No spam, unsubscribe anytime.
+      </p>
+
+      <form id="newsletter-form" class="flex flex-col gap-3">
+        <div>
+          <label for="email" class="block text-sm font-medium mb-1">
+            Email address
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            placeholder="you@example.com"
+            class="w-full px-4 py-2 border border-base-content/20 rounded-lg bg-base-200/60 focus:ring-2 focus:ring-primary focus:border-transparent text-base-content"
+          />
+        </div>
+
+        <div
+          id="turnstile-container"
+          class="cf-turnstile"
+          data-sitekey={siteKey}
+        ></div>
+
+        <button
+          type="submit"
+          id="submit-btn"
+          class="w-full bg-primary text-primary-content py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Subscribe
+        </button>
+
+        <div id="message" class="text-sm hidden"></div>
+      </form>
+
+      <div class="mt-4 flex items-center gap-2">
+        <input type="checkbox" id="dismiss-checkbox" class="checkbox checkbox-sm checkbox-primary" />
+        <label for="dismiss-checkbox" class="text-base-content/60 cursor-pointer text-sm">Don't ask me again for 7 days</label>
+      </div>
+
+      <p class="text-xs text-base-content/50 mt-4">
+        By subscribing, you agree to our
+        <a href="/privacy" class="text-primary hover:underline">Privacy Policy</a>.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById("newsletter-modal") as HTMLDivElement;
+  const closeBtn = document.getElementById("close-modal") as HTMLButtonElement;
+  const form = document.getElementById("newsletter-form") as HTMLFormElement;
+  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+  const message = document.getElementById("message") as HTMLDivElement;
+  const dismissCheckbox = document.getElementById("dismiss-checkbox") as HTMLInputElement;
+
+  // Check if user has dismissed before and if 7 days have passed
+  const dismissUntil = localStorage.getItem("newsletterDismissUntil");
+  if (!dismissUntil || Date.now() > parseInt(dismissUntil)) {
+    // Show modal after 50% scroll
+    const scrollThreshold = 0.5;
+    let hasShown = false;
+
+    window.addEventListener("scroll", () => {
+      if (hasShown) return;
+
+      const scrollPercentage = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+      if (scrollPercentage >= scrollThreshold) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        hasShown = true;
+      }
+    });
+  }
+
+  function closeModal() {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+
+    // If checkbox is checked, dismiss for 7 days
+    if (dismissCheckbox.checked) {
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      localStorage.setItem("newsletterDismissUntil", String(Date.now() + sevenDays));
+    }
+  }
+
+  // Close modal
+  closeBtn.addEventListener("click", closeModal);
+
+  // Close on backdrop click
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Close on Escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+      closeModal();
+    }
+  });
+
+  // Form submission
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = (document.getElementById("email") as HTMLInputElement).value;
+    const turnstileResponse = (
+      document.querySelector(
+        "#turnstile-container input[name='cf-turnstile-response']",
+      ) as HTMLInputElement
+    )?.value;
+
+    if (!turnstileResponse) {
+      showMessage("Please complete the CAPTCHA", "error");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    showMessage("Subscribing...", "info");
+
+    try {
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          token: turnstileResponse,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showMessage("Successfully subscribed! Check your email.", "success");
+        form.reset();
+        // Close modal after success and dismiss for 7 days
+        setTimeout(() => {
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+          const sevenDays = 7 * 24 * 60 * 60 * 1000;
+          localStorage.setItem("newsletterDismissUntil", String(Date.now() + sevenDays));
+        }, 2000);
+        // Reset Turnstile
+        if ((window as any).turnstile) {
+          (window as any).turnstile.reset("#turnstile-container");
+        }
+      } else {
+        showMessage(data.error || "Subscription failed", "error");
+      }
+    } catch (error) {
+      showMessage("An error occurred. Please try again.", "error");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  function showMessage(text: string, type: "success" | "error" | "info") {
+    message.textContent = text;
+    message.className = "text-sm";
+    message.classList.remove("hidden");
+    
+    if (type === "success") {
+      message.classList.add("text-success");
+    } else if (type === "error") {
+      message.classList.add("text-error");
+    } else {
+      message.classList.add("text-info");
+    }
+  }
+</script>

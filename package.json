@@ -29,7 +29,8 @@
     "test:coverage": "turbo -F web test -- --coverage",
     "qa": "bun run lint && bun run fmt:check && turbo -F web check && turbo -F web test",
     "media:upload": "bun run scripts/media-pipeline.ts upload",
-    "media:rewrite": "bun run scripts/media-pipeline.ts rewrite"
+    "media:rewrite": "bun run scripts/media-pipeline.ts rewrite",
+    "newsletter:send": "bun run scripts/send-newsletter.ts"
   },
   "dependencies": {},
   "devDependencies": {
@@ -37,6 +38,7 @@
     "@blog/config": "workspace:*",
     "@cloudflare/workers-types": "catalog:",
     "@tailwindcss/typography": "^0.5.19",
+    "@types/node": "^22.10.2",
     "daisyui": "^5.5.19",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
