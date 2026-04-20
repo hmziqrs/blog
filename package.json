@@ -30,7 +30,15 @@
     "qa": "bun run lint && bun run fmt:check && turbo -F web check && turbo -F web test",
     "media:upload": "bun run scripts/media-pipeline.ts upload",
     "media:rewrite": "bun run scripts/media-pipeline.ts rewrite",
-    "newsletter:send": "bun run scripts/send-newsletter.ts"
+    "newsletter:send": "bun run scripts/send-newsletter.ts",
+    "db:create": "wrangler d1 create blog-newsletter",
+    "db:create:dev": "wrangler d1 create blog-newsletter-dev",
+    "db:migrate": "wrangler d1 execute blog-newsletter --file=./apps/web/migrations/0001_initial.sql",
+    "db:migrate:dev": "wrangler d1 execute blog-newsletter-dev --file=./apps/web/migrations/0001_initial.sql",
+    "db:query": "wrangler d1 execute blog-newsletter --command",
+    "db:query:dev": "wrangler d1 execute blog-newsletter-dev --command",
+    "db:console": "wrangler d1 execute blog-newsletter --remote",
+    "db:console:dev": "wrangler d1 execute blog-newsletter-dev --remote"
   },
   "dependencies": {},
   "devDependencies": {
