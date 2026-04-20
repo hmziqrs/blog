@@ -1,10 +1,5 @@
 import { Database } from "bun:sqlite";
-import {
-  CopyObjectCommand,
-  DeleteObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import fs from "node:fs";
@@ -67,7 +62,9 @@ function createR2Client(): S3Client {
 
 async function upload() {
   if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_NAME) {
-    console.error("Missing R2 credentials. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME.");
+    console.error(
+      "Missing R2 credentials. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME.",
+    );
     process.exit(1);
   }
 
@@ -109,7 +106,9 @@ async function upload() {
     // If file changed (old entry exists), delete old R2 object first
     if (existing && existing.r2_key !== r2Key) {
       try {
-        await client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: existing.r2_key }));
+        await client.send(
+          new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: existing.r2_key }),
+        );
       } catch {
         // Best-effort delete — old key may already be gone
       }

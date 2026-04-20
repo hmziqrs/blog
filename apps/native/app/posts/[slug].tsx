@@ -56,29 +56,42 @@ export default function PostDetailScreen() {
 
   return (
     <Container isScrollable={false}>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView keyboardShouldPersistTaps="handled">
         <View className="px-4 pt-4">
           <CategoryBadge category={post.category} />
-          <Text style={{ color: foreground }} className="mt-3 text-3xl font-semibold tracking-tight">
+          <Text
+            style={{ color: foreground }}
+            className="mt-3 text-3xl font-semibold tracking-tight"
+          >
             {post.title}
           </Text>
-          <Text style={{ color: foreground, opacity: 0.68 }} className="mt-3 max-w-2xl text-base leading-7">
+          <Text
+            style={{ color: foreground, opacity: 0.68 }}
+            className="mt-3 max-w-2xl text-base leading-7"
+          >
             {post.description}
           </Text>
           <View className="mt-3 flex-row flex-wrap items-center gap-2">
-            <Text style={{ color: foreground, opacity: 0.46 }} className="font-mono text-xs tracking-[0.08em] uppercase">
+            <Text
+              style={{ color: foreground, opacity: 0.46 }}
+              className="font-mono text-xs tracking-[0.08em] uppercase"
+            >
               {formatDate(post.date)}
             </Text>
             <Text style={{ color: foreground, opacity: 0.3 }}>·</Text>
-            <Text style={{ color: foreground, opacity: 0.46 }} className="font-mono text-xs tracking-[0.08em] uppercase">
+            <Text
+              style={{ color: foreground, opacity: 0.46 }}
+              className="font-mono text-xs tracking-[0.08em] uppercase"
+            >
               {readingTime} min read
             </Text>
             {post.updated && (
               <>
                 <Text style={{ color: foreground, opacity: 0.3 }}>·</Text>
-                <Text style={{ color: foreground, opacity: 0.46 }} className="font-mono text-xs tracking-[0.08em] uppercase">
+                <Text
+                  style={{ color: foreground, opacity: 0.46 }}
+                  className="font-mono text-xs tracking-[0.08em] uppercase"
+                >
                   Updated {formatDate(post.updated)}
                 </Text>
               </>

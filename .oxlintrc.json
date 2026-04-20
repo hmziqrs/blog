@@ -4,5 +4,6 @@
     "correctness": "error",
     "suspicious": "warn",
     "pedantic": "off"
-  }
+  },
+  "ignorePatterns": ["**/dist/**", "**/public/web-components/**", "**/node_modules/**"]
 }

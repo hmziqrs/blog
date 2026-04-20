@@ -40,9 +40,10 @@ export function getTags() {
 }
 
 export function getTagPosts(tag: string) {
-  return fetchApi<TagPostsResponse>(`/api/tags/${encodeURIComponent(tag)}.json`).then(
-    (r) => ({ tag: r.tag, posts: r.posts.map(resolveCover) }),
-  );
+  return fetchApi<TagPostsResponse>(`/api/tags/${encodeURIComponent(tag)}.json`).then((r) => ({
+    tag: r.tag,
+    posts: r.posts.map(resolveCover),
+  }));
 }
 
 export function getCategories() {
@@ -50,9 +51,9 @@ export function getCategories() {
 }
 
 export function getCategoryPosts(category: string) {
-  return fetchApi<CategoryPostsResponse>(
-    `/api/category/${encodeURIComponent(category)}.json`,
-  ).then((r) => ({ category: r.category, posts: r.posts.map(resolveCover) }));
+  return fetchApi<CategoryPostsResponse>(`/api/category/${encodeURIComponent(category)}.json`).then(
+    (r) => ({ category: r.category, posts: r.posts.map(resolveCover) }),
+  );
 }
 
 export function getPageConfig(page: "about" | "contact" | "privacy" | "terms") {

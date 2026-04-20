@@ -34,7 +34,12 @@ export default function PrivacyScreen() {
   return (
     <Container isScrollable={false}>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 20 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 32,
+          gap: 20,
+        }}
         keyboardShouldPersistTaps="handled"
       >
         <PageHeader title={config.title} description={config.description} />
@@ -58,12 +63,8 @@ export default function PrivacyScreen() {
 
         {config.sections.map((section, i) => (
           <View key={i}>
-            <Text className="mb-2 text-lg font-semibold text-foreground">
-              {section.title}
-            </Text>
-            <Text className="text-base leading-7 text-base-content/78">
-              {section.body}
-            </Text>
+            <Text className="mb-2 text-lg font-semibold text-foreground">{section.title}</Text>
+            <Text className="text-base leading-7 text-base-content/78">{section.body}</Text>
           </View>
         ))}
       </ScrollView>

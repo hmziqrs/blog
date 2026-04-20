@@ -10,17 +10,12 @@ import type { ContactPageConfig, ContactMethod } from "@/lib/types";
 
 function ContactCard({ method }: { method: ContactMethod }) {
   return (
-    <Pressable
-      onPress={() => Linking.openURL(method.href).catch(() => {})}
-      className="flex-1"
-    >
+    <Pressable onPress={() => Linking.openURL(method.href).catch(() => {})} className="flex-1">
       <Surface variant="secondary" className="items-center p-4">
         <Text className="font-mono text-[0.68rem] tracking-[0.16em] uppercase text-base-content/48">
           {method.label}
         </Text>
-        <Text className="mt-1 text-sm font-medium text-foreground">
-          {method.value}
-        </Text>
+        <Text className="mt-1 text-sm font-medium text-foreground">{method.value}</Text>
       </Surface>
     </Pressable>
   );
@@ -53,7 +48,12 @@ export default function ContactScreen() {
   return (
     <Container isScrollable={false}>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 32,
+          gap: 16,
+        }}
         keyboardShouldPersistTaps="handled"
       >
         <PageHeader title={config.title} description={config.description} />

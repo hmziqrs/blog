@@ -62,10 +62,7 @@ function PostCardInfo({ post }: PostCardProps) {
       >
         {post.title}
       </Text>
-      <Text
-        className="mt-1.5 text-sm leading-6 text-base-content/72"
-        numberOfLines={2}
-      >
+      <Text className="mt-1.5 text-sm leading-6 text-base-content/72" numberOfLines={2}>
         {post.description}
       </Text>
       {post.tags.length > 0 && (

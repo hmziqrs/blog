@@ -42,10 +42,7 @@ export default function TagPostsScreen() {
         renderItem={({ item }) => <PostCard post={item} />}
         ListHeaderComponent={
           <View className="px-4 pt-4 pb-2">
-            <PageHeader
-              title={decodedTag}
-              description={`Posts tagged with "${decodedTag}"`}
-            />
+            <PageHeader title={decodedTag} description={`Posts tagged with "${decodedTag}"`} />
           </View>
         }
         ListEmptyComponent={

@@ -40,9 +40,7 @@ export default function HomeScreen() {
         renderItem={({ item }) => <PostCard post={item} />}
         ListHeaderComponent={
           <View className="px-4 pt-6 pb-2">
-            <Text className="text-3xl font-semibold tracking-tight text-foreground">
-              hmziq.rs
-            </Text>
+            <Text className="text-3xl font-semibold tracking-tight text-foreground">hmziq.rs</Text>
             <Text className="mt-1 text-sm text-base-content/56">
               Writing about software engineering, tools, and ideas.
             </Text>
@@ -50,9 +48,7 @@ export default function HomeScreen() {
         }
         ListEmptyComponent={
           <View className="px-4">
-            <Text className="text-sm text-base-content/40">
-              No posts yet. Check back soon.
-            </Text>
+            <Text className="text-sm text-base-content/40">No posts yet. Check back soon.</Text>
           </View>
         }
         contentContainerStyle={{

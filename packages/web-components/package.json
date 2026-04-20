@@ -2,6 +2,18 @@
   "name": "web-components",
   "version": "1.0.0",
   "description": "Framework-agnostic 3D advertisement banner web component",
+  "keywords": [
+    "3d",
+    "banner",
+    "svelte",
+    "threejs",
+    "web-component"
+  ],
+  "license": "ISC",
+  "author": "",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "main": "dist/three-js-banner.umd.js",
   "module": "dist/three-js-banner.es.js",
@@ -11,23 +23,17 @@
       "require": "./dist/three-js-banner.umd.js"
     }
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch"
-  },
-  "keywords": ["web-component", "threejs", "svelte", "3d", "banner"],
-  "author": "",
-  "license": "ISC",
-  "peerDependencies": {
-    "three": "^0.184.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "svelte": "^5.55.4",
     "three": "^0.184.0",
     "vite": "^8.0.8"
+  },
+  "peerDependencies": {
+    "three": "^0.184.0"
   }
 }

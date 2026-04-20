@@ -1,3 +1,4 @@
+import cloudflare from "@astrojs/cloudflare";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import icon from "astro-icon";
@@ -6,6 +7,7 @@ import { siteConfig } from "../../site.config.ts";
 
 export default defineConfig({
   output: "static",
+  adapter: cloudflare(),
   site: siteConfig.publicSiteUrl,
   base: siteConfig.basePath,
   integrations: [sitemap(), icon()],

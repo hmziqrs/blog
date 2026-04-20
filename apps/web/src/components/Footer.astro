@@ -3,7 +3,7 @@ import { siteConfig } from "../config/site";
 import PageContainer from "./PageContainer.astro";
 
 const year = new Date().getFullYear();
-const hasSponsor = siteConfig.advertisement?.href ? true : false;
+const hasSponsor = Boolean(siteConfig.advertisement?.href);
 const sponsorName = hasSponsor ? "SPONSOR" : '"your brand"';
 const sponsorHref = hasSponsor ? siteConfig.advertisement?.href : "/contact";
 ---

@@ -12,11 +12,10 @@ export const GET: APIRoute = async () => {
   }
 
   const tags = [...tagMap.entries()]
-    .sort((a, b) => b[1] - a[1])
+    .toSorted((a, b) => b[1] - a[1])
     .map(([tag, count]) => ({ tag, count }));
 
-  return new Response(
-    JSON.stringify({ tags }),
-    { headers: { "Content-Type": "application/json" } },
-  );
+  return new Response(JSON.stringify({ tags }), {
+    headers: { "Content-Type": "application/json" },
+  });
 };

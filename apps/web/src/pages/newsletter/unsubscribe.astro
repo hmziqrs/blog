@@ -1,0 +1,62 @@
+---
+import { pageTitle } from "../../config/site";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageContainer from "../../components/PageContainer.astro";
+
+const title = pageTitle("Unsubscribe");
+---
+
+<BaseLayout title={title} description="Unsubscribe from the newsletter">
+  <PageContainer>
+    <main class="max-w-2xl mx-auto px-4 py-16 text-center">
+      <div id="loading">
+        <p class="text-base-content/70">Processing your request…</p>
+      </div>
+      <div id="success" class="hidden">
+        <h1 class="text-3xl font-bold mb-4">Unsubscribed</h1>
+        <p class="text-base-content/70">
+          You've been removed from the newsletter. Sorry to see you go.
+        </p>
+        <a href="/" class="btn btn-primary mt-8">Back to blog</a>
+      </div>
+      <div id="error" class="hidden">
+        <h1 class="text-3xl font-bold mb-4">Unsubscribe failed</h1>
+        <p id="error-msg" class="text-error"></p>
+        <a href="/" class="btn btn-ghost mt-8">Back to blog</a>
+      </div>
+    </main>
+  </PageContainer>
+</BaseLayout>
+
+<script is:inline>
+  (async () => {
+    const token = new URLSearchParams(location.search).get("token");
+    const $loading = document.getElementById("loading");
+    const $success = document.getElementById("success");
+    const $error = document.getElementById("error");
+    const $msg = document.getElementById("error-msg");
+
+    if (!token) {
+      $loading.classList.add("hidden");
+      $error.classList.remove("hidden");
+      $msg.textContent = "No unsubscribe token provided.";
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}`);
+      const data = await res.json();
+      $loading.classList.add("hidden");
+      if (res.ok) {
+        $success.classList.remove("hidden");
+      } else {
+        $error.classList.remove("hidden");
+        $msg.textContent = data.error || "Something went wrong.";
+      }
+    } catch {
+      $loading.classList.add("hidden");
+      $error.classList.remove("hidden");
+      $msg.textContent = "Network error. Please try again.";
+    }
+  })();
+</script>

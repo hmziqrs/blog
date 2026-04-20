@@ -35,12 +35,8 @@ export default function ExploreScreen() {
           <PageHeader title="Explore" />
 
           <View>
-            <Text className="mb-3 text-lg font-semibold text-foreground">
-              Tags
-            </Text>
-            {tags.error && (
-              <Text className="text-sm text-red-500">{tags.error}</Text>
-            )}
+            <Text className="mb-3 text-lg font-semibold text-foreground">Tags</Text>
+            {tags.error && <Text className="text-sm text-red-500">{tags.error}</Text>}
             {tags.data && tags.data.tags.length === 0 && (
               <Text className="text-sm text-base-content/40">No tags yet.</Text>
             )}
@@ -52,22 +48,14 @@ export default function ExploreScreen() {
           </View>
 
           <View>
-            <Text className="mb-3 text-lg font-semibold text-foreground">
-              Categories
-            </Text>
-            {categories.error && (
-              <Text className="text-sm text-red-500">{categories.error}</Text>
-            )}
+            <Text className="mb-3 text-lg font-semibold text-foreground">Categories</Text>
+            {categories.error && <Text className="text-sm text-red-500">{categories.error}</Text>}
             {categories.data && categories.data.categories.length === 0 && (
               <Text className="text-sm text-base-content/40">No categories yet.</Text>
             )}
             <View className="flex-row flex-wrap gap-2">
               {categories.data?.categories.map((c) => (
-                <CategoryBadge
-                  key={c.category}
-                  category={c.category}
-                  count={c.count}
-                />
+                <CategoryBadge key={c.category} category={c.category} count={c.count} />
               ))}
             </View>
           </View>

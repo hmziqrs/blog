@@ -31,30 +31,15 @@ function StackLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="posts/[slug]"
-        options={{ title: "Post", headerBackTitle: "Back" }}
-      />
-      <Stack.Screen
-        name="tags/[tag]"
-        options={{ title: "Tag", headerBackTitle: "Back" }}
-      />
+      <Stack.Screen name="posts/[slug]" options={{ title: "Post", headerBackTitle: "Back" }} />
+      <Stack.Screen name="tags/[tag]" options={{ title: "Tag", headerBackTitle: "Back" }} />
       <Stack.Screen
         name="category/[category]"
         options={{ title: "Category", headerBackTitle: "Back" }}
       />
-      <Stack.Screen
-        name="contact"
-        options={{ title: "Contact", headerBackTitle: "Back" }}
-      />
-      <Stack.Screen
-        name="privacy"
-        options={{ title: "Privacy", headerBackTitle: "Back" }}
-      />
-      <Stack.Screen
-        name="terms"
-        options={{ title: "Terms", headerBackTitle: "Back" }}
-      />
+      <Stack.Screen name="contact" options={{ title: "Contact", headerBackTitle: "Back" }} />
+      <Stack.Screen name="privacy" options={{ title: "Privacy", headerBackTitle: "Back" }} />
+      <Stack.Screen name="terms" options={{ title: "Terms", headerBackTitle: "Back" }} />
     </Stack>
   );
 }

@@ -11,8 +11,8 @@
   export let modelType = 'cube';
   export let particleCount = 150;
 
-  let container;
-  let canvas;
+  let container = null;
+  let canvas = null;
   let scene, camera, renderer;
   let particles, model, logoText, decorativeRings;
   let animationId;

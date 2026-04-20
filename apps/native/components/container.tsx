@@ -19,10 +19,7 @@ export function Container({
   ...props
 }: PropsWithChildren<Props>) {
   return (
-    <AnimatedView
-      className={cn("flex-1 bg-background", className)}
-      {...props}
-    >
+    <AnimatedView className={cn("flex-1 bg-background", className)} {...props}>
       {isScrollable ? (
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}

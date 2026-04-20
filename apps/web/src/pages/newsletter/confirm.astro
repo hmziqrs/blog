@@ -1,0 +1,62 @@
+---
+import { pageTitle } from "../../config/site";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageContainer from "../../components/PageContainer.astro";
+
+const title = pageTitle("Confirm Subscription");
+---
+
+<BaseLayout title={title} description="Confirm your newsletter subscription">
+  <PageContainer>
+    <main class="max-w-2xl mx-auto px-4 py-16 text-center">
+      <div id="loading">
+        <p class="text-base-content/70">Confirming your subscription…</p>
+      </div>
+      <div id="success" class="hidden">
+        <h1 class="text-3xl font-bold mb-4">You're subscribed!</h1>
+        <p class="text-base-content/70">
+          Your subscription has been confirmed. You'll get an email when new posts go up.
+        </p>
+        <a href="/" class="btn btn-primary mt-8">Start reading</a>
+      </div>
+      <div id="error" class="hidden">
+        <h1 class="text-3xl font-bold mb-4">Confirmation failed</h1>
+        <p id="error-msg" class="text-error"></p>
+        <a href="/newsletter" class="btn btn-ghost mt-8">Try subscribing again</a>
+      </div>
+    </main>
+  </PageContainer>
+</BaseLayout>
+
+<script is:inline>
+  (async () => {
+    const token = new URLSearchParams(location.search).get("token");
+    const $loading = document.getElementById("loading");
+    const $success = document.getElementById("success");
+    const $error = document.getElementById("error");
+    const $msg = document.getElementById("error-msg");
+
+    if (!token) {
+      $loading.classList.add("hidden");
+      $error.classList.remove("hidden");
+      $msg.textContent = "No confirmation token provided.";
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/newsletter/confirm?token=${encodeURIComponent(token)}`);
+      const data = await res.json();
+      $loading.classList.add("hidden");
+      if (res.ok) {
+        $success.classList.remove("hidden");
+      } else {
+        $error.classList.remove("hidden");
+        $msg.textContent = data.error || "Something went wrong.";
+      }
+    } catch {
+      $loading.classList.add("hidden");
+      $error.classList.remove("hidden");
+      $msg.textContent = "Network error. Please try again.";
+    }
+  })();
+</script>

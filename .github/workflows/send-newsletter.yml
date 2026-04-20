@@ -2,8 +2,8 @@ name: Send Newsletter
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:  # Allow manual triggering
+      - master
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   send-newsletter:
@@ -18,3 +18,4 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
           EMAIL_FROM_ADDRESS: ${{ secrets.EMAIL_FROM_ADDRESS }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

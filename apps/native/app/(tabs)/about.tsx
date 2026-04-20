@@ -58,25 +58,35 @@ export default function AboutScreen() {
             onPress={() => router.push("/(tabs)/explore")}
             className="items-center justify-center rounded-full border border-base-300 bg-base-100/80 active:border-primary active:bg-primary/8 px-3.5 py-2"
           >
-            <Text className="font-mono font-medium tracking-[0.01em] text-xs text-base-content/72">Tags</Text>
+            <Text className="font-mono font-medium tracking-[0.01em] text-xs text-base-content/72">
+              Tags
+            </Text>
           </Pressable>
           <Pressable
             onPress={() => router.push("/(tabs)/explore")}
             className="items-center justify-center rounded-full border border-primary/18 bg-primary/12 active:border-primary/28 active:bg-primary/18 px-3.5 py-2"
           >
-            <Text className="font-mono font-medium tracking-[0.01em] text-xs text-primary">Categories</Text>
+            <Text className="font-mono font-medium tracking-[0.01em] text-xs text-primary">
+              Categories
+            </Text>
           </Pressable>
         </View>
 
         <View className="mt-4 border-t border-base-content/10 pt-4 gap-1">
           <Pressable onPress={() => router.push("/contact")}>
-            <Text className="py-1.5 font-mono text-[0.72rem] font-semibold tracking-[0.14em] uppercase text-primary">Contact</Text>
+            <Text className="py-1.5 font-mono text-[0.72rem] font-semibold tracking-[0.14em] uppercase text-primary">
+              Contact
+            </Text>
           </Pressable>
           <Pressable onPress={() => router.push("/privacy")}>
-            <Text className="py-1.5 font-mono text-[0.72rem] font-semibold tracking-[0.14em] uppercase text-primary">Privacy</Text>
+            <Text className="py-1.5 font-mono text-[0.72rem] font-semibold tracking-[0.14em] uppercase text-primary">
+              Privacy
+            </Text>
           </Pressable>
           <Pressable onPress={() => router.push("/terms")}>
-            <Text className="py-1.5 font-mono text-[0.72rem] font-semibold tracking-[0.14em] uppercase text-primary">Terms</Text>
+            <Text className="py-1.5 font-mono text-[0.72rem] font-semibold tracking-[0.14em] uppercase text-primary">
+              Terms
+            </Text>
           </Pressable>
         </View>
       </ScrollView>

@@ -14,7 +14,10 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 export const GET: APIRoute = async ({ props }) => {
-  const { tag, posts } = props as { tag: string; posts: { id: string; data: Record<string, unknown> }[] };
+  const { tag, posts } = props as {
+    tag: string;
+    posts: { id: string; data: Record<string, unknown> }[];
+  };
 
   return new Response(
     JSON.stringify({

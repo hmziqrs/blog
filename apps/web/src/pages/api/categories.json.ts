@@ -10,11 +10,10 @@ export const GET: APIRoute = async () => {
   }
 
   const categories = [...catMap.entries()]
-    .sort((a, b) => b[1] - a[1])
+    .toSorted((a, b) => b[1] - a[1])
     .map(([category, count]) => ({ category, count }));
 
-  return new Response(
-    JSON.stringify({ categories }),
-    { headers: { "Content-Type": "application/json" } },
-  );
+  return new Response(JSON.stringify({ categories }), {
+    headers: { "Content-Type": "application/json" },
+  });
 };

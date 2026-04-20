@@ -33,8 +33,7 @@ export const getStaticPaths = (async () => {
 export const GET: APIRoute = async ({ props }) => {
   const { page, config } = props as OptionalPageEntry;
 
-  return new Response(
-    JSON.stringify({ page, config }),
-    { headers: { "Content-Type": "application/json" } },
-  );
+  return new Response(JSON.stringify({ page, config }), {
+    headers: { "Content-Type": "application/json" },
+  });
 };

@@ -33,9 +33,7 @@ export function PostList({
   }
 
   if (posts.length === 0) {
-    return (
-      <Text className="text-sm text-base-content/40">{emptyMessage}</Text>
-    );
+    return <Text className="text-sm text-base-content/40">{emptyMessage}</Text>;
   }
 
   return (
