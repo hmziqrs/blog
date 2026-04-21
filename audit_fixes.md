@@ -27,7 +27,7 @@ Legend: 🔴 blocker · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-
 - [x] **Add double opt-in.** `status='pending'` → confirmation email → `GET /api/newsletter/confirm` → `'active'`. `/newsletter/confirm` page handles the click.
 - [x] **Pass `remoteip` to Turnstile siteverify.**
 - [x] **Drop blacklist-on-unsubscribe.** Unsubscribe just deletes the row.
-- [x] **Strengthen rate limiting.** 3/min per-IP + 2/hr per-email on subscribe. 5/hr per-IP on unsubscribe.
+- [x] **Strengthen rate limiting.** 2/hr per-IP + 2/hr per-email on subscribe. 3/hr per-IP on unsubscribe. 5/hr per-IP on `confirm.ts`. `send.ts` is secret-authenticated only — no IP rate limit.
 - [x] **Rate-limit `/api/newsletter/unsubscribe`.**
 - [x] **Replace `z.string().email()` with `z.email()`** (Zod 4).
 - [x] **Normalize emails.** `src/lib/email.ts` — strips plus-addressing for all providers, strips dots for Gmail, normalises `googlemail.com → gmail.com`.
@@ -36,6 +36,11 @@ Legend: 🔴 blocker · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-
 - [x] **Record per-recipient send status.** `newsletter_deliveries` table; `send-newsletter.ts` writes `sent`/`failed` rows.
 - [x] **Batch + retry in the sender.** Batches of 10, per-email error handling.
 - [x] **Stop picking "latest post" by filename sort.** Uses frontmatter `pubDate` via `.toSorted()`.
+- [x] **HTML-escape email content.** `escapeHTML()` in `email.ts` sanitizes `post.title` and `post.excerpt` in newsletter HTML. `encodeURIComponent()` on URL parameters.
+- [x] **Validate `Content-Type` on all API endpoints.** Returns 415 for non-JSON requests.
+- [x] **Mitigate timing attack on email enumeration.** Added dummy DB query in "already subscribed" path to align timing with the sendMail path.
+- [x] **Validate input length in send endpoint.** `slug`/`title` ≤ 256 chars, `excerpt` ≤ 4096 chars.
+- [x] **Require explicit `SITE_URL`.** No production default in `send-newsletter.ts` trigger script.
 
 ---
 

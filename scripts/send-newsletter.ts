@@ -1,11 +1,16 @@
 import { getLatestPost } from "./newsletter-utils.ts";
 
-const SITE_URL = process.env.SITE_URL ?? "https://hmziq.rs";
+const SITE_URL = process.env.SITE_URL ?? "";
 const NEWSLETTER_SEND_SECRET = process.env.NEWSLETTER_SEND_SECRET ?? "";
 
 async function main() {
   if (!NEWSLETTER_SEND_SECRET) {
     console.error("NEWSLETTER_SEND_SECRET is required");
+    process.exit(1);
+  }
+
+  if (!SITE_URL) {
+    console.error("SITE_URL is required");
     process.exit(1);
   }
 

@@ -18,17 +18,16 @@ async function checkRateLimit(
   email: string,
 ): Promise<boolean> {
   const now = Date.now();
-  const oneMinuteAgo = now - 60 * 1000;
   const oneHourAgo = now - 60 * 60 * 1000;
 
-  await db.prepare("DELETE FROM rate_limits WHERE timestamp < ?").bind(oneMinuteAgo).run();
+  await db.prepare("DELETE FROM rate_limits WHERE timestamp < ?").bind(oneHourAgo).run();
 
   const ipCount = await db
     .prepare("SELECT COUNT(*) as count FROM rate_limits WHERE ip = ? AND timestamp > ?")
-    .bind(ip, oneMinuteAgo)
+    .bind(ip, oneHourAgo)
     .first<{ count: number }>();
 
-  if ((ipCount?.count ?? 0) >= 3) return false;
+  if ((ipCount?.count ?? 0) >= 2) return false;
 
   const emailCount = await db
     .prepare("SELECT COUNT(*) as count FROM rate_limits WHERE email = ? AND timestamp > ?")
@@ -47,6 +46,14 @@ async function checkRateLimit(
 
 export async function POST(context: APIContext): Promise<Response> {
   const env = context.locals.runtime.env;
+
+  const contentType = context.request.headers.get("Content-Type") ?? "";
+  if (!contentType.includes("application/json")) {
+    return new Response(JSON.stringify({ error: "Content-Type must be application/json" }), {
+      status: 415,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   try {
     const ip = context.request.headers.get("CF-Connecting-IP") || "unknown";
@@ -101,6 +108,8 @@ export async function POST(context: APIContext): Promise<Response> {
 
     if (existing) {
       if (existing.status === "active") {
+        // Dummy await to mitigate timing attack (aligns with sendMail path)
+        await env.DB.prepare("SELECT 1").first();
         return new Response(JSON.stringify({ error: "Already subscribed" }), {
           status: 409,
           headers: { "Content-Type": "application/json" },

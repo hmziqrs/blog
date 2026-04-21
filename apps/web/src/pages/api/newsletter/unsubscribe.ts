@@ -21,7 +21,7 @@ async function checkRateLimit(
     .bind(ip, oneHourAgo)
     .first<{ count: number }>();
 
-  if ((count?.count ?? 0) >= 5) return false;
+  if ((count?.count ?? 0) >= 3) return false;
 
   await db.prepare("INSERT INTO rate_limits (ip, timestamp) VALUES (?, ?)").bind(ip, now).run();
 
@@ -31,6 +31,14 @@ async function checkRateLimit(
 export async function POST(context: APIContext): Promise<Response> {
   const env = context.locals.runtime.env;
   const ip = context.request.headers.get("CF-Connecting-IP") || "unknown";
+
+  const contentType = context.request.headers.get("Content-Type") ?? "";
+  if (!contentType.includes("application/json")) {
+    return new Response(JSON.stringify({ error: "Content-Type must be application/json" }), {
+      status: 415,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   const allowed = await checkRateLimit(env.DB, ip);
   if (!allowed) {

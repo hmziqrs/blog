@@ -1,5 +1,17 @@
 const GMAIL_DOMAINS = new Set(["gmail.com", "googlemail.com"]);
 
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+export function escapeHTML(raw: string): string {
+  return raw.replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch] ?? ch);
+}
+
 export function normalizeEmail(raw: string): string {
   const atIndex = raw.lastIndexOf("@");
   if (atIndex === -1) return raw.toLowerCase().trim();
