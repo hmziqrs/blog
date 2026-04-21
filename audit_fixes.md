@@ -13,7 +13,7 @@ Legend: 🔴 blocker · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-
 - [x] **Pick a runtime for API routes.** `output: "static"` + `@astrojs/cloudflare` adapter. `export const prerender = false` on newsletter endpoints.
 - [x] **Fix `wrangler.toml`.** Removed `main`, added placeholder `database_id`, bumped `compatibility_date` to `2025-04-01`.
 - [x] **Fill in `database_id`.** Placeholder UUIDs in `wrangler.toml`. CI substitutes real value from `D1_DATABASE_ID` secret via `sed` before deploy.
-- [x] **Implement email sending.** Resend. Subscribe sends confirmation; send-newsletter sends newsletters.
+- [x] **Implement email sending.** Cloudflare Workers `send_email` binding. Subscribe sends confirmation; send-newsletter triggers Worker endpoint.
 - [x] **Fix newsletter workflow branch.** Triggers on `master`.
 - [x] **Create the unsubscribe page.** `/newsletter/unsubscribe` — static, client-side fetch to `GET /api/newsletter/unsubscribe?token=…`.
 - [x] **Add a Cloudflare Pages deploy step.** `ci.yml` runs `wrangler pages deploy` on master push.

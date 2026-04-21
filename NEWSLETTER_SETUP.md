@@ -2,8 +2,7 @@
 
 ## Prerequisites
 
-- Cloudflare account with Workers Paid plan (for Email Sending)
-- Cloudflare API token with D1 and Email Sending permissions
+- Cloudflare account with Workers Paid plan (for Email Routing + Email Sending)
 
 ## Setup Steps
 
@@ -26,42 +25,37 @@ bun run db:migrate      # Production database
 bun run db:migrate:dev  # Development database
 ```
 
-### 3. Set Up Cloudflare Turnstile
+### 3. Enable Cloudflare Email Routing
+
+1. Go to https://dash.cloudflare.com/
+2. Navigate to Email → Email Routing
+3. Verify your domain (hmziq.rs)
+4. Add `newsletter@hmziq.rs` as a verified sender in Email → Email Sending
+
+### 4. Set Up Cloudflare Turnstile
 
 1. Go to https://dash.cloudflare.com/
 2. Navigate to Turnstile
 3. Create a new site
 4. Copy site key and secret key
 
-### 4. Configure Environment Variables
+### 5. Configure Environment Variables
 
 **Development (.env.development):**
 
 ```
-CLOUDFLARE_ACCOUNT_ID=<your-account-id>
-CLOUDFLARE_API_TOKEN=<your-api-token>
-D1_DATABASE_ID=<your-dev-database-id>
-EMAIL_FROM_ADDRESS=newsletter@blog.hmziq.rs
-TURNSTILE_SITE_KEY=<turnstile-site-key>
+EMAIL_FROM_ADDRESS=newsletter@hmziq.rs
+NEWSLETTER_SEND_SECRET=<random-secret>
 TURNSTILE_SECRET_KEY=<turnstile-secret-key>
 PUBLIC_TURNSTILE_SITE_KEY=<turnstile-site-key>
 ```
 
 **GitHub Secrets (for production):**
 
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_API_TOKEN`
-- `D1_DATABASE_ID` (production ID)
-- `EMAIL_FROM_ADDRESS`
-- `TURNSTILE_SITE_KEY`
+- `SITE_URL` (e.g. `https://hmziq.rs`)
+- `NEWSLETTER_SEND_SECRET`
 - `TURNSTILE_SECRET_KEY`
-
-### 5. Enable Cloudflare Email Sending
-
-1. Go to Cloudflare dashboard
-2. Navigate to Email → Email Sending
-3. Verify your domain (blog.hmziq.rs)
-4. Configure sending rules
+- `TURNSTILE_SITE_KEY`
 
 ## Testing
 
@@ -94,8 +88,8 @@ curl -X POST http://localhost:4321/api/newsletter/unsubscribe \
 ### Test Newsletter Sending
 
 ```bash
-# Add test subscriber to D1 first
-bun run newsletter:send
+# Requires NEWSLETTER_SEND_SECRET env var
+NEWSLETTER_SEND_SECRET=your-secret bun run newsletter:send
 ```
 
 ### Database Queries
@@ -103,8 +97,10 @@ bun run newsletter:send
 ```bash
 bun run db:query:dev --command "SELECT * FROM subscribers"
 bun run db:query:dev --command "SELECT * FROM newsletter_sent"
+bun run db:query:dev --command "SELECT * FROM newsletter_deliveries"
 bun run db:query:dev --command "SELECT * FROM blacklist"
 bun run db:query:dev --command "SELECT * FROM rate_limits"
+bun run db:query:dev --command "SELECT * FROM media"
 ```
 
 ### Production Deployment
@@ -116,17 +112,20 @@ bun run db:query:dev --command "SELECT * FROM rate_limits"
 
 ## Database Schema
 
-- `subscribers` - Email addresses and tokens
+- `subscribers` - Email addresses, status, tokens
 - `newsletter_sent` - Track which posts have been sent
+- `newsletter_deliveries` - Per-recipient send status
 - `blacklist` - Block abusive emails
 - `rate_limits` - Prevent spam (3 requests/min per IP)
+- `media` - Uploaded media metadata
 
 ## Files
 
 - `apps/web/wrangler.toml` - Cloudflare Workers config
 - `apps/web/migrations/0001_initial.sql` - Database schema
-- `apps/web/src/pages/api/newsletter/` - API endpoints
+- `apps/web/src/pages/api/newsletter/` - API endpoints (subscribe, confirm, unsubscribe, send)
+- `apps/web/src/lib/mailer.ts` - `send_email` wrapper
 - `apps/web/src/components/NewsletterForm.astro` - Subscription form
 - `apps/web/src/components/NewsletterModal.astro` - Scroll modal
-- `scripts/send-newsletter.ts` - Newsletter sending script
+- `scripts/send-newsletter.ts` - Newsletter trigger script (calls Worker endpoint)
 - `.github/workflows/send-newsletter.yml` - CI/CD workflow

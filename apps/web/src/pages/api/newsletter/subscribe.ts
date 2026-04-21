@@ -1,5 +1,6 @@
 import type { APIContext } from "astro";
 import { normalizeEmail } from "../../../lib/email";
+import { sendMail } from "../../../lib/mailer";
 import { z } from "zod";
 
 export const prerender = false;
@@ -94,15 +95,29 @@ export async function POST(context: APIContext): Promise<Response> {
       });
     }
 
-    const existing = await env.DB.prepare("SELECT id, status FROM subscribers WHERE email = ?")
+    const existing = await env.DB.prepare("SELECT id, status, confirmation_token FROM subscribers WHERE email = ?")
       .bind(email)
-      .first<{ id: string; status: string }>();
+      .first<{ id: string; status: string; confirmation_token: string | null }>();
 
     if (existing) {
       if (existing.status === "active") {
         return new Response(JSON.stringify({ error: "Already subscribed" }), {
           status: 409,
           headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (existing.confirmation_token) {
+        const siteUrl = "https://hmziq.rs";
+        const confirmUrl = `${siteUrl}/newsletter/confirm?token=${existing.confirmation_token}`;
+        await sendMail(env.SEND_EMAIL, {
+          from: env.EMAIL_FROM_ADDRESS,
+          to: email,
+          subject: "Confirm your newsletter subscription",
+          html: `
+            <p>Click the link below to confirm your subscription to Hmziq's blog newsletter:</p>
+            <p><a href="${confirmUrl}">Confirm subscription</a></p>
+            <p>If you didn't request this, ignore this email.</p>
+          `,
         });
       }
       return new Response(JSON.stringify({ message: "Check your email to confirm" }), {
@@ -124,7 +139,16 @@ export async function POST(context: APIContext): Promise<Response> {
     const siteUrl = "https://hmziq.rs";
     const confirmUrl = `${siteUrl}/newsletter/confirm?token=${confirmationToken}`;
 
-    await sendConfirmationEmail(env, email, confirmUrl);
+    await sendMail(env.SEND_EMAIL, {
+      from: env.EMAIL_FROM_ADDRESS,
+      to: email,
+      subject: "Confirm your newsletter subscription",
+      html: `
+        <p>Click the link below to confirm your subscription to Hmziq's blog newsletter:</p>
+        <p><a href="${confirmUrl}">Confirm subscription</a></p>
+        <p>If you didn't request this, ignore this email.</p>
+      `,
+    });
 
     return new Response(JSON.stringify({ message: "Check your email to confirm subscription" }), {
       status: 201,
@@ -143,24 +167,4 @@ export async function POST(context: APIContext): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   }
-}
-
-async function sendConfirmationEmail(env: Env, to: string, confirmUrl: string) {
-  await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: env.EMAIL_FROM_ADDRESS,
-      to,
-      subject: "Confirm your newsletter subscription",
-      html: `
-        <p>Click the link below to confirm your subscription to Hmziq's blog newsletter:</p>
-        <p><a href="${confirmUrl}">Confirm subscription</a></p>
-        <p>If you didn't request this, ignore this email.</p>
-      `,
-    }),
-  });
 }

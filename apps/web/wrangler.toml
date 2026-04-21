@@ -10,6 +10,9 @@ binding = "DB"
 database_name = "blog-newsletter"
 database_id = "00000000-0000-0000-0000-000000000000" # TODO: replace with real D1 database ID from Cloudflare dashboard
 
+[[send_email]]
+name = "SEND_EMAIL"
+
 # Development environment
 [env.dev]
 vars = { ENVIRONMENT = "development" }
@@ -18,3 +21,6 @@ vars = { ENVIRONMENT = "development" }
 binding = "DB"
 database_name = "blog-newsletter-dev"
 database_id = "00000000-0000-0000-0000-000000000001" # TODO: replace with real D1 dev database ID from Cloudflare dashboard
+
+[[env.dev.send_email]]
+name = "SEND_EMAIL"
