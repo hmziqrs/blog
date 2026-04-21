@@ -123,7 +123,7 @@ bun run db:query:dev --command "SELECT * FROM media"
 
 - `apps/web/wrangler.toml` - Cloudflare Workers config
 - `apps/web/migrations/0001_initial.sql` - Database schema
-- `apps/web/src/pages/api/newsletter/` - API endpoints (subscribe, confirm, unsubscribe, send)
+- `apps/web/src/pages/api/newsletter/` - API endpoints (subscribe, unsubscribe, send)
 - `apps/web/src/lib/mailer.ts` - `send_email` wrapper
 - `apps/web/src/components/NewsletterForm.astro` - Subscription form
 - `apps/web/src/components/NewsletterModal.astro` - Scroll modal

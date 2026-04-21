@@ -1,6 +1,5 @@
 import type { APIContext } from "astro";
 import { normalizeEmail } from "../../../lib/email";
-import { sendMail } from "../../../lib/mailer";
 import { z } from "zod";
 
 export const prerender = false;
@@ -102,64 +101,29 @@ export async function POST(context: APIContext): Promise<Response> {
       });
     }
 
-    const existing = await env.DB.prepare("SELECT id, status, confirmation_token FROM subscribers WHERE email = ?")
+    const existing = await env.DB.prepare("SELECT id, status FROM subscribers WHERE email = ?")
       .bind(email)
-      .first<{ id: string; status: string; confirmation_token: string | null }>();
+      .first<{ id: string; status: string }>();
 
     if (existing) {
       if (existing.status === "active") {
-        // Dummy await to mitigate timing attack (aligns with sendMail path)
-        await env.DB.prepare("SELECT 1").first();
         return new Response(JSON.stringify({ error: "Already subscribed" }), {
           status: 409,
           headers: { "Content-Type": "application/json" },
         });
       }
-      if (existing.confirmation_token) {
-        const siteUrl = "https://hmziq.rs";
-        const confirmUrl = `${siteUrl}/newsletter/confirm?token=${existing.confirmation_token}`;
-        await sendMail(env.SEND_EMAIL, {
-          from: env.EMAIL_FROM_ADDRESS,
-          to: email,
-          subject: "Confirm your newsletter subscription",
-          html: `
-            <p>Click the link below to confirm your subscription to Hmziq's blog newsletter:</p>
-            <p><a href="${confirmUrl}">Confirm subscription</a></p>
-            <p>If you didn't request this, ignore this email.</p>
-          `,
-        });
-      }
-      return new Response(JSON.stringify({ message: "Check your email to confirm" }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
     }
 
     const id = crypto.randomUUID();
-    const confirmationToken = crypto.randomUUID();
     const unsubscribeToken = crypto.randomUUID();
 
     await env.DB.prepare(
-      "INSERT INTO subscribers (id, email, status, confirmation_token, unsubscribe_token) VALUES (?, ?, 'pending', ?, ?)",
+      "INSERT INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
     )
-      .bind(id, email, confirmationToken, unsubscribeToken)
+      .bind(id, email, unsubscribeToken)
       .run();
 
-    const siteUrl = "https://hmziq.rs";
-    const confirmUrl = `${siteUrl}/newsletter/confirm?token=${confirmationToken}`;
-
-    await sendMail(env.SEND_EMAIL, {
-      from: env.EMAIL_FROM_ADDRESS,
-      to: email,
-      subject: "Confirm your newsletter subscription",
-      html: `
-        <p>Click the link below to confirm your subscription to Hmziq's blog newsletter:</p>
-        <p><a href="${confirmUrl}">Confirm subscription</a></p>
-        <p>If you didn't request this, ignore this email.</p>
-      `,
-    });
-
-    return new Response(JSON.stringify({ message: "Check your email to confirm subscription" }), {
+    return new Response(JSON.stringify({ message: "Subscribed" }), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });

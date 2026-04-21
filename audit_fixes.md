@@ -13,7 +13,7 @@ Legend: 🔴 blocker · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-
 - [x] **Pick a runtime for API routes.** `output: "static"` + `@astrojs/cloudflare` adapter. `export const prerender = false` on newsletter endpoints.
 - [x] **Fix `wrangler.toml`.** Removed `main`, added placeholder `database_id`, bumped `compatibility_date` to `2025-04-01`.
 - [x] **Fill in `database_id`.** Placeholder UUIDs in `wrangler.toml`. CI substitutes real value from `D1_DATABASE_ID` secret via `sed` before deploy.
-- [x] **Implement email sending.** Cloudflare Workers `send_email` binding. Subscribe sends confirmation; send-newsletter triggers Worker endpoint.
+- [x] **Implement email sending.** Cloudflare Workers `send_email` binding. Single opt-in; send-newsletter triggers Worker endpoint.
 - [x] **Fix newsletter workflow branch.** Triggers on `master`.
 - [x] **Create the unsubscribe page.** `/newsletter/unsubscribe` — static, client-side fetch to `GET /api/newsletter/unsubscribe?token=…`.
 - [x] **Add a Cloudflare Pages deploy step.** `ci.yml` runs `wrangler pages deploy` on master push.
@@ -24,10 +24,10 @@ Legend: 🔴 blocker · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-
 ## 🟠 Newsletter — security & anti-abuse
 
 - [x] **Fix Astro endpoint signature.** All endpoints use `context.locals.runtime.env`.
-- [x] **Add double opt-in.** `status='pending'` → confirmation email → `GET /api/newsletter/confirm` → `'active'`. `/newsletter/confirm` page handles the click.
+- [x] **Single opt-in.** Subscribers inserted with `status='active'` directly. No confirmation email or confirm endpoint.
 - [x] **Pass `remoteip` to Turnstile siteverify.**
 - [x] **Drop blacklist-on-unsubscribe.** Unsubscribe just deletes the row.
-- [x] **Strengthen rate limiting.** 2/hr per-IP + 2/hr per-email on subscribe. 3/hr per-IP on unsubscribe. 5/hr per-IP on `confirm.ts`. `send.ts` is secret-authenticated only — no IP rate limit.
+- [x] **Strengthen rate limiting.** 2/hr per-IP + 2/hr per-email on subscribe. 3/hr per-IP on unsubscribe. `send.ts` is secret-authenticated only — no IP rate limit.
 - [x] **Rate-limit `/api/newsletter/unsubscribe`.**
 - [x] **Replace `z.string().email()` with `z.email()`** (Zod 4).
 - [x] **Normalize emails.** `src/lib/email.ts` — strips plus-addressing for all providers, strips dots for Gmail, normalises `googlemail.com → gmail.com`.

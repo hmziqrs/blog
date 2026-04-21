@@ -4,13 +4,11 @@ CREATE TABLE IF NOT EXISTS subscribers (
   email TEXT UNIQUE NOT NULL,
   subscribed_at TEXT DEFAULT (datetime('now')),
   unsubscribe_token TEXT UNIQUE NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active',
-  confirmation_token TEXT UNIQUE
+  status TEXT NOT NULL DEFAULT 'active'
 );
 
 CREATE INDEX IF NOT EXISTS idx_email ON subscribers(email);
 CREATE INDEX IF NOT EXISTS idx_subscribers_status ON subscribers(status);
-CREATE INDEX IF NOT EXISTS idx_subscribers_confirmation_token ON subscribers(confirmation_token);
 
 -- Newsletter tracking table
 CREATE TABLE IF NOT EXISTS newsletter_sent (
