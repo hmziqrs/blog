@@ -2,83 +2,71 @@
 
 Date: 2026-04-20
 Branch: `master`
+Last updated: 2026-04-21 — all items complete
 
-Legend: 🔴 blocker (deploy is broken) · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-have
+Legend: 🔴 blocker · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-have
 
 ---
 
-## 🔴 Blockers — the site will deploy but features won't work
+## 🔴 Blockers
 
-- [ ] **Pick a runtime for API routes.** `apps/web/astro.config.ts:8` has `output: "static"` but `src/pages/api/newsletter/*.ts` defines `POST` handlers. Options:
-  - [ ] Switch to `output: "server"` + install `@astrojs/cloudflare` adapter, **or**
-  - [ ] Move `/api/newsletter/*` into a standalone Cloudflare Worker and keep Pages as SSG
-- [ ] **Fix `wrangler.toml`.** `apps/web/wrangler.toml:2` references `./src/entry-worker.ts` which does not exist. Either create it or remove the `main` field once the runtime model is decided.
-- [ ] **Fill in `database_id`** for prod and dev in `apps/web/wrangler.toml:12,21`.
-- [ ] **Implement email sending.** `scripts/send-newsletter.ts:138-143` `sendEmail` is a `console.log` stub. Pick a provider (Resend recommended over the deprecated MailChannels path).
-- [ ] **Fix newsletter workflow branch.** `.github/workflows/send-newsletter.yml:5` triggers on `main`, default branch is `master`.
-- [ ] **Create the unsubscribe page.** `scripts/send-newsletter.ts:111` links to `/newsletter/unsubscribe` — that route does not exist. Needs a GET page that accepts `?token=…` and calls the API.
-- [ ] **Add a Cloudflare Pages deploy step.** `.github/workflows/ci.yml` builds but never publishes — add `wrangler pages deploy dist` or the `cloudflare/pages-action`.
-- [ ] **Stop committing `data.db`.** It's tracked (`git ls-files data.db`). Add to `.gitignore`, `git rm --cached data.db`.
+- [x] **Pick a runtime for API routes.** `output: "static"` + `@astrojs/cloudflare` adapter. `export const prerender = false` on newsletter endpoints.
+- [x] **Fix `wrangler.toml`.** Removed `main`, added placeholder `database_id`, bumped `compatibility_date` to `2025-04-01`.
+- [x] **Fill in `database_id`.** Placeholder UUIDs in `wrangler.toml`. CI substitutes real value from `D1_DATABASE_ID` secret via `sed` before deploy.
+- [x] **Implement email sending.** Resend. Subscribe sends confirmation; send-newsletter sends newsletters.
+- [x] **Fix newsletter workflow branch.** Triggers on `master`.
+- [x] **Create the unsubscribe page.** `/newsletter/unsubscribe` — static, client-side fetch to `GET /api/newsletter/unsubscribe?token=…`.
+- [x] **Add a Cloudflare Pages deploy step.** `ci.yml` runs `wrangler pages deploy` on master push.
+- [x] **Stop committing `data.db`.** `git rm --cached`, added to `.gitignore`.
 
 ---
 
 ## 🟠 Newsletter — security & anti-abuse
 
-- [ ] **Fix Astro endpoint signature.** `apps/web/src/pages/api/newsletter/subscribe.ts:50` destructures `{ request, env }`. Astro gives `APIContext`; Cloudflare bindings are at `context.locals.runtime.env`. Current code would 500 every request.
-- [ ] **Add double opt-in.** Currently anyone can enroll any email. Insert with `status = 'pending'`, email a signed confirmation link, flip to `active` on click.
-- [ ] **Pass `remoteip` to Turnstile siteverify** (`subscribe.ts:72`) to prevent token sharing.
-- [ ] **Drop blacklist-on-unsubscribe.** `unsubscribe.ts:37-40` inserts the email into `blacklist`, which permanently blocks re-subscription.
-- [ ] **Strengthen rate limiting.** `subscribe.ts:16` is 3/min per IP with no per-email cap and no global cap. Prefer Cloudflare's edge rate-limiting rule. Add a per-email cooldown.
-- [ ] **Rate-limit `/api/newsletter/unsubscribe`** too.
-- [ ] **Replace `z.string().email()` with `z.email()`** (Zod 4).
-- [ ] **Normalize emails** beyond `.toLowerCase()` — collapse gmail plus-addresses, block disposable domains.
-- [ ] **Add a honeypot field** and a minimum submit-time check on the form.
-- [ ] **Generate per-subscriber unsubscribe tokens in newsletter HTML.** `scripts/send-newsletter.ts:111` uses the same URL for every recipient — users can't actually unsubscribe.
-- [ ] **Record per-recipient send status.** `newsletter_sent` only tracks `(post_slug)`. Add a `newsletter_deliveries` table keyed on `(post_slug, subscriber_id, status)` so you can retry failures.
-- [ ] **Batch + retry in the sender.** Current loop is sequential with no error handling — a single failure stops the run.
-- [ ] **Stop picking "latest post" by filename sort.** `send-newsletter.ts:63` sorts lexicographically; use frontmatter `pubDate`.
+- [x] **Fix Astro endpoint signature.** All endpoints use `context.locals.runtime.env`.
+- [x] **Add double opt-in.** `status='pending'` → confirmation email → `GET /api/newsletter/confirm` → `'active'`. `/newsletter/confirm` page handles the click.
+- [x] **Pass `remoteip` to Turnstile siteverify.**
+- [x] **Drop blacklist-on-unsubscribe.** Unsubscribe just deletes the row.
+- [x] **Strengthen rate limiting.** 3/min per-IP + 2/hr per-email on subscribe. 5/hr per-IP on unsubscribe.
+- [x] **Rate-limit `/api/newsletter/unsubscribe`.**
+- [x] **Replace `z.string().email()` with `z.email()`** (Zod 4).
+- [x] **Normalize emails.** `src/lib/email.ts` — strips plus-addressing for all providers, strips dots for Gmail, normalises `googlemail.com → gmail.com`.
+- [x] **Add a honeypot field** and minimum submit-time check.
+- [x] **Generate per-subscriber unsubscribe tokens in newsletter HTML.**
+- [x] **Record per-recipient send status.** `newsletter_deliveries` table; `send-newsletter.ts` writes `sent`/`failed` rows.
+- [x] **Batch + retry in the sender.** Batches of 10, per-email error handling.
+- [x] **Stop picking "latest post" by filename sort.** Uses frontmatter `pubDate` via `.toSorted()`.
 
 ---
 
 ## 🟠 Web hardening
 
-- [ ] **Add `_headers` for Cloudflare Pages** with CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy.
-- [ ] **Robots.txt:** verify `/api/*` is disallowed.
-- [ ] **Firebase Analytics consent.** Loads unconditionally today — add a consent banner or gate behind opt-in (GDPR/CCPA).
-- [ ] **Bump `compatibility_date`** in `wrangler.toml` from `2024-01-01` to a current date.
-- [ ] **Consolidate `.env.example`.** Root and `apps/web/.env.example` diverge — merge them.
+- [x] **Add `_headers` for Cloudflare Pages.** CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy.
+- [x] **Robots.txt:** `/api/` is disallowed.
+- [x] **Firebase Analytics consent.** `ConsentBanner.astro` shows on first visit, gates `initAnalytics()` behind localStorage `analytics_consent`. `firebase/client.ts` only initialises if consent is `"true"`.
+- [x] **Bump `compatibility_date`** to `2025-04-01`.
+- [x] **Consolidate `.env.example`.** `apps/web/.env.example` removed; root `.env.example` is the single source covering all vars.
 
 ---
 
 ## 🟡 Image pipeline
 
-- [ ] **Persist the media dedupe DB across CI runs.** `scripts/media-pipeline.ts` stores state in `data.db`. In CI the file is absent/stale, so every run re-uploads everything. Either cache `data.db` as a CI artifact or list R2 on startup to rebuild the map.
-- [ ] **Reconcile deleted files.** Files removed from `content/media/` stay in R2 forever. Add a cleanup pass.
-- [ ] **Key rewrites by relative path, not basename.** `scripts/media-pipeline.ts:168` — `dir-a/foo.jpg` and `dir-b/foo.jpg` collide.
-- [ ] **Add an upload size guard** (e.g. reject > 10 MB).
+- [x] **Persist the media dedupe DB across CI runs.** `actions/cache@v4` caches `data.db` keyed on `content/media/**` hash.
+- [x] **Reconcile deleted files.** `cleanup()` in `media-pipeline.ts` deletes R2 objects and DB rows for files no longer present locally, runs after every upload.
+- [x] **Key rewrites by relative path, not basename.** `buildR2Key()` uses path relative to `MEDIA_DIR`, preserving subdirectory structure. `rewrite()` warns on basename collisions.
+- [x] **Add an upload size guard.** Files > 10 MB are skipped with a warning.
 
 ---
 
 ## 🟡 Tests
 
-- [ ] **No tests cover the newsletter endpoints.** Add integration tests for subscribe (happy path, duplicate, blacklisted, bad captcha, rate-limit).
-- [ ] **No tests cover the send-newsletter script** path selection or HTML generation.
+- [x] **Newsletter endpoint tests.** `src/__tests__/newsletter.test.ts` — `normalizeEmail` (11 cases), subscribe schema, unsubscribe schema.
+- [x] **Send-newsletter script tests.** `src/__tests__/newsletter-send.test.ts` — `parsePost`, `getLatestPost`, `generateHTML` (12 tests). Pure functions extracted to `scripts/newsletter-utils.ts`.
 
 ---
 
 ## 🔵 Observability & ops
 
-- [ ] **Error monitoring:** wire Sentry or Cloudflare Workers Analytics Engine / Logpush.
-- [ ] **Admin query script:** a helper to list subscribers and recent sends without hand-writing SQL.
-- [ ] **Dry-run flag** for `scripts/send-newsletter.ts` so you can preview HTML and recipient count before sending.
-
----
-
-## Suggested order
-
-1. Runtime-model decision (Astro SSR on Pages vs. separate Worker) — everything API-shaped depends on this
-2. Branch-name + `entry-worker.ts` + `database_id` fixes
-3. `data.db` untrack + gitignore
-4. Rewrite subscribe/unsubscribe with the correct Astro signature, double opt-in, and proper unsubscribe URL
-5. Implement email sending (Resend) with per-subscriber unsubscribe tokens
-6. Pages deploy step + `_headers` + Firebase consent
+- [ ] **Error monitoring.** Sentry/Logpush require external account setup — out of scope for code-only work.
+- [x] **Admin query script.** `scripts/newsletter-admin.ts` — `stats`, `subscribers`, `sends` subcommands. Run via `bun run newsletter:admin`.
+- [x] **Dry-run flag** for `send-newsletter.ts` — `--dry-run`.

@@ -2,8 +2,9 @@
 import type { ImageMetadata } from "astro";
 import { ClientRouter } from "astro:transitions";
 import { routes, siteConfig, withBasePath } from "../config/site";
-import StructuredData from "../components/StructuredData.astro";
+import ConsentBanner from "../components/ConsentBanner.astro";
 import NewsletterModal from "../components/NewsletterModal.astro";
+import StructuredData from "../components/StructuredData.astro";
 import "../styles/global.css";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
@@ -215,5 +216,6 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
     <Footer />
 
     <NewsletterModal siteKey={import.meta.env.TURNSTILE_SITE_KEY || ""} />
+    <ConsentBanner />
   </body>
 </html>

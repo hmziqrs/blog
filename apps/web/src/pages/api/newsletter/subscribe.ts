@@ -1,4 +1,5 @@
 import type { APIContext } from "astro";
+import { normalizeEmail } from "../../../lib/email";
 import { z } from "zod";
 
 export const prerender = false;
@@ -66,7 +67,7 @@ export async function POST(context: APIContext): Promise<Response> {
       });
     }
 
-    const email = validated.email.toLowerCase();
+    const email = normalizeEmail(validated.email);
 
     const allowed = await checkRateLimit(env.DB, ip, email);
     if (!allowed) {

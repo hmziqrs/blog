@@ -12,6 +12,14 @@ jobs:
       - run: bun run fmt:check
       - run: turbo -F web check
       - run: bun run test
+
+      - name: Restore media DB cache
+        uses: actions/cache@v4
+        with:
+          path: data.db
+          key: media-db-${{ hashFiles('content/media/**') }}
+          restore-keys: media-db-
+
       - run: bun run media:upload
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
@@ -19,10 +27,24 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+
+      - name: Substitute D1 database ID
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: |
+          sed -i "s/00000000-0000-0000-0000-000000000000/${{ secrets.D1_DATABASE_ID }}/g" apps/web/wrangler.toml
+
+      - name: Apply D1 migrations
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: bunx wrangler d1 migrations apply blog-newsletter --remote --config apps/web/wrangler.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - run: |
           CONTENT_DIR=$(bun run media:rewrite) bun run build
         env:
           R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+
       - name: Deploy to Cloudflare Pages
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         run: bunx wrangler pages deploy apps/web/dist --project-name=web --branch=master

@@ -15,6 +15,20 @@ const app = initializeApp(firebaseConfig);
 
 export let analytics: ReturnType<typeof getAnalytics> | undefined;
 
-if (typeof window !== "undefined") {
+export function initAnalytics() {
+  if (typeof window === "undefined" || analytics) return;
   analytics = getAnalytics(app);
+}
+
+if (typeof window !== "undefined") {
+  // Expose for the consent banner
+  (window as Window & { __initAnalytics?: () => void }).__initAnalytics = initAnalytics;
+
+  try {
+    if (localStorage.getItem("analytics_consent") === "true") {
+      initAnalytics();
+    }
+  } catch {
+    // localStorage not available
+  }
 }

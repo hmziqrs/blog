@@ -7,13 +7,42 @@ const unsubscribeSchema = z.object({
   token: z.string().min(1, "Unsubscribe token required"),
 });
 
+async function checkRateLimit(
+  db: import("@cloudflare/workers-types").D1Database,
+  ip: string,
+): Promise<boolean> {
+  const now = Date.now();
+  const oneHourAgo = now - 60 * 60 * 1000;
+
+  await db.prepare("DELETE FROM rate_limits WHERE timestamp < ?").bind(oneHourAgo).run();
+
+  const count = await db
+    .prepare("SELECT COUNT(*) as count FROM rate_limits WHERE ip = ? AND timestamp > ?")
+    .bind(ip, oneHourAgo)
+    .first<{ count: number }>();
+
+  if ((count?.count ?? 0) >= 5) return false;
+
+  await db.prepare("INSERT INTO rate_limits (ip, timestamp) VALUES (?, ?)").bind(ip, now).run();
+
+  return true;
+}
+
 export async function POST(context: APIContext): Promise<Response> {
   const env = context.locals.runtime.env;
+  const ip = context.request.headers.get("CF-Connecting-IP") || "unknown";
+
+  const allowed = await checkRateLimit(env.DB, ip);
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   try {
     const body = await context.request.json();
     const validated = unsubscribeSchema.parse(body);
-
     return await processUnsubscribe(env, validated.token);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -31,8 +60,17 @@ export async function POST(context: APIContext): Promise<Response> {
 
 export async function GET(context: APIContext): Promise<Response> {
   const env = context.locals.runtime.env;
-  const token = new URL(context.request.url).searchParams.get("token");
+  const ip = context.request.headers.get("CF-Connecting-IP") || "unknown";
 
+  const allowed = await checkRateLimit(env.DB, ip);
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const token = new URL(context.request.url).searchParams.get("token");
   if (!token) {
     return new Response(JSON.stringify({ error: "Token required" }), {
       status: 400,
