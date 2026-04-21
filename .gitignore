@@ -50,7 +50,3 @@ coverage
 tmp
 temp
 
-# Local SQLite DB
-data.db
-data.db-shm
-data.db-wal

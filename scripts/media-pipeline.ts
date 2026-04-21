@@ -1,4 +1,3 @@
-import { Database } from "bun:sqlite";
 import {
   DeleteObjectCommand,
   ListObjectsV2Command,
@@ -16,7 +15,6 @@ import { tmpdir } from "node:os";
 const REPO_ROOT = path.resolve(import.meta.dir, "..");
 const CONTENT_DIR = path.join(REPO_ROOT, "content");
 const MEDIA_DIR = path.join(CONTENT_DIR, "media");
-const DB_PATH = path.join(REPO_ROOT, "data.db");
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID ?? "";
@@ -25,23 +23,40 @@ const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY ?? "";
 const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME ?? "";
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL ?? "";
 
+const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID ?? "";
+const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN ?? "";
+const D1_DATABASE_ID = process.env.D1_DATABASE_ID ?? "";
+
 const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".avif"]);
 
-// ─── DB helpers ────────────────────────────────────────────────────────────────
+// ─── D1 client ─────────────────────────────────────────────────────────────────
 
-function openDb(): Database {
-  const db = new Database(DB_PATH, { create: true });
-  db.run(`
-    CREATE TABLE IF NOT EXISTS media (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      local_path TEXT NOT NULL UNIQUE,
-      r2_key TEXT NOT NULL,
-      r2_url TEXT NOT NULL,
-      content_hash TEXT NOT NULL,
-      uploaded_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )
-  `);
-  return db;
+async function queryD1<T = Record<string, unknown>>(
+  sql: string,
+  params: unknown[] = [],
+): Promise<T[]> {
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}/query`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ sql, params }),
+    },
+  );
+
+  if (!response.ok) throw new Error(`D1 query failed: ${response.statusText}`);
+
+  const data = await response.json<{
+    success: boolean;
+    errors: Array<{ message: string }>;
+    result: Array<{ results: T[] }>;
+  }>();
+  if (!data.success) throw new Error(`D1 error: ${data.errors[0].message}`);
+
+  return data.result[0].results;
 }
 
 // ─── Hashing ───────────────────────────────────────────────────────────────────
@@ -84,13 +99,13 @@ export function reverseR2Key(r2Key: string): string | null {
   return `content/media/${m[1]}${ext}`;
 }
 
-// ─── Sync DB from R2 (cold-start recovery) ─────────────────────────────────────
+// ─── Sync D1 from R2 (cold-start recovery) ─────────────────────────────────────
 
-async function syncDbFromR2(db: Database, client: S3Client): Promise<void> {
-  const count = (db.prepare("SELECT COUNT(*) as n FROM media").get() as { n: number }).n;
-  if (count > 0) return; // DB already populated
+async function syncD1FromR2(client: S3Client): Promise<void> {
+  const [row] = await queryD1<{ n: number }>("SELECT COUNT(*) as n FROM media");
+  if (row.n > 0) return;
 
-  console.log("  data.db is empty — rebuilding from R2 listing...");
+  console.log("  media table is empty — rebuilding from R2 listing...");
 
   let token: string | undefined;
   let total = 0;
@@ -110,8 +125,7 @@ async function syncDbFromR2(db: Database, client: S3Client): Promise<void> {
       const localPath = reverseR2Key(key);
       if (!localPath) continue;
       const r2Url = `${R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`;
-      // hash stored as empty — upload logic will populate it on next run without re-uploading
-      db.run(
+      await queryD1(
         `INSERT OR IGNORE INTO media (local_path, r2_key, r2_url, content_hash) VALUES (?, ?, ?, '')`,
         [localPath, key, r2Url],
       );
@@ -139,18 +153,21 @@ async function upload() {
     process.exit(1);
   }
 
+  if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN || !D1_DATABASE_ID) {
+    console.error(
+      "Missing D1 credentials. Set CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, D1_DATABASE_ID.",
+    );
+    process.exit(1);
+  }
+
   if (!existsSync(MEDIA_DIR)) {
     console.log("No content/media/ directory found. Nothing to upload.");
     return;
   }
 
-  const db = openDb();
   const client = createR2Client();
 
-  // Rebuild map from R2 if data.db was absent (cache miss or first run)
-  await syncDbFromR2(db, client);
-
-  const getExisting = db.prepare("SELECT content_hash, r2_key FROM media WHERE local_path = ?");
+  await syncD1FromR2(client);
 
   const files = scanDir(MEDIA_DIR);
   let uploaded = 0;
@@ -168,7 +185,10 @@ async function upload() {
     }
 
     const hash = hashFile(filePath);
-    const existing = getExisting.get(localPath) as { content_hash: string; r2_key: string } | null;
+    const [existing] = await queryD1<{ content_hash: string; r2_key: string }>(
+      "SELECT content_hash, r2_key FROM media WHERE local_path = ?",
+      [localPath],
+    );
 
     // Fast path: content unchanged
     if (existing && existing.content_hash === hash) {
@@ -179,9 +199,9 @@ async function upload() {
     const r2Key = buildR2Key(filePath, hash);
     const r2Url = `${R2_PUBLIC_URL.replace(/\/$/, "")}/${r2Key}`;
 
-    // R2 already has this exact version (synced from listing, hash was empty)
+    // R2 already has this exact version (recovered from listing, hash was empty)
     if (existing && existing.r2_key === r2Key) {
-      db.run("UPDATE media SET content_hash = ? WHERE local_path = ?", [hash, localPath]);
+      await queryD1("UPDATE media SET content_hash = ? WHERE local_path = ?", [hash, localPath]);
       skipped++;
       continue;
     }
@@ -207,7 +227,7 @@ async function upload() {
       }),
     );
 
-    db.run(
+    await queryD1(
       `INSERT INTO media (local_path, r2_key, r2_url, content_hash)
        VALUES (?, ?, ?, ?)
        ON CONFLICT(local_path) DO UPDATE SET
@@ -222,10 +242,8 @@ async function upload() {
     uploaded++;
   }
 
-  // Remove DB entries for files that no longer exist locally
-  const deleted = await cleanup(db, client);
+  const deleted = await cleanup(client);
 
-  db.close();
   const parts = [`${uploaded} uploaded`, `${skipped} skipped`];
   if (oversized > 0) parts.push(`${oversized} oversized`);
   if (deleted > 0) parts.push(`${deleted} cleaned up`);
@@ -234,11 +252,10 @@ async function upload() {
 
 // ─── Cleanup deleted files ─────────────────────────────────────────────────────
 
-async function cleanup(db: Database, client: S3Client): Promise<number> {
-  const rows = db.prepare("SELECT local_path, r2_key FROM media").all() as {
-    local_path: string;
-    r2_key: string;
-  }[];
+async function cleanup(client: S3Client): Promise<number> {
+  const rows = await queryD1<{ local_path: string; r2_key: string }>(
+    "SELECT local_path, r2_key FROM media",
+  );
 
   let deleted = 0;
   for (const row of rows) {
@@ -249,7 +266,7 @@ async function cleanup(db: Database, client: S3Client): Promise<number> {
       } catch {
         // best-effort
       }
-      db.run("DELETE FROM media WHERE local_path = ?", [row.local_path]);
+      await queryD1("DELETE FROM media WHERE local_path = ?", [row.local_path]);
       console.log(`  removed: ${row.local_path}`);
       deleted++;
     }
@@ -259,16 +276,20 @@ async function cleanup(db: Database, client: S3Client): Promise<number> {
 
 // ─── Rewrite ───────────────────────────────────────────────────────────────────
 
-function rewrite(outDir?: string) {
-  const db = openDb();
-  const rows = db.prepare("SELECT local_path, r2_url FROM media").all() as {
-    local_path: string;
-    r2_url: string;
-  }[];
-  db.close();
+async function rewrite(outDir?: string) {
+  if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN || !D1_DATABASE_ID) {
+    console.error(
+      "Missing D1 credentials. Set CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, D1_DATABASE_ID.",
+    );
+    process.exit(1);
+  }
+
+  const rows = await queryD1<{ local_path: string; r2_url: string }>(
+    "SELECT local_path, r2_url FROM media",
+  );
 
   if (rows.length === 0) {
-    console.error("No media entries in data.db. Run `bun run media:upload` first.");
+    console.error("No media entries in D1. Run `bun run media:upload` first.");
     process.exit(1);
   }
 
@@ -277,7 +298,6 @@ function rewrite(outDir?: string) {
   const byBasename = new Map<string, string>();
   for (const row of rows) {
     byPath.set(row.local_path.replaceAll(path.sep, "/"), row.r2_url);
-    // Warn on basename collisions rather than silently dropping one
     const bn = path.basename(row.local_path);
     if (byBasename.has(bn)) {
       console.warn(`  warning: basename collision for "${bn}" — use full paths in markdown`);
@@ -372,7 +392,7 @@ switch (command) {
     await upload();
     break;
   case "rewrite":
-    rewrite(outDir);
+    await rewrite(outDir);
     break;
   default:
     console.log("Usage: media-pipeline.ts <upload|rewrite> [--out-dir <path>]");

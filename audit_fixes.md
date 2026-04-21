@@ -17,7 +17,7 @@ Legend: 🔴 blocker · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-
 - [x] **Fix newsletter workflow branch.** Triggers on `master`.
 - [x] **Create the unsubscribe page.** `/newsletter/unsubscribe` — static, client-side fetch to `GET /api/newsletter/unsubscribe?token=…`.
 - [x] **Add a Cloudflare Pages deploy step.** `ci.yml` runs `wrangler pages deploy` on master push.
-- [x] **Stop committing `data.db`.** `git rm --cached`, added to `.gitignore`.
+- [x] **Remove `data.db` entirely.** Media metadata moved to D1. `data.db` removed from `.gitignore` — no longer exists.
 
 ---
 
@@ -51,8 +51,9 @@ Legend: 🔴 blocker · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-
 
 ## 🟡 Image pipeline
 
-- [x] **Persist the media dedupe DB across CI runs.** `actions/cache@v4` caches `data.db` keyed on `content/media/**` hash.
-- [x] **Reconcile deleted files.** `cleanup()` in `media-pipeline.ts` deletes R2 objects and DB rows for files no longer present locally, runs after every upload.
+- [x] **Store media metadata in D1.** `media` table in D1 (`0003_media_table.sql`). `media-pipeline.ts` uses the Cloudflare REST API — no local `data.db`, no GH Actions cache. Accessible from CI, local scripts, and the future admin panel.
+- [x] **Cold-start recovery.** `syncD1FromR2()` lists R2 and rebuilds D1 when the `media` table is empty (first run or new DB).
+- [x] **Reconcile deleted files.** `cleanup()` in `media-pipeline.ts` deletes R2 objects and D1 rows for files no longer present locally, runs after every upload.
 - [x] **Key rewrites by relative path, not basename.** `buildR2Key()` uses path relative to `MEDIA_DIR`, preserving subdirectory structure. `rewrite()` warns on basename collisions.
 - [x] **Add an upload size guard.** Files > 10 MB are skipped with a warning.
 
