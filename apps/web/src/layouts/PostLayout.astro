@@ -4,7 +4,6 @@ import { pageTitle, routes, siteConfig, withBasePath } from "../config/site";
 import AdvertisementBanner from "../components/AdvertisementBanner.astro";
 import BaseLayout from "./BaseLayout.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
-import InlineNewsletter from "../components/InlineNewsletter.astro";
 import PageContainer from "../components/PageContainer.astro";
 import TagBadge from "../components/TagBadge.astro";
 import ThemedImage from "../components/ThemedImage.astro";
@@ -158,12 +157,6 @@ const structuredData = {
         </script>
       )}
 
-      <div class="mt-12">
-        <InlineNewsletter
-          siteKey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""}
-          uid="post-newsletter"
-        />
-      </div>
     </div>
   </PageContainer>
 </BaseLayout>
