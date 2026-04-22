@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { generateHTML, parsePost, getLatestPost } from "../../../../scripts/newsletter-utils.ts";
+import { generateHTML, parsePost, getLatestPost } from "../newsletter-utils.ts";
 
 // ─── parsePost ─────────────────────────────────────────────────────────────────
 

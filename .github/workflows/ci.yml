@@ -27,11 +27,11 @@ jobs:
       - name: Substitute D1 database ID
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         run: |
-          sed -i "s/00000000-0000-0000-0000-000000000000/${{ secrets.D1_DATABASE_ID }}/g" apps/web/wrangler.toml
+          sed -i "s/00000000-0000-0000-0000-000000000000/${{ secrets.D1_DATABASE_ID }}/g" apps/newsletter/wrangler.toml
 
       - name: Apply D1 migrations
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: bunx wrangler d1 migrations apply blog-newsletter --remote --config apps/web/wrangler.toml
+        run: bunx wrangler d1 migrations apply blog-newsletter --remote --config apps/newsletter/wrangler.toml
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -43,6 +43,13 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+
+      - name: Deploy newsletter Worker
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: bunx wrangler deploy --config apps/newsletter/wrangler.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy to Cloudflare Pages
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'

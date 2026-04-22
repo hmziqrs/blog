@@ -213,15 +213,15 @@ The `vite.server.proxy` is dev-only (Vite ignores it during build), forwarding t
 
 ## Migration Order (safe, stepwise)
 
-1. Scaffold `apps/newsletter/` skeleton — package.json, tsconfig, wrangler.toml, `src/index.ts` stub returning 404. `bun install`.
-2. `git mv` libs, tests, migration.
-3. Port 3 routes to Hono (subscribe → unsubscribe → send). Run tests. `wrangler deploy --dry-run` to verify it builds.
-4. Set secrets on the Worker: `wrangler secret put TURNSTILE_SECRET_KEY`, `NEWSLETTER_SEND_SECRET`, `EMAIL_FROM_ADDRESS`. Confirm SendEmail destination address is verified in Dashboard.
-5. Deploy Worker with `routes` **commented out** first. Smoke-test via the Worker's `*.workers.dev` URL with curl.
-6. Uncomment `routes` → `wrangler deploy` → Worker is now live at `blog.hmziq.rs/api/newsletter/*`. At this instant, the old Astro-adapter routes are bypassed.
-7. Delete `apps/web/src/pages/api/newsletter/`, `apps/web/wrangler.toml`, `apps/web/src/lib/{email,mailer}.ts`, `apps/web/migrations/`. Remove `export const prerender` from all 17 pages. Update `astro.config.ts` to pure static. Remove `@astrojs/cloudflare` + `wrangler` from `apps/web/package.json`. `bun install`. Run `bun dev:web` to verify the dev server is happy.
-8. Update `.github/workflows/ci.yml` and root `package.json` scripts.
-9. Push to master. CI deploys both. Manual prod verification: subscribe + unsubscribe + trigger a send.
+1. ✅ Scaffold `apps/newsletter/` skeleton — package.json, tsconfig, wrangler.toml, `src/index.ts` stub returning 404. `bun install`.
+2. ✅ `git mv` libs, tests, migration.
+3. ✅ Port 3 routes to Hono (subscribe → unsubscribe → send). Run tests. `wrangler deploy --dry-run` to verify it builds.
+4. ⬜ Set secrets on the Worker: `wrangler secret put TURNSTILE_SECRET_KEY`, `NEWSLETTER_SEND_SECRET`, `EMAIL_FROM_ADDRESS`. Confirm SendEmail destination address is verified in Dashboard.
+5. ⬜ Deploy Worker with `routes` **commented out** first. Smoke-test via the Worker's `*.workers.dev` URL with curl.
+6. ⬜ Uncomment `routes` → `wrangler deploy` → Worker is now live at `blog.hmziq.rs/api/newsletter/*`. At this instant, the old Astro-adapter routes are bypassed.
+7. ✅ Delete `apps/web/src/pages/api/newsletter/`, `apps/web/wrangler.toml`, `apps/web/src/lib/{email,mailer}.ts`, `apps/web/migrations/`. Update `astro.config.ts` to pure static. Remove `@astrojs/cloudflare` from `apps/web/package.json`. `bun install`.
+8. ✅ Update `.github/workflows/ci.yml` and root `package.json` scripts.
+9. ⬜ Push to master. CI deploys both. Manual prod verification: subscribe + unsubscribe + trigger a send.
 
 **Rollback path:** any step before #6 is reversible (the old routes are still serving). Step #6 is the single cutover; rolling back means redeploying the Worker without the `routes` config or deleting the route in the Dashboard.
 
