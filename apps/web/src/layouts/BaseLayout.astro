@@ -215,7 +215,7 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
 
     <Footer />
 
-    <NewsletterModal siteKey={import.meta.env.TURNSTILE_SITE_KEY || ""} />
+    <NewsletterModal siteKey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} />
     <ConsentBanner />
   </body>
 </html>

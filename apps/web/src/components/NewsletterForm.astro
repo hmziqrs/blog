@@ -1,52 +1,50 @@
 ---
-const { siteKey = "" } = Astro.props;
+const { siteKey = "", uid = "newsletter" } = Astro.props;
 ---
 
-<form id="newsletter-form" class="flex flex-col gap-3 max-w-md">
+<form id={`${uid}-form`} class="flex flex-col gap-3">
   <div>
-    <label for="email" class="block text-sm font-medium mb-1">
+    <label for={`${uid}-email`} class="block text-sm font-medium mb-1">
       Email address
     </label>
     <input
       type="email"
-      id="email"
+      id={`${uid}-email`}
       name="email"
       required
       placeholder="you@example.com"
-      class="w-full px-4 py-2 border border-base-content/20 rounded-lg bg-base-200/60 focus:ring-2 focus:ring-primary focus:border-transparent text-base-content"
+      class="w-full px-4 py-2.5 border border-base-content/15 rounded-xl bg-base-100/80 focus:ring-2 focus:ring-primary/50 focus:border-primary/40 text-base-content placeholder:text-base-content/40 transition-all"
     />
   </div>
 
   <div
-    id="turnstile-container"
+    id={`${uid}-turnstile`}
     class="cf-turnstile"
     data-sitekey={siteKey}
   ></div>
 
   <button
     type="submit"
-    id="submit-btn"
-    class="w-full bg-primary text-primary-content py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    id={`${uid}-submit`}
+    class="w-full bg-primary text-primary-content font-semibold py-2.5 px-4 rounded-xl hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
   >
     Subscribe
   </button>
 
-  <div id="message" class="text-sm hidden"></div>
+  <div id={`${uid}-message`} class="text-sm hidden"></div>
 </form>
 
-<script>
-  const form = document.getElementById("newsletter-form") as HTMLFormElement;
-  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
-  const message = document.getElementById("message") as HTMLDivElement;
+<script define:vars={{ uid }}>
+  const form = document.getElementById(`${uid}-form`);
+  const submitBtn = document.getElementById(`${uid}-submit`);
+  const message = document.getElementById(`${uid}-message`);
 
-  form.addEventListener("submit", async (e) => {
+  form?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = (document.getElementById("email") as HTMLInputElement).value;
-    const turnstileResponse = (
-      document.querySelector(
-        "#turnstile-container input[name='cf-turnstile-response']",
-      ) as HTMLInputElement
+    const email = document.getElementById(`${uid}-email`)?.value;
+    const turnstileResponse = document.querySelector(
+      `#${uid}-turnstile input[name='cf-turnstile-response']`,
     )?.value;
 
     if (!turnstileResponse) {
@@ -72,9 +70,8 @@ const { siteKey = "" } = Astro.props;
       if (response.ok) {
         showMessage("Successfully subscribed! Check your email.", "success");
         form.reset();
-        // Reset Turnstile
-        if ((window as any).turnstile) {
-          (window as any).turnstile.reset("#turnstile-container");
+        if (window.turnstile) {
+          window.turnstile.reset(`#${uid}-turnstile`);
         }
       } else {
         showMessage(data.error || "Subscription failed", "error");
@@ -86,11 +83,11 @@ const { siteKey = "" } = Astro.props;
     }
   });
 
-  function showMessage(text: string, type: "success" | "error" | "info") {
+  function showMessage(text, type) {
     message.textContent = text;
     message.className = "text-sm";
     message.classList.remove("hidden");
-    
+
     if (type === "success") {
       message.classList.add("text-success");
     } else if (type === "error") {

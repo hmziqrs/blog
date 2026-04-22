@@ -1,0 +1,60 @@
+---
+import NewsletterForm from "./NewsletterForm.astro";
+
+interface Props {
+  siteKey?: string;
+  uid?: string;
+}
+
+const { siteKey = "", uid = "inline-newsletter" } = Astro.props;
+---
+
+<div
+  class="group relative overflow-hidden rounded-2xl border border-base-content/8 bg-gradient-to-br from-base-200/70 to-base-100/50 p-6 sm:p-8"
+>
+  <div
+    class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-3xl transition-all group-hover:bg-primary/15"
+  >
+  </div>
+  <div
+    class="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-secondary/10 blur-3xl transition-all group-hover:bg-secondary/15"
+  >
+  </div>
+
+  <div class="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-10">
+    <div class="flex-1 space-y-3">
+      <div
+        class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold tracking-tight sm:text-xl">
+          Subscribe to the Newsletter
+        </h3>
+        <p class="mt-1 max-w-md text-sm leading-relaxed text-base-content/65">
+          Get notified when new posts are published. No spam, unsubscribe
+          anytime.
+        </p>
+      </div>
+    </div>
+
+    <div class="flex-1 lg:max-w-sm">
+      <NewsletterForm siteKey={siteKey} uid={uid} />
+    </div>
+  </div>
+</div>
