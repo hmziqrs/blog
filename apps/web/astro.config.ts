@@ -6,12 +6,15 @@ import { defineConfig } from "astro/config";
 import { siteConfig } from "../../site.config.ts";
 
 export default defineConfig({
-  output: "hybrid",
+  output: "server",
   adapter: cloudflare(),
   site: siteConfig.publicSiteUrl,
   base: siteConfig.basePath,
   integrations: [sitemap(), icon()],
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      noExternal: true,
+    },
   },
 });

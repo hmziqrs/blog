@@ -10,7 +10,7 @@ Legend: 🔴 blocker · 🟠 security/abuse · 🟡 correctness · 🔵 nice-to-
 
 ## 🔴 Blockers
 
-- [x] **Pick a runtime for API routes.** `output: "static"` + `@astrojs/cloudflare` adapter. `export const prerender = false` on newsletter endpoints.
+- [x] **Pick a runtime for API routes.** `output: "server"` + `@astrojs/cloudflare` adapter. `export const prerender = true` on all blog/static pages. `export const prerender = false` on newsletter API endpoints.
 - [x] **Fix `wrangler.toml`.** Removed `main`, added placeholder `database_id`, bumped `compatibility_date` to `2025-04-01`.
 - [x] **Fill in `database_id`.** Placeholder UUIDs in `wrangler.toml`. CI substitutes real value from `D1_DATABASE_ID` secret via `sed` before deploy.
 - [x] **Implement email sending.** Cloudflare Workers `send_email` binding. Single opt-in; send-newsletter triggers Worker endpoint.
