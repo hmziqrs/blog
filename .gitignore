@@ -12,6 +12,7 @@ build
 .env
 .env.development
 .env*.local
+.dev.vars
 
 # IDEs and editors
 .vscode/*
@@ -49,4 +50,7 @@ coverage
 .cache
 tmp
 temp
+
+# Wrangler
+.wrangler
 
