@@ -71,9 +71,14 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
   const message = document.getElementById(`${uid}-message`);
   const dismissCheckbox = document.getElementById(`${uid}-dismiss`);
 
+  // Never show if already subscribed
+  const isSubscribed = localStorage.getItem("newsletterSubscribed") === "true";
+
   // Check if user has dismissed before and if 7 days have passed
   const dismissUntil = localStorage.getItem("newsletterDismissUntil");
-  if (!dismissUntil || Date.now() > parseInt(dismissUntil)) {
+  const isDismissed = dismissUntil && Date.now() < parseInt(dismissUntil);
+
+  if (!isSubscribed && !isDismissed) {
     // Show modal after 50% scroll
     const scrollThreshold = 0.5;
     let hasShown = false;
@@ -150,12 +155,12 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
       if (response.ok) {
         showMessage("Successfully subscribed! Check your email.", "success");
         form.reset();
-        // Close modal after success and dismiss for 7 days
+        // Mark as permanently subscribed so modal never shows again
+        localStorage.setItem("newsletterSubscribed", "true");
+        // Close modal after success
         setTimeout(() => {
           modal.classList.add("hidden");
           modal.classList.remove("flex");
-          const sevenDays = 7 * 24 * 60 * 60 * 1000;
-          localStorage.setItem("newsletterDismissUntil", String(Date.now() + sevenDays));
         }, 2000);
         // Reset Turnstile
         if (window.turnstile) {

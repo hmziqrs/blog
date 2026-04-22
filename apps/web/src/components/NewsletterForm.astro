@@ -70,6 +70,7 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
       if (response.ok) {
         showMessage("Successfully subscribed! Check your email.", "success");
         form.reset();
+        localStorage.setItem("newsletterSubscribed", "true");
         if (window.turnstile) {
           window.turnstile.reset(`#${uid}-turnstile`);
         }
