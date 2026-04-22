@@ -12,20 +12,35 @@ import ButtonLink from "./ButtonLink.astro";
         {siteConfig.name}
       </a>
       <div class="flex items-center gap-1.5">
-        <div class="hidden items-center gap-1.5 sm:inline-flex">
-          <nav class="flex flex-wrap items-end justify-end gap-1.5">
-            {siteConfig.primaryNav.map((link) => (
-              <ButtonLink
+        <nav class="flex flex-wrap items-center gap-1.5">
+          {siteConfig.primaryNav.map((link) => (
+            <>
+              <span class="hidden sm:inline-flex">
+                <ButtonLink
+                  href={link.href}
+                  variant="plain"
+                  size="sm"
+                  class="font-mono tracking-[0.14em] uppercase"
+                >
+                  {link.label}
+                </ButtonLink>
+              </span>
+              <a
                 href={link.href}
-                variant="plain"
-                size="sm"
-                class="font-mono tracking-[0.14em] uppercase"
+                class="text-base-content/62 hover:bg-base-200 hover:text-base-content inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 sm:hidden"
+                aria-label={link.label}
+                title={link.label}
               >
-                {link.label}
-              </ButtonLink>
-            ))}
-          </nav>
-        </div>
+                <Icon
+                  name={link.label === "About" ? "tabler:user" : link.label === "Contact" ? "tabler:mail" : "tabler:link"}
+                  class="h-4 w-4"
+                  aria-hidden="true"
+                  stroke-width="1.75"
+                />
+              </a>
+            </>
+          ))}
+        </nav>
         <button
           type="button"
           class="text-base-content/62 hover:bg-base-200 hover:text-base-content inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200"
