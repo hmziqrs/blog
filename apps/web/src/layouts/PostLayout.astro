@@ -81,7 +81,7 @@ const structuredData = {
   modifiedTime={frontmatter.updated?.toISOString()}
   structuredData={structuredData}
 >
-  <PageContainer>
+  <PageContainer class={frontmatter.cover ? "" : "pb-5 sm:pb-6"}>
     <AdvertisementBanner
       href={siteConfig.advertisement?.href || ""}
       imageUrl={siteConfig.advertisement?.imageUrl}
@@ -128,7 +128,7 @@ const structuredData = {
     )
   }
 
-  <PageContainer>
+  <PageContainer class={frontmatter.cover ? "" : "pt-5 sm:pt-6"}>
     <div class="max-w-3xl">
       <article class="prose max-w-none text-[1.03rem] leading-8">
         <slot />
