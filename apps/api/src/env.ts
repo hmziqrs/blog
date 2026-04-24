@@ -7,4 +7,5 @@ export type Bindings = {
   NEWSLETTER_SEND_SECRET: string;
   EMAIL_FROM_ADDRESS: string;
   ENVIRONMENT: string;
+  ALLOWED_ORIGIN: string;
 };

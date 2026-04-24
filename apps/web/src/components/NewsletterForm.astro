@@ -56,7 +56,8 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
     showMessage("Subscribing...", "info");
 
     try {
-      const response = await fetch("/api/newsletter/subscribe", {
+      const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "";
+      const response = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

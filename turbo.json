@@ -5,7 +5,14 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".astro/**"]
+      "outputs": ["dist/**", ".astro/**"],
+      "env": [
+        "PUBLIC_API_BASE",
+        "PUBLIC_TURNSTILE_SITE_KEY",
+        "CONTENT_DIR",
+        "R2_PUBLIC_URL",
+        "SITE_URL"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]

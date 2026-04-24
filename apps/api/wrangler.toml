@@ -3,29 +3,35 @@ main = "src/index.ts"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Uncomment to go live:
+# Prod routes — uncomment to go live
 # routes = [
 #   { pattern = "blog.hmziq.rs/api/newsletter/*", zone_name = "hmziq.rs" }
 # ]
 
 [vars]
 ENVIRONMENT = "production"
+ALLOWED_ORIGIN = "" # prod is same-origin; CORS off
 
 [[d1_databases]]
 binding = "DB"
 database_name = "blog-db"
-database_id = "00000000-0000-0000-0000-000000000000" # TODO: replace with real D1 database ID
+database_id = "00000000-0000-0000-0000-000000000000" # TODO: replace with real D1 prod ID
 
 [[send_email]]
 name = "SEND_EMAIL"
 
-[env.dev]
-vars = { ENVIRONMENT = "development" }
+# ─── Staging ────────────────────────────────────────────
+[env.staging]
+name = "api-staging"
 
-[[env.dev.d1_databases]]
+[env.staging.vars]
+ENVIRONMENT = "staging"
+ALLOWED_ORIGIN = "https://web-staging.pages.dev" # update after first Pages deploy
+
+[[env.staging.d1_databases]]
 binding = "DB"
-database_name = "blog-db-dev"
-database_id = "00000000-0000-0000-0000-000000000001" # TODO: replace with real D1 dev database ID
+database_name = "blog-db-staging"
+database_id = "00000000-0000-0000-0000-000000000001" # TODO: replace with real D1 staging ID
 
-[[env.dev.send_email]]
+[[env.staging.send_email]]
 name = "SEND_EMAIL"

@@ -1,9 +1,10 @@
 name: Send Newsletter
 on:
   push:
-    branches:
-      - master
-  workflow_dispatch: # Allow manual triggering
+    branches: [master]
+    paths:
+      - "apps/web/src/content/posts/**"
+  workflow_dispatch:
 
 jobs:
   send-newsletter:

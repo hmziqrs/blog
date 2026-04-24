@@ -13,6 +13,9 @@ build
 .env.development
 .env*.local
 .dev.vars
+# Allow committed env files with public values only
+!.env.staging
+!.env.production
 
 # IDEs and editors
 .vscode/*

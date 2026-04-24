@@ -44,7 +44,8 @@ const title = pageTitle("Unsubscribe");
     }
 
     try {
-      const res = await fetch(`/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}`);
+      const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "";
+      const res = await fetch(`${API_BASE}/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}`);
       const data = await res.json();
       $loading.classList.add("hidden");
       if (res.ok) {
