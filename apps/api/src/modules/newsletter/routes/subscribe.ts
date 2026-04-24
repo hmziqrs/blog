@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { Bindings } from "../env";
-import { normalizeEmail } from "../lib/email";
-import { checkSubscribeRateLimit } from "../lib/rate-limit";
+import type { Bindings } from "../../../env";
+import { normalizeEmail } from "../../../lib/email";
+import { checkSubscribeRateLimit } from "../../../lib/rate-limit";
 
 const subscribeSchema = z.object({
   email: z.email("Invalid email address"),

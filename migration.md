@@ -3,6 +3,7 @@
 ## Context
 
 We've spent hours fighting Astro 6 + `@astrojs/cloudflare`'s dev server. The three output modes all fail for our setup:
+
 - `output: "hybrid"` — removed in Astro 6, Astro refuses to start.
 - `output: "static"` — silently ignores `export const prerender = false`, so API routes would be pre-rendered to broken static HTML.
 - `output: "server"` — dev server crashes with `module is not defined` inside `@cloudflare/vite-plugin`'s workerd module runner whenever a route is requested.
@@ -50,6 +51,7 @@ scripts/
 ## File-by-file Actions
 
 ### Move (use `git mv`)
+
 - `apps/web/migrations/0001_initial.sql` → `apps/newsletter/migrations/0001_initial.sql`
 - `apps/web/src/lib/email.ts` → `apps/newsletter/src/lib/email.ts`
 - `apps/web/src/lib/mailer.ts` → `apps/newsletter/src/lib/mailer.ts`
@@ -57,11 +59,13 @@ scripts/
 - `apps/web/src/__tests__/newsletter-send.test.ts` → `scripts/__tests__/newsletter-send.test.ts` (update import path)
 
 ### Delete
+
 - `apps/web/src/pages/api/newsletter/` (subscribe.ts, unsubscribe.ts, send.ts)
 - `apps/web/wrangler.toml`
 - `apps/web/migrations/` (now empty)
 
 ### Edit in place
+
 - `apps/web/astro.config.ts` — remove `cloudflare()` adapter, set `output: "static"`, remove `ssr.noExternal`
 - All static pages: remove the `export const prerender = true` we added earlier (unnecessary with `output: "static"`). Files: `404.astro`, `[page].astro`, `advertise.astro`, `categories.astro`, `category/[category].astro`, `index.astro`, `newsletter.astro`, `newsletter/unsubscribe.astro`, `posts/[...slug].astro`, `tags/[tag].astro`, `tags/index.astro`, `rss.xml.ts`, `robots.txt.ts`, `og-default.svg.ts`, `api/*.json.ts` (all 6)
 - `apps/web/package.json` — remove `@astrojs/cloudflare` and `wrangler` deps
@@ -72,6 +76,7 @@ scripts/
 ## New Files
 
 ### `apps/newsletter/package.json`
+
 ```json
 {
   "name": "newsletter",
@@ -95,6 +100,7 @@ scripts/
 ```
 
 ### `apps/newsletter/wrangler.toml`
+
 ```toml
 name = "newsletter"
 main = "src/index.ts"
@@ -116,11 +122,13 @@ database_id = "00000000-0000-0000-0000-000000000000"  # CI sed target
 ```
 
 SendEmail binding is set up in the Cloudflare Dashboard (Email Routing). Secrets via `wrangler secret put`:
+
 - `TURNSTILE_SECRET_KEY`
 - `NEWSLETTER_SEND_SECRET`
 - `EMAIL_FROM_ADDRESS`
 
 ### `apps/newsletter/src/env.ts`
+
 ```ts
 import type { D1Database, SendEmail } from "@cloudflare/workers-types";
 export type Bindings = {
@@ -134,6 +142,7 @@ export type Bindings = {
 ```
 
 ### `apps/newsletter/src/index.ts`
+
 ```ts
 import { Hono } from "hono";
 import type { Bindings } from "./env";
@@ -150,6 +159,7 @@ export default app;
 ```
 
 ### Routes — Translation Rules (Astro APIContext → Hono Context)
+
 - `context.locals.runtime.env` → `c.env`
 - `context.request.headers.get(x)` → `c.req.header(x)`
 - `new URL(context.request.url).searchParams.get(k)` → `c.req.query(k)`
@@ -164,6 +174,7 @@ Extract the existing shared rate-limit logic (used in subscribe/unsubscribe) int
 ## Frontend Changes
 
 **None.** URLs stay `/api/newsletter/*`. These components are untouched:
+
 - `apps/web/src/components/NewsletterForm.astro`
 - `apps/web/src/components/NewsletterModal.astro`
 - `apps/web/src/pages/newsletter/unsubscribe.astro`
@@ -250,6 +261,7 @@ The `vite.server.proxy` is dev-only (Vite ignores it during build), forwarding t
 ## Verification
 
 After step #6:
+
 ```bash
 curl -i https://blog.hmziq.rs/api/newsletter/subscribe \
   -X POST -H 'Content-Type: application/json' \
@@ -261,6 +273,7 @@ curl -i 'https://blog.hmziq.rs/api/newsletter/unsubscribe?token=nonexistent'
 ```
 
 After step #7 (web cutover):
+
 ```bash
 bun run dev:web
 # expect astro v6.1.7 ready, no "module is not defined", homepage loads
@@ -269,6 +282,7 @@ curl -sI http://localhost:4321/ | head -1
 ```
 
 Full end-to-end (post-merge to master):
+
 1. Subscribe via the newsletter form on the live site.
 2. Check D1: `bun run newsletter:admin stats`.
 3. Manually trigger `newsletter-send` workflow; verify delivery log in D1.

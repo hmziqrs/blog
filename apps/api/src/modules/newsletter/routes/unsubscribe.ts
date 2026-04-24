@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { Bindings } from "../env";
-import { checkUnsubscribeRateLimit } from "../lib/rate-limit";
+import type { Bindings } from "../../../env";
+import { checkUnsubscribeRateLimit } from "../../../lib/rate-limit";
 
 const unsubscribeSchema = z.object({
   token: z.string().min(1, "Unsubscribe token required"),
@@ -41,7 +41,10 @@ app.get("/", async (c) => {
   }
 
   const result = await processUnsubscribe(c.env.DB, token);
-  return c.json("error" in result ? { error: result.error } : { message: result.message }, result.status);
+  return c.json(
+    "error" in result ? { error: result.error } : { message: result.message },
+    result.status,
+  );
 });
 
 app.post("/", async (c) => {
@@ -61,7 +64,10 @@ app.post("/", async (c) => {
     const body = await c.req.json();
     const validated = unsubscribeSchema.parse(body);
     const result = await processUnsubscribe(c.env.DB, validated.token);
-    return c.json("error" in result ? { error: result.error } : { message: result.message }, result.status);
+    return c.json(
+      "error" in result ? { error: result.error } : { message: result.message },
+      result.status,
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return c.json({ error: error.issues[0]?.message ?? "Validation error" }, 400);

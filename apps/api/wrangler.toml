@@ -1,4 +1,4 @@
-name = "newsletter"
+name = "api"
 main = "src/index.ts"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
@@ -13,7 +13,7 @@ ENVIRONMENT = "production"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "blog-newsletter"
+database_name = "blog-db"
 database_id = "00000000-0000-0000-0000-000000000000" # TODO: replace with real D1 database ID
 
 [[send_email]]
@@ -24,7 +24,7 @@ vars = { ENVIRONMENT = "development" }
 
 [[env.dev.d1_databases]]
 binding = "DB"
-database_name = "blog-newsletter-dev"
+database_name = "blog-db-dev"
 database_id = "00000000-0000-0000-0000-000000000001" # TODO: replace with real D1 dev database ID
 
 [[env.dev.send_email]]

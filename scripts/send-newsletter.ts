@@ -42,9 +42,7 @@ async function main() {
   }
 
   const result = (await response.json()) as { sent?: number; failed?: number; message?: string };
-  console.log(
-    result.message ?? `Done. Sent: ${result.sent ?? 0}, Failed: ${result.failed ?? 0}`,
-  );
+  console.log(result.message ?? `Done. Sent: ${result.sent ?? 0}, Failed: ${result.failed ?? 0}`);
 
   if ((result.failed ?? 0) > 0) process.exit(1);
 }

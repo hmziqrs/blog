@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import type { Bindings } from "../env";
-import { escapeHTML } from "../lib/email";
-import { sendMail } from "../lib/mailer";
+import type { Bindings } from "../../../env";
+import { escapeHTML } from "../../../lib/email";
+import { sendMail } from "../../../lib/mailer";
 
 interface PostMeta {
   slug: string;
@@ -9,7 +9,11 @@ interface PostMeta {
   excerpt: string;
 }
 
-function generateHTML(post: PostMeta, unsubscribeToken: string, siteUrl = "https://hmziq.rs"): string {
+function generateHTML(
+  post: PostMeta,
+  unsubscribeToken: string,
+  siteUrl = "https://hmziq.rs",
+): string {
   const postUrl = `${siteUrl}/posts/${encodeURIComponent(post.slug)}`;
   const unsubscribeUrl = `${siteUrl}/newsletter/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`;
 
@@ -62,9 +66,7 @@ app.post("/", async (c) => {
       return c.json({ error: "Field too long" }, 400);
     }
 
-    const alreadySent = await c.env.DB.prepare(
-      "SELECT id FROM newsletter_sent WHERE post_slug = ?",
-    )
+    const alreadySent = await c.env.DB.prepare("SELECT id FROM newsletter_sent WHERE post_slug = ?")
       .bind(post.slug)
       .first<{ id: number }>();
 
@@ -111,7 +113,9 @@ app.post("/", async (c) => {
       );
     }
 
-    await c.env.DB.prepare("INSERT INTO newsletter_sent (post_slug) VALUES (?)").bind(post.slug).run();
+    await c.env.DB.prepare("INSERT INTO newsletter_sent (post_slug) VALUES (?)")
+      .bind(post.slug)
+      .run();
 
     return c.json({ sent, failed }, 200);
   } catch (error) {
