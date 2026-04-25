@@ -5,7 +5,6 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(__dirname, "..");
 export const POSTS_DIR = path.join(REPO_ROOT, "content", "posts");
-export const SITE_URL = "https://hmziq.rs";
 
 export interface PostMeta {
   slug: string;
@@ -44,7 +43,7 @@ export function getLatestPost(postsDir = POSTS_DIR): PostMeta | null {
   return posts.toSorted((a, b) => b.pubDate.getTime() - a.pubDate.getTime())[0] ?? null;
 }
 
-export function generateHTML(post: PostMeta, unsubscribeToken: string, siteUrl = SITE_URL): string {
+export function generateHTML(post: PostMeta, unsubscribeToken: string, siteUrl: string): string {
   const postUrl = `${siteUrl}/posts/${post.slug}`;
   const unsubscribeUrl = `${siteUrl}/newsletter/unsubscribe?token=${unsubscribeToken}`;
 

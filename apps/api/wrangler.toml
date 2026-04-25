@@ -11,6 +11,7 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 ENVIRONMENT = "production"
 ALLOWED_ORIGIN = "" # prod is same-origin; CORS off
+SITE_URL = "https://blog.hmziq.rs"
 
 [[d1_databases]]
 binding = "DB"
@@ -27,6 +28,7 @@ name = "api-staging"
 [env.staging.vars]
 ENVIRONMENT = "staging"
 ALLOWED_ORIGIN = "https://web-staging.pages.dev" # update after first Pages deploy
+SITE_URL = "https://web-staging.pages.dev" # update after first Pages deploy
 
 [[env.staging.d1_databases]]
 binding = "DB"

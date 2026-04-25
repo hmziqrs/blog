@@ -9,11 +9,7 @@ interface PostMeta {
   excerpt: string;
 }
 
-function generateHTML(
-  post: PostMeta,
-  unsubscribeToken: string,
-  siteUrl = "https://hmziq.rs",
-): string {
+function generateHTML(post: PostMeta, unsubscribeToken: string, siteUrl: string): string {
   const postUrl = `${siteUrl}/posts/${encodeURIComponent(post.slug)}`;
   const unsubscribeUrl = `${siteUrl}/newsletter/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`;
 
@@ -87,7 +83,7 @@ app.post("/", async (c) => {
       const batch = rows.slice(i, i + BATCH_SIZE);
       await Promise.all(
         batch.map(async (sub) => {
-          const html = generateHTML(post, sub.unsubscribe_token);
+          const html = generateHTML(post, sub.unsubscribe_token, c.env.SITE_URL);
           try {
             await sendMail(c.env.SEND_EMAIL, {
               from: c.env.EMAIL_FROM_ADDRESS,

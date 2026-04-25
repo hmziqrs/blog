@@ -8,4 +8,5 @@ export type Bindings = {
   EMAIL_FROM_ADDRESS: string;
   ENVIRONMENT: string;
   ALLOWED_ORIGIN: string;
+  SITE_URL: string;
 };

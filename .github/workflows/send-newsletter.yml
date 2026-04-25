@@ -3,7 +3,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "apps/web/src/content/posts/**"
+      - "content/posts/**"
   workflow_dispatch:
 
 jobs:

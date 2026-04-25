@@ -4,6 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageContainer from "../../components/PageContainer.astro";
 
 const title = pageTitle("Unsubscribe");
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? "";
 ---
 
 <BaseLayout title={title} description="Unsubscribe from the newsletter">
@@ -28,7 +29,7 @@ const title = pageTitle("Unsubscribe");
   </PageContainer>
 </BaseLayout>
 
-<script is:inline>
+<script define:vars={{ apiBase }}>
   (async () => {
     const token = new URLSearchParams(location.search).get("token");
     const $loading = document.getElementById("loading");
@@ -44,8 +45,7 @@ const title = pageTitle("Unsubscribe");
     }
 
     try {
-      const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "";
-      const res = await fetch(`${API_BASE}/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}`);
+      const res = await fetch(`${apiBase}/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}`);
       const data = await res.json();
       $loading.classList.add("hidden");
       if (res.ok) {

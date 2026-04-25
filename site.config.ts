@@ -2,7 +2,7 @@ import { defineSiteConfig, formatPageTitle } from "./packages/site/index.ts";
 
 export const siteConfig = defineSiteConfig({
   name: "Hmziq blog",
-  siteUrl: "https://blog.hmziq.rs",
+  siteUrl: process.env.PUBLIC_SITE_URL ?? "https://blog.hmziq.rs",
   copyrightSiteName: "hmziq.rs",
   copyrightSiteURL: "https://hmziq.rs",
   basePath: "/",
