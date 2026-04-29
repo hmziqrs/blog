@@ -1,8 +1,6 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { z } from "zod";
-import { normalizeEmail } from "../lib/email";
-
-// ─── normalizeEmail ────────────────────────────────────────────────────────────
+import { normalizeEmail } from "../src/lib/email";
 
 describe("normalizeEmail", () => {
   test("lowercases the address", () => {
@@ -50,8 +48,6 @@ describe("normalizeEmail", () => {
   });
 });
 
-// ─── Subscribe schema validation ──────────────────────────────────────────────
-
 const subscribeSchema = z.object({
   email: z.email("Invalid email address"),
   token: z.string().min(1, "CAPTCHA token required"),
@@ -92,8 +88,6 @@ describe("subscribe schema", () => {
     ).not.toThrow();
   });
 });
-
-// ─── Unsubscribe schema validation ────────────────────────────────────────────
 
 const unsubscribeSchema = z.object({
   token: z.string().min(1, "Unsubscribe token required"),

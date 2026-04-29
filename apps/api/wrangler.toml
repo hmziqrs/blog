@@ -1,7 +1,11 @@
 name = "api"
 main = "src/index.ts"
-compatibility_date = "2025-04-01"
+compatibility_date = "2025-10-11"
 compatibility_flags = ["nodejs_compat"]
+
+[dev]
+port = 8788
+ip = "localhost"
 
 # Prod routes — uncomment to go live
 # routes = [

@@ -17,10 +17,10 @@ Outcome: the api can be developed and tested locally with the toolchain Cloudfla
 
 This plan touches two distinct Cloudflare-managed local environments. They share the same `workerd` SQLite engine — neither is a mock or a hack.
 
-| Scope | Where data lives | How to inspect | Tooling |
-|---|---|---|---|
-| `wrangler dev` (interactive) | `.wrangler/state/v3/d1/...` — persisted across runs | **Local Explorer** dashboard (press `e` in the dev session, or hit `/cdn-cgi/explorer/api`) | `wrangler dev`, `wrangler d1 execute --local`, `wrangler d1 migrations apply --local` |
-| `vitest run` (tests) | Ephemeral, isolated per test file | n/a — assertions in spec | `@cloudflare/vitest-pool-workers`, `applyD1Migrations(env.DB, env.TEST_MIGRATIONS)` from `cloudflare:test` |
+| Scope                        | Where data lives                                    | How to inspect                                                                              | Tooling                                                                                                    |
+| ---------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `wrangler dev` (interactive) | `.wrangler/state/v3/d1/...` — persisted across runs | **Local Explorer** dashboard (press `e` in the dev session, or hit `/cdn-cgi/explorer/api`) | `wrangler dev`, `wrangler d1 execute --local`, `wrangler d1 migrations apply --local`                      |
+| `vitest run` (tests)         | Ephemeral, isolated per test file                   | n/a — assertions in spec                                                                    | `@cloudflare/vitest-pool-workers`, `applyD1Migrations(env.DB, env.TEST_MIGRATIONS)` from `cloudflare:test` |
 
 **Local Explorer** is the recent open-beta UI Cloudflare shipped to introspect simulated KV / R2 / D1 / Durable Objects / Workflows during `wrangler dev`. It requires no config — wrangler v4 is enough — and is what makes the dev flow first-class without third-party tools like Localflare. ([Cloudflare blog](https://blog.cloudflare.com/cf-cli-local-explorer/))
 
@@ -29,6 +29,7 @@ This plan touches two distinct Cloudflare-managed local environments. They share
 ## Scope
 
 In:
+
 - `apps/api/wrangler.toml` — `[dev]` block, refreshed `compatibility_date`.
 - `apps/api/package.json` — wrangler v4 (unlocks Local Explorer), vitest deps, `test` script change.
 - `apps/api/vitest.config.ts` — new.
@@ -38,6 +39,7 @@ In:
 - Root `package.json` — only if the wrangler v4 bump warrants a CLI version bump there too (it isn't a direct dep of root, so likely no change).
 
 Out:
+
 - Switching to `wrangler.jsonc` (toml is supported, no value in churning).
 - Auto-generated `worker-configuration.d.ts` via `generate_types = true` — would conflict with the hand-written `src/env.ts`. Defer.
 - Touching `scripts/__tests__` — those stay on `bun:test`; only the api swaps.
@@ -68,15 +70,15 @@ ip = "localhost"
     "build": "wrangler deploy --dry-run --outdir dist",
     "deploy": "wrangler deploy",
     "check-types": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.9.0",
     "@cloudflare/workers-types": "catalog:",
     "typescript": "catalog:",
     "vitest": "^4.1.0",
-    "wrangler": "^4.0.0"
-  }
+    "wrangler": "^4.0.0",
+  },
 }
 ```
 
@@ -111,6 +113,7 @@ export default defineConfig(async () => {
 ```
 
 Notes:
+
 - No `environment: "production"` because the top-level wrangler config IS production; staging is a named env we don't need in tests.
 - `readD1Migrations()` reads `migrations/*.sql`, surfaced to tests via the synthetic `TEST_MIGRATIONS` binding.
 
@@ -151,9 +154,9 @@ This shape is what `cloudflare:test` expects for typing `env`. Mirrors `Bindings
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["@cloudflare/vitest-pool-workers"]
+    "types": ["@cloudflare/vitest-pool-workers"],
   },
-  "include": ["./**/*.ts", "../src/**/*.ts"]
+  "include": ["./**/*.ts", "../src/**/*.ts"],
 }
 ```
 
@@ -203,10 +206,10 @@ Drop `bun-types`:
 {
   "extends": "../../packages/config/tsconfig.base.json",
   "compilerOptions": {
-    "types": ["@cloudflare/workers-types"]
+    "types": ["@cloudflare/workers-types"],
   },
   "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "test"]
+  "exclude": ["dist", "node_modules", "test"],
 }
 ```
 
