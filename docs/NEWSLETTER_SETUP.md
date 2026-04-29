@@ -9,20 +9,18 @@
 ### 1. Create D1 Databases
 
 ```bash
-bun run db:create        # Creates blog-newsletter (production)
-bun run db:create:dev    # Creates blog-newsletter-dev (development)
+bun run db:create         # Production
+bun run db:create:staging # Staging
 ```
 
-Copy the `database_id` from each output and add to `apps/web/wrangler.toml`:
-
-- Production: `database_id = "<your-prod-id>"`
-- Development: `database_id = "<your-dev-id>"`
+Copy the `database_id` from each output into `apps/api/wrangler.toml`.
 
 ### 2. Run Migrations
 
 ```bash
-bun run db:migrate      # Production database
-bun run db:migrate:dev  # Development database
+bun run db:migrate:local  # Local (miniflare SQLite)
+bun run db:migrate:prod   # Production
+bun run db:migrate:staging
 ```
 
 ### 3. Enable Cloudflare Email Routing
@@ -69,7 +67,7 @@ bun run dev:web
 - Test modal (scroll to 50%)
 - Test 7-day dismissal checkbox
 - Test subscription form
-- Check D1: `bun run db:query:dev --command "SELECT * FROM subscribers"`
+- Check D1: `bun run db:query --command "SELECT * FROM subscribers"`
 
 ### Test API Endpoints
 
@@ -92,39 +90,18 @@ curl -X POST http://localhost:4321/api/newsletter/unsubscribe \
 NEWSLETTER_SEND_SECRET=your-secret bun run newsletter:send
 ```
 
-### Database Queries
-
-```bash
-bun run db:query:dev --command "SELECT * FROM subscribers"
-bun run db:query:dev --command "SELECT * FROM newsletter_sent"
-bun run db:query:dev --command "SELECT * FROM newsletter_deliveries"
-bun run db:query:dev --command "SELECT * FROM blacklist"
-bun run db:query:dev --command "SELECT * FROM rate_limits"
-bun run db:query:dev --command "SELECT * FROM media"
-```
-
 ### Production Deployment
 
-1. Push to main branch
-2. Cloudflare Pages will auto-deploy
-3. Newsletter workflow triggers after deployment
-4. Add GitHub Secrets before deployment
-
-## Database Schema
-
-- `subscribers` - Email addresses, status, tokens
-- `newsletter_sent` - Track which posts have been sent
-- `newsletter_deliveries` - Per-recipient send status
-- `blacklist` - Block abusive emails
-- `rate_limits` - Prevent spam (3 requests/min per IP)
-- `media` - Uploaded media metadata
+1. Push to `master` — CI deploys both Pages and Worker
+2. Newsletter workflow fires only when a post changes under `content/posts/`
+3. Ensure GitHub Secrets are set before first deploy
 
 ## Files
 
-- `apps/web/wrangler.toml` - Cloudflare Workers config
-- `apps/web/migrations/0001_initial.sql` - Database schema
-- `apps/web/src/pages/api/newsletter/` - API endpoints (subscribe, unsubscribe, send)
-- `apps/web/src/lib/mailer.ts` - `send_email` wrapper
+- `apps/api/wrangler.toml` - Cloudflare Workers config
+- `apps/api/migrations/0001_initial.sql` - Database schema
+- `apps/api/src/modules/newsletter/` - API endpoints (subscribe, unsubscribe, send)
+- `apps/api/src/lib/mailer.ts` - `send_email` wrapper
 - `apps/web/src/components/NewsletterForm.astro` - Subscription form
 - `apps/web/src/components/NewsletterModal.astro` - Scroll modal
 - `scripts/send-newsletter.ts` - Newsletter trigger script (calls Worker endpoint)

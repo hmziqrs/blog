@@ -15,7 +15,8 @@ Bun monorepo. Astro 6 blog (SSG) + Expo native app. Cloudflare Pages.
 ## Structure
 
 ```
-apps/web/          Astro blog
+apps/web/          Astro 6 blog (SSG)
+apps/api/          Cloudflare Worker — newsletter API (Hono)
 apps/native/       Expo app
 site.config.ts     Concrete site identity, nav, and optional page content
 packages/config/   Shared tsconfig
@@ -27,10 +28,29 @@ packages/site/     Shared config types, routes, and helpers
 ```bash
 bun run dev          # all apps
 bun run dev:web      # astro only
+bun run dev:api      # worker only
 bun run dev:native   # expo only
 bun run build        # turbo build
 bun run check        # oxlint && oxfmt --write
+bun run qa           # lint + fmt + typecheck + test
+
+# deploy
+bun run deploy:staging  # migrate + api + web
+bun run deploy:prod
+
+# db
+bun run db:migrate:local
+bun run db:migrate:prod
+bun run db:query --command "SELECT * FROM subscribers"
+
+# newsletter
+bun run newsletter:send
+bun run newsletter:admin
 ```
+
+## Newsletter API
+
+The `apps/api/` Hono Worker owns `/api/newsletter/*` endpoints. Astro dev proxies these via Vite. Same-origin in production via Workers Routes.
 
 ## Astro 6 Rules
 
