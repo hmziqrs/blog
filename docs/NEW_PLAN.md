@@ -239,8 +239,27 @@ Delete the directory once specs are ported.
 7. `bun run qa` from repo root — full lint + fmt + typecheck + turbo test.
 8. Manual: `curl -X POST http://localhost:8788/api/newsletter/subscribe -H 'content-type: application/json' -d '{"email":"a@b.com","token":""}'` should return 400 (matches the integration test).
 
+## What actually happened (deviations from plan)
+
+- **`compatibility_date`**: Planned `2026-04-01`, downgraded to `2025-10-11` — the workerd binary that ships with wrangler 4.86.0 only supports up to `2025-10-11`.
+- **`@cloudflare/vitest-pool-workers`**: Planned `^0.9.0`, resolved to `^0.15.1`. v0.9.x's peer dep on vitest `~3.2.0` conflicted with vitest 4.x; v0.9.x also bundles an older workerd that lacks `vm._setUnsafeEval`. v0.15.x ships with a compatible workerd and peers on vitest `^4.1.0`.
+- **Config API**: v0.9.x placed `cloudflareTest`/`readD1Migrations` behind a `/config` subpath export; v0.15.x folded them back into the main entry. The plan's import shape (`cloudflareTest`, `readD1Migrations` from main) matches v0.15.x, not v0.9.x.
+- **Test runner**: The `test` script is `vitest run` — Bun shell spawns it fine (vitest boots Node/workerd, not Bun's vm).
+- **Root `package.json`**: No change needed (as predicted).
+
+## Verification results
+
+1. `bun install` — clean, no peer dep warnings. ✔
+2. `bun run check-types` — tsc passes. ✔
+3. `bun run test` (api) — 2 files, 21 tests pass (workerd boots, D1 migrated, route returns 400). ✔
+4. `bun run dev:api` — worker boots on :8788 via `[dev]` block, curl returns 400 as expected. ✔
+5. **Local Explorer** — not manually verified (requires interactive wrangler session). ⏸
+6. `bun run db:migrate:local` — not manually verified (implicitly works — `wrangler dev` and `vitest` both apply migrations). ⏸
+7. `bun run qa` — lint ✓, fmt ✓, api typecheck ✓, api tests ✓, web+scripts tests ✓. Web check (`turbo -F web check`) has pre-existing TS errors in `src/__tests__/routes.test.ts` and `public/web-components/three-js-banner.es.js` unrelated to this change.
+8. Manual curl — 400 as expected. ✔
+
 ## Risks
 
-- **Wrangler v4 default flag changes** — mostly affects deploy flags, not `dev`. If `bun run dev:api` errors, the fix is usually a single CLI flag rename; not a structural problem.
-- **`@cloudflare/vitest-pool-workers` peerDeps** — pins a vitest major. If `^4.1.0` is wrong for the published pool, fall back to whatever the pool's peer range demands; the test config shape doesn't change.
-- **Hono `app.fetch(req, env)` signature** — confirmed by reading `src/index.ts` (default export is `app`); if the route test fails to reach the handler, switch to importing via `cloudflare:test`'s `SELF` and using `SELF.fetch(...)` instead.
+- **Wrangler v4 default flag changes** — no issues encountered; `wrangler dev` worked without flag changes.
+- **`@cloudflare/vitest-pool-workers` peerDeps** — resolved by bumping to v0.15.x; v0.9.x peers on vitest `~3.2.0`, v0.15.x peers on vitest `^4.1.0`.
+- **Hono `app.fetch(req, env)` signature** — works as expected; the integration test reaches the route handler correctly.
