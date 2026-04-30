@@ -1,6 +1,6 @@
 # Migrate Rate Limiting to KV, Add Queues for Newsletter, and Add Comprehensive Tests
 
-Migrate D1-based rate limiting to Cloudflare KV with automatic TTL, replace direct batch email sending with Cloudflare Queues for reliable delivery, and add comprehensive tests for all Cloudflare services (D1, KV, Queues, SendEmail, Turnstile).
+Migrate D1-based rate limiting to Cloudflare KV with automatic TTL via `expirationTtl`, replace direct batch email sending with Cloudflare Queues for reliable delivery, and add comprehensive tests for all Cloudflare services (D1, KV, Queues, SendEmail, Turnstile).
 
 ---
 
@@ -19,7 +19,7 @@ The `apps/api/` Hono Worker uses D1 for structured data (subscribers, newsletter
 - Tests still assert against D1 rate-limit rows and `{ sent, failed }` shapes.
 - `scripts/send-newsletter.ts` still parses `{ sent, failed }`.
 
-The sections below have been **cross-checked against latest Cloudflare and Hono documentation** and include corrected/recommended implementations.
+The sections below have been **cross-checked against latest Cloudflare and Hono documentation (re-verified 2026-05-01 via context7 + Cloudflare developer docs)** and include corrected/recommended implementations.
 
 ---
 
@@ -78,7 +78,19 @@ max_batch_size = 10
 max_batch_timeout = 30
 ```
 
-Add staging equivalents.
+Add staging Queue bindings (use a separate `newsletter-send-staging` queue so staging cannot drain prod messages):
+```toml
+[[env.staging.queues.producers]]
+binding = "NEWSLETTER_QUEUE"
+queue = "newsletter-send-staging"
+
+[[env.staging.queues.consumers]]
+queue = "newsletter-send-staging"
+max_batch_size = 10
+max_batch_timeout = 30
+```
+
+> **Operational note:** Both queues (`newsletter-send`, `newsletter-send-staging`) must exist before the first `wrangler deploy` — otherwise the deploy fails with an unknown-queue error. Run `wrangler queues create newsletter-send` and `wrangler queues create newsletter-send-staging` (or the helper script in step 17) before deploying.
 
 > **Doc ref:** [KV get-started](https://developers.cloudflare.com/kv/get-started/), [Queues configuration](https://developers.cloudflare.com/queues/configuration/configure-queues/)
 
@@ -177,10 +189,11 @@ export interface NewsletterMessage {
 
 ### 6. `apps/api/src/lib/rate-limit.ts`
 
-Full rewrite to KV. Key pattern: `rl:ip:${ip}` and `rl:email:${email}`. Store JSON array of timestamps. On check: `get` → prune entries older than 1h → count remaining → if under limit, append now and `put`. No DELETE queries needed.
+Full rewrite to KV. Key pattern: `rl:ip:${ip}` and `rl:email:${email}`. Store JSON array of timestamps. On check: `get` → prune entries older than 1h → count remaining → if under limit, append now and `put` with `expirationTtl: 3600` so KV auto-expires keys for IPs/emails that never come back. No DELETE queries needed.
 
 ```ts
 const WINDOW_MS = 60 * 60 * 1000;
+const WINDOW_SECONDS = 60 * 60;
 
 async function checkAndRecord(
   kv: KVNamespace,
@@ -189,7 +202,17 @@ async function checkAndRecord(
 ): Promise<boolean> {
   const now = Date.now();
   const raw = await kv.get(key);
-  const timestamps: number[] = raw ? JSON.parse(raw) : [];
+
+  let timestamps: number[] = [];
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) timestamps = parsed;
+    } catch {
+      // corrupt / non-JSON value — treat as empty so a single bad write
+      // can't permanently 500 the rate limiter
+    }
+  }
 
   const pruned = timestamps.filter((t) => now - t < WINDOW_MS);
 
@@ -198,7 +221,7 @@ async function checkAndRecord(
   }
 
   pruned.push(now);
-  await kv.put(key, JSON.stringify(pruned));
+  await kv.put(key, JSON.stringify(pruned), { expirationTtl: WINDOW_SECONDS });
   return true;
 }
 
@@ -251,7 +274,9 @@ const subscribers = await c.env.DB.prepare(
 
 const rows = subscribers.results ?? [];
 
-// Use sendBatch for fewer queue operations and better throughput
+// Use sendBatch for fewer queue operations and better throughput.
+// sendBatch is hard-capped at 100 messages and 256 KB total per call,
+// so chunk explicitly — required for any subscriber count > 100.
 const messages: MessageSendRequest<NewsletterMessage>[] = rows.map((sub) => ({
   body: {
     postSlug: post.slug,
@@ -263,7 +288,10 @@ const messages: MessageSendRequest<NewsletterMessage>[] = rows.map((sub) => ({
   },
 }));
 
-await c.env.NEWSLETTER_QUEUE.sendBatch(messages);
+const SEND_BATCH_CHUNK = 100;
+for (let i = 0; i < messages.length; i += SEND_BATCH_CHUNK) {
+  await c.env.NEWSLETTER_QUEUE.sendBatch(messages.slice(i, i + SEND_BATCH_CHUNK));
+}
 
 await c.env.DB.prepare("INSERT INTO newsletter_sent (post_slug) VALUES (?)")
   .bind(post.slug)
@@ -272,7 +300,7 @@ await c.env.DB.prepare("INSERT INTO newsletter_sent (post_slug) VALUES (?)")
 return c.json({ queued: messages.length }, 200);
 ```
 
-> **Recommendation:** Use `sendBatch()` instead of individual `send()` calls in a loop. A batch can contain up to 100 messages and the total array size must not exceed 256 KB. For newsletters with many subscribers, batch in chunks of 100.
+> **Recommendation:** Use `sendBatch()` instead of individual `send()` calls in a loop. A batch can contain up to 100 messages and the total array size must not exceed 256 KB — chunk explicitly so the producer keeps working past 100 active subscribers.
 
 > **Doc ref:** [Queues JavaScript APIs — sendBatch](https://developers.cloudflare.com/queues/configuration/javascript-apis/)
 
@@ -281,11 +309,13 @@ return c.json({ queued: messages.length }, 200);
 ### 8. `apps/api/src/modules/newsletter/queue-consumer.ts` (new)
 
 ```ts
-import type { MessageBatch } from "@cloudflare/workers-types";
 import type { Bindings } from "../../env";
 import type { NewsletterMessage } from "./queue";
 import { sendMail } from "../../lib/mailer";
 import { escapeHTML } from "../../lib/email";
+
+// `MessageBatch` and `ExecutionContext` are global ambient types from
+// @cloudflare/workers-types — no explicit import needed.
 
 function generateHTML(post: NewsletterMessage, siteUrl: string): string {
   const postUrl = `${siteUrl}/posts/${encodeURIComponent(post.postSlug)}`;
@@ -407,7 +437,9 @@ declare module "cloudflare:test" {
 
 > **Doc ref:** [Test APIs — `cloudflare:workers` / `cloudflare:test`](https://developers.cloudflare.com/workers/testing/vitest-integration/test-apis/)
 
-> **Note:** `Queue` must be typed. Use an inline `import()` type reference to avoid a real module dependency in a `.d.ts` ambient file, or import the interface at the top of the file.
+> **Note:** `Queue`, `KVNamespace`, and `D1Database` are global ambient types from `@cloudflare/workers-types` — no explicit import needed in `.d.ts`. If `tsconfig.json` does not list `@cloudflare/workers-types` in `compilerOptions.types`, fall back to inline imports: `Queue<import("../src/modules/newsletter/queue").NewsletterMessage>` and `import("@cloudflare/workers-types").Queue<...>`.
+
+> **`env` import currency:** Latest Cloudflare docs prefer `import { env } from "cloudflare:workers"` for tests. This codebase uses `import { env } from "cloudflare:test"` (which still re-exports `env` for backward compatibility). New tests in this migration follow the existing `cloudflare:test` style for consistency; switching the whole suite to `cloudflare:workers` is out of scope.
 
 ---
 
@@ -466,7 +498,15 @@ describe("checkSubscribeRateLimit", () => {
     expect(allowed).toBe(true);
 
     const remaining = await env.RATE_LIMIT_KV.get("rl:ip:old-ip");
-    expect(JSON.parse(remaining!).length).toBe(1); // only the fresh entry
+    const arr = JSON.parse(remaining!) as number[];
+    expect(arr.length).toBe(1); // stale entry pruned, only fresh entry kept
+    expect(arr[0]).toBeGreaterThanOrEqual(now); // fresh entry, not the stale one
+  });
+
+  it("treats corrupt JSON values as empty (does not throw)", async () => {
+    await env.RATE_LIMIT_KV.put("rl:ip:corrupt", "not-json{{");
+    const allowed = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "corrupt", "ok@example.com");
+    expect(allowed).toBe(true);
   });
 
   it("does not interfere across different IPs and emails", async () => {
@@ -545,6 +585,7 @@ describe("handleQueueBatch", () => {
     const result = await getQueueResult(batch, ctx);
 
     expect(result.ackAll).toBe(false);
+    expect(result.retryBatch).toMatchObject({ retry: false });
     expect(result.explicitAcks).toStrictEqual(["msg-1"]);
     expect(result.retryMessages).toStrictEqual([]);
 
@@ -577,7 +618,9 @@ describe("handleQueueBatch", () => {
     await worker.queue(batch, env, ctx);
     const result = await getQueueResult(batch, ctx);
 
+    expect(result.retryBatch).toMatchObject({ retry: false });
     expect(result.explicitAcks).toStrictEqual(["msg-2"]);
+    expect(result.retryMessages).toStrictEqual([]);
 
     const delivery = await env.DB.prepare(
       "SELECT id FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?"
@@ -608,13 +651,13 @@ describe("handleQueueBatch", () => {
 
 #### `subscribe.route.test.ts`
 - **Import change:** `import app from "../src/index"` → `import app from "../src/app"`
-- **Cleanup:** Remove `await env.DB.prepare("DELETE FROM rate_limits").run()` from `afterEach`. KV state is auto-isolated per test file in vitest-pool-workers.
+- **Cleanup:** Remove **only** the `await env.DB.prepare("DELETE FROM rate_limits").run()` line from `afterEach`. **Keep** the `DELETE FROM subscribers WHERE email LIKE 'test-%@example.com'` line — KV is per-file isolated, but the D1 subscriber rows are not, so the subscriber cleanup is still required.
 - **Remove test:** `"records rate-limit entries in DB"` — this test queries the `rate_limits` D1 table and is no longer relevant.
 - **Rate-limit 429 tests:** Keep as-is. They should still pass because the routes will still return 429; only the backend storage changes.
 
 #### `unsubscribe.route.test.ts`
 - **Import change:** `import app from "../src/index"` → `import app from "../src/app"`
-- **Cleanup:** Remove `await env.DB.prepare("DELETE FROM rate_limits").run()` from `afterEach`.
+- **Cleanup:** Remove **only** the `await env.DB.prepare("DELETE FROM rate_limits").run()` line from `afterEach`. **Keep** the `DELETE FROM subscribers` line.
 
 #### `send.route.test.ts`
 - **Import change:** `import app from "../src/index"` → `import app from "../src/app"`
@@ -641,7 +684,13 @@ Remove the `if ((result.failed ?? 0) > 0) process.exit(1)` line since `failed` n
 
 ### 17. `package.json` helper script
 
-Add: `"queue:create": "wrangler queues create newsletter-send"` in `apps/api/package.json`.
+Add to `apps/api/package.json`:
+```json
+"queue:create": "wrangler queues create newsletter-send",
+"queue:create:staging": "wrangler queues create newsletter-send-staging"
+```
+
+> **Run order:** Both queues must exist **before** the first `wrangler deploy` (and `wrangler deploy --env staging`) — otherwise the deploy fails because the consumer config references a queue that doesn't exist yet. Sequence: (1) update `wrangler.toml` (step 1), (2) `bun --filter api queue:create` and `bun --filter api queue:create:staging`, (3) `wrangler deploy`.
 
 > **Doc ref:** [Queues get-started](https://developers.cloudflare.com/queues/get-started/)
 
@@ -676,20 +725,21 @@ To avoid circular dependencies and build errors, implement in this order:
 
 1. Create `src/modules/newsletter/queue.ts` (`NewsletterMessage` interface).
 2. Update `src/env.ts` with new bindings.
-3. Rewrite `src/lib/rate-limit.ts` to KV.
+3. Rewrite `src/lib/rate-limit.ts` to KV (with `expirationTtl` and JSON-parse guard).
 4. Create `src/app.ts` (extract from `index.ts`).
 5. Refactor `src/index.ts` to `{ fetch, queue }` module export.
 6. Create `src/modules/newsletter/queue-consumer.ts`.
-7. Update `src/modules/newsletter/routes/send.ts` to enqueue.
+7. Update `src/modules/newsletter/routes/send.ts` to enqueue (chunk `sendBatch` to 100).
 8. Update `src/modules/newsletter/routes/subscribe.ts` and `unsubscribe.ts` to pass KV.
-9. Update `wrangler.toml` with KV + Queue bindings.
-10. Update `test/env.d.ts` with simulated bindings.
-11. Rewrite `test/rate-limit.test.ts` for KV.
-12. Create `test/newsletter-queue.test.ts`.
-13. Update existing route tests (imports, assertions, cleanup).
-14. Update `scripts/send-newsletter.ts`.
-15. Add `queue:create` script to `package.json`.
-16. Run `bun run check-types` and `bun run test`.
+9. Update `wrangler.toml` with KV + Queue bindings (prod **and** staging).
+10. Add `queue:create` + `queue:create:staging` scripts to `apps/api/package.json` (step 17).
+11. Run `bun --filter api queue:create` and `bun --filter api queue:create:staging` against the relevant accounts before any deploy that references the new queues.
+12. Update `test/env.d.ts` with simulated bindings.
+13. Rewrite `test/rate-limit.test.ts` for KV.
+14. Create `test/newsletter-queue.test.ts`.
+15. Update existing route tests (imports, assertions, cleanup).
+16. Update `scripts/send-newsletter.ts`.
+17. Run `bun run check-types` and `bun run test`.
 
 ---
 
