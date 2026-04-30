@@ -12,11 +12,17 @@ describe("POST /api/newsletter/send", () => {
   const AUTH_HEADER = { "x-send-secret": "local-dev-secret" };
 
   beforeAll(async () => {
-    // Seed an active subscriber for send tests
+    // Seed active subscribers for send tests
+    // Use namespaced emails to avoid collision with other test cleanups
     await env.DB.prepare(
       "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
     )
-      .bind("send-sub-1", "test-send@example.com", "unsub-token-send")
+      .bind("send-sub-1", "sendtest-1@example.com", "unsub-send-1")
+      .run();
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+    )
+      .bind("send-sub-2", "sendtest-2@example.com", "unsub-send-2")
       .run();
   });
 
@@ -212,7 +218,7 @@ describe("POST /api/newsletter/send", () => {
 
   // ─── Happy path ────────────────────────────────────────────────────
 
-  it("sends newsletter to active subscribers and records deliveries", async () => {
+  it("sends newsletter to all active subscribers and records deliveries", async () => {
     const res = await app.fetch(
       req("/api/newsletter/send", {
         method: "POST",
@@ -231,7 +237,9 @@ describe("POST /api/newsletter/send", () => {
     );
     expect(res.status).toBe(200);
     const body = await res.json<{ sent: number; failed: number }>();
-    expect(body.sent).toBeGreaterThanOrEqual(0);
+    // SendEmail binding in local mode simulates success for all recipients
+    expect(body.sent).toBe(2);
+    expect(body.failed).toBe(0);
 
     // Verify newsletter_sent entry
     const sentRow = await env.DB.prepare("SELECT id FROM newsletter_sent WHERE post_slug = ?")
@@ -239,12 +247,16 @@ describe("POST /api/newsletter/send", () => {
       .first();
     expect(sentRow).not.toBeNull();
 
-    // Verify newsletter_deliveries entries
-    const deliveryCount = await env.DB.prepare(
-      "SELECT COUNT(*) as c FROM newsletter_deliveries WHERE post_slug = ?",
+    // Verify newsletter_deliveries: one 'sent' entry per subscriber
+    const deliveries = await env.DB.prepare(
+      "SELECT subscriber_id, status FROM newsletter_deliveries WHERE post_slug = ?",
     )
       .bind("send-test-post")
-      .first<{ c: number }>();
-    expect(deliveryCount?.c).toBeGreaterThanOrEqual(0);
+      .all<{ subscriber_id: string; status: string }>();
+
+    expect(deliveries.results.length).toBe(2);
+    for (const d of deliveries.results) {
+      expect(d.status).toBe("sent");
+    }
   });
 });
