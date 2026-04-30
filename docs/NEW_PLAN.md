@@ -254,7 +254,7 @@ Delete the directory once specs are ported.
 3. `bun run test` (api) — 2 files, 21 tests pass (workerd boots, D1 migrated, route returns 400). ✔
 4. `bun run dev:api` — worker boots on :8788 via `[dev]` block, curl returns 400 as expected. ✔
 5. **Local Explorer** — not manually verified (requires interactive wrangler session). ⏸
-6. `bun run db:migrate:local` — not manually verified (implicitly works — `wrangler dev` and `vitest` both apply migrations). ⏸
+6. `bun run db:migrate:local` — works under wrangler v4 (no migrations to apply — already current). ✔
 7. `bun run qa` — lint ✓, fmt ✓, api typecheck ✓, api tests ✓, web+scripts tests ✓. Web check (`turbo -F web check`) has pre-existing TS errors in `src/__tests__/routes.test.ts` and `public/web-components/three-js-banner.es.js` unrelated to this change.
 8. Manual curl — 400 as expected. ✔
 
