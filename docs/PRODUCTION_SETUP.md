@@ -2,7 +2,7 @@
 
 Complete checklist for setting up the **production** environment.
 
-> **One-time setup:** If you already set up staging, some steps (R2 bucket, Email Routing, Turnstile) are already done. These are marked below — skip them if applicable.
+> **One-time setup:** If you already set up staging, some steps (Email Routing, Turnstile) are already done. These are marked below — skip them if applicable.
 
 ---
 
@@ -37,13 +37,11 @@ Messages that fail after max retries are automatically routed to the DLQ instead
 
 ---
 
-## 3. Create R2 Bucket (One-Time)
+## 3. Create Production R2 Bucket
 
 ```bash
 wrangler r2 bucket create blog-media
 ```
-
-> Skip if already created for staging. Both environments share the same bucket.
 
 Generate S3-compatible tokens in the Cloudflare dashboard (**R2 → Manage R2 API tokens**):
 
@@ -96,6 +94,7 @@ EMAIL_FROM_ADDRESS=newsletter@<your-domain>
 NEWSLETTER_SEND_SECRET=<random-secret>
 TURNSTILE_SECRET_KEY=<turnstile-secret-key>
 PUBLIC_TURNSTILE_SITE_KEY=<turnstile-site-key>
+R2_BUCKET_NAME=blog-media
 ```
 
 Also update `site.config.ts` and any domain-specific URLs.

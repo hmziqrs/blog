@@ -2,7 +2,7 @@
 
 Complete checklist for setting up the **staging** environment.
 
-> **One-time setup:** Some steps (R2 bucket, Email Routing, Turnstile) are shared across environments and only need to be done once per account/domain. These are marked below.
+> **One-time setup:** Email Routing and Turnstile are shared across environments and only need to be done once per account/domain. These are marked below.
 
 ---
 
@@ -37,20 +37,18 @@ Messages that fail after max retries are automatically routed to the DLQ instead
 
 ---
 
-## 3. Create R2 Bucket (One-Time)
+## 3. Create Staging R2 Bucket
 
 ```bash
-wrangler r2 bucket create blog-media
+wrangler r2 bucket create blog-media-staging
 ```
-
-> Only needs to be done once. Both environments share the same bucket.
 
 Generate S3-compatible tokens in the Cloudflare dashboard (**R2 → Manage R2 API tokens**):
 
 - `R2_ACCOUNT_ID`
 - `R2_ACCESS_KEY_ID`
 - `R2_SECRET_ACCESS_KEY`
-- `R2_BUCKET_NAME=blog-media`
+- `R2_BUCKET_NAME=blog-media-staging`
 - `R2_PUBLIC_URL` — use the `*.r2.dev` URL (e.g. `https://pub-abc123.r2.dev`) or a custom domain (e.g. `https://media.yourdomain.com`). Custom domains serve objects at the root path, not under the bucket name.
 
 ---
@@ -96,6 +94,7 @@ EMAIL_FROM_ADDRESS=newsletter@<your-domain>
 NEWSLETTER_SEND_SECRET=<random-secret>
 TURNSTILE_SECRET_KEY=<turnstile-secret-key>
 PUBLIC_TURNSTILE_SITE_KEY=<turnstile-site-key>
+R2_BUCKET_NAME=blog-media-staging
 ```
 
 ---
