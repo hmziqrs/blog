@@ -34,6 +34,30 @@ async function processUnsubscribe(
   return { message: "Successfully unsubscribed", status: 200 };
 }
 
+app.get("/", async (c) => {
+  const token = c.req.query("token");
+  if (!token) {
+    return c.json({ error: "No unsubscribe token provided" }, 400);
+  }
+
+  const ip = c.req.header("CF-Connecting-IP");
+  if (!ip && c.env.ENVIRONMENT === "production") {
+    return c.json({ error: "Missing required headers" }, 400);
+  }
+  const clientIp = ip ?? "unknown";
+
+  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp);
+  if (!allowed) {
+    return c.json({ error: "Too many requests" }, 429);
+  }
+
+  const result = await processUnsubscribe(c.env.DB, token);
+  return c.json(
+    "error" in result ? { error: result.error } : { message: result.message },
+    result.status,
+  );
+});
+
 app.post("/", async (c) => {
   const contentType = c.req.header("Content-Type") ?? "";
   if (contentType.split(";")[0].trim() !== "application/json") {

@@ -7,6 +7,7 @@ interface SendRequest {
   slug: string;
   subject: string;
   htmlBody: string;
+  force?: boolean;
 }
 
 export function timingSafeEqual(a: string, b: string): boolean {
@@ -46,6 +47,12 @@ app.post("/", async (c) => {
 
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(body.slug)) {
       return c.json({ error: "Invalid slug format" }, 400);
+    }
+
+    if (body.force) {
+      await c.env.DB.prepare("DELETE FROM newsletter_sent WHERE issue_slug = ?")
+        .bind(body.slug)
+        .run();
     }
 
     const insertResult = await c.env.DB.prepare(

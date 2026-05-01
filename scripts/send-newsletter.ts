@@ -2,6 +2,7 @@ import { parseNewsletterIssue, listNewsletterIssues, getSentSlugs } from "./news
 
 const SITE_URL = process.env.SITE_URL ?? "";
 const NEWSLETTER_SEND_SECRET = process.env.NEWSLETTER_SEND_SECRET ?? "";
+const force = process.argv.includes("--force");
 
 async function sendIssue(issueSlug: string) {
   const issue = parseNewsletterIssue(issueSlug);
@@ -10,7 +11,7 @@ async function sendIssue(issueSlug: string) {
     process.exit(1);
   }
 
-  console.log(`Sending: "${issue.subject}" (${issue.slug})`);
+  console.log(`Sending: "${issue.subject}" (${issue.slug})${force ? " [force]" : ""}`);
 
   const response = await fetch(`${SITE_URL}/api/newsletter/send`, {
     method: "POST",
@@ -22,6 +23,7 @@ async function sendIssue(issueSlug: string) {
       slug: issue.slug,
       subject: issue.subject,
       htmlBody: issue.htmlBody,
+      force,
     }),
   });
 
@@ -45,7 +47,8 @@ async function main() {
     process.exit(1);
   }
 
-  const explicitSlug = process.argv[2];
+  const args = process.argv.slice(2).filter((a) => a !== "--force");
+  const explicitSlug = args[0];
   if (explicitSlug) {
     await sendIssue(explicitSlug);
     return;
@@ -57,6 +60,13 @@ async function main() {
   if (issues.length === 0) {
     console.log("No newsletter issues found in content/newsletters/");
     process.exit(0);
+  }
+
+  if (force) {
+    const latest = issues[issues.length - 1];
+    console.log(`Force-sending latest issue: "${latest.subject}" (${latest.slug})`);
+    await sendIssue(latest.slug);
+    return;
   }
 
   const sentSlugs = await getSentSlugs();
