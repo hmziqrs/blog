@@ -9,6 +9,31 @@ Complete checklist for setting up the **staging** environment. Every resource is
 - Cloudflare account with domain added
 - `wrangler` CLI installed and authenticated (`wrangler login`)
 - R2 plan enabled (free tier ok)
+- API token with the permissions below
+
+---
+
+## API Token Permissions
+
+Create a token at **My Profile → API Tokens → Create Token** → start with "Create Custom Token".
+
+### Account-level permissions (select "Account" dropdown)
+
+| Permission | Access |
+|---|---|
+| Workers Scripts | Edit |
+| D1 | Edit |
+| Cloudflare Pages | Edit |
+| Queues | Edit |
+| Workers R2 Storage | Edit |
+
+### Zone-level permission (select "Zone" dropdown)
+
+| Permission | Access | Resource |
+|---|---|---|
+| Workers Routes | Edit | `hmziq.rs` |
+
+> "Workers Routes" is a **Zone-level** permission — it won't appear under Account. Switch the dropdown from "Account" to "Zone" to find it.
 
 ---
 
@@ -106,36 +131,53 @@ Use these as `PUBLIC_TURNSTILE_SITE_KEY` (Astro) and `TURNSTILE_SECRET_KEY` (Wor
 
 ## 6. Configure Environment Variables
 
-### Worker Secrets (via `wrangler secret put`)
+### Worker Secrets (via `wrangler secret put --env staging`)
+
+These are encrypted in Cloudflare — never stored in files.
 
 ```bash
-wrangler secret put TURNSTILE_SECRET_KEY --env staging
-# → paste the test secret key: 1x0000000000000000000000000000000AA
-wrangler secret put NEWSLETTER_SEND_SECRET --env staging
+wrangler secret put TURNSTILE_SECRET_KEY --env staging --config apps/api/wrangler.toml
+# → 1x0000000000000000000000000000000AA (test key)
+wrangler secret put NEWSLETTER_SEND_SECRET --env staging --config apps/api/wrangler.toml
 # → generate a random secret (e.g. openssl rand -hex 32)
-wrangler secret put EMAIL_FROM_ADDRESS --env staging
+wrangler secret put EMAIL_FROM_ADDRESS --env staging --config apps/api/wrangler.toml
 # → no-reply@<your-domain> (must use a domain with Email Routing enabled)
 ```
 
 ### Worker Vars (in `wrangler.toml` `env.staging.vars`)
 
-Already configured — `ENVIRONMENT`, `ALLOWED_ORIGIN`, `SITE_URL`.
+Already configured — no action needed.
 
-### Media Upload (local shell / CI)
+| Variable | Value |
+|---|---|
+| `ENVIRONMENT` | `staging` |
+| `ALLOWED_ORIGIN` | `https://staging.hmziqblog.pages.dev` |
+| `SITE_URL` | `https://staging.hmziqblog.pages.dev` |
 
-```
+### Local `.env` (for manual deploys from your machine)
+
+Set these in your `.env` file before running `bun run deploy:staging`:
+
+```bash
+# ─── Shared (same for staging and prod) ───────────────────
+CLOUDFLARE_ACCOUNT_ID=f05ef21f6ee2c5e0d688d6358bcd47f6
+CLOUDFLARE_API_TOKEN=<your-api-token>
+R2_ACCOUNT_ID=<same-as-cloudflare-account-id>
+
+# ─── Staging-specific ─────────────────────────────────────
+R2_ACCESS_KEY_ID=<staging-r2-token>
+R2_SECRET_ACCESS_KEY=<staging-r2-token>
 R2_BUCKET_NAME=blog-media-staging
-```
+R2_PUBLIC_URL=<staging-r2-dev-url>
 
-Set in shell before running `bun run media:upload`, or as a GitHub Secret for CI.
-
-### Astro Build-Time Vars
-
-```
+# ─── Astro build-time ─────────────────────────────────────
 PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+
+# ─── Optional ──────────────────────────────────────────────
+# Firebase vars (PUBLIC_FIREBASE_*) — skip if not using analytics
 ```
 
-Set in your local `.env` before running `bun run deploy:web:staging`, or in the Astro build environment.
+> `PUBLIC_SITE_URL` is set inline by the deploy script — don't set it in `.env`.
 
 ---
 
@@ -223,17 +265,25 @@ NEWSLETTER_SEND_SECRET=your-secret bun run newsletter:send
 
 ## GitHub Secrets
 
-Add these to your repository secrets for CI deploys:
+Add these to your repository secrets for CI staging deploys. Staging-specific secrets use the `STAGE_` prefix.
 
-| Secret                  | Used By               |
-| ----------------------- | --------------------- |
-| `CLOUDFLARE_API_TOKEN`  | All deploys           |
-| `CLOUDFLARE_ACCOUNT_ID` | All deploys           |
-| `R2_ACCOUNT_ID`         | Media upload          |
-| `R2_ACCESS_KEY_ID`      | Media upload          |
-| `R2_SECRET_ACCESS_KEY`  | Media upload          |
-| `R2_BUCKET_NAME`        | Media upload          |
-| `R2_PUBLIC_URL`         | Media upload + deploy |
+### Shared (used by both staging and prod)
+
+| Secret | Value |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Your Cloudflare API token |
+| `CLOUDFLARE_ACCOUNT_ID` | `f05ef21f6ee2c5e0d688d6358bcd47f6` |
+| `R2_ACCOUNT_ID` | Same as Cloudflare account ID |
+
+### Staging-only (prefixed with `STAGE_`)
+
+| Secret | Value |
+|---|---|
+| `STAGE_R2_ACCESS_KEY_ID` | R2 token scoped to `blog-media-staging` |
+| `STAGE_R2_SECRET_ACCESS_KEY` | R2 token scoped to `blog-media-staging` |
+| `STAGE_R2_BUCKET_NAME` | `blog-media-staging` |
+| `STAGE_R2_PUBLIC_URL` | Your staging R2 public URL |
+| `STAGE_PUBLIC_TURNSTILE_SITE_KEY` | `1x00000000000000000000AA` (test key) |
 
 ---
 

@@ -9,6 +9,31 @@ Complete checklist for setting up the **production** environment. Every resource
 - Cloudflare account with domain added
 - `wrangler` CLI installed and authenticated (`wrangler login`)
 - R2 plan enabled (free tier ok)
+- API token with the permissions below
+
+---
+
+## API Token Permissions
+
+Create a token at **My Profile → API Tokens → Create Token** → start with "Create Custom Token".
+
+### Account-level permissions (select "Account" dropdown)
+
+| Permission | Access |
+|---|---|
+| Workers Scripts | Edit |
+| D1 | Edit |
+| Cloudflare Pages | Edit |
+| Queues | Edit |
+| Workers R2 Storage | Edit |
+
+### Zone-level permission (select "Zone" dropdown)
+
+| Permission | Access | Resource |
+|---|---|---|
+| Workers Routes | Edit | `hmziq.rs` |
+
+> "Workers Routes" is a **Zone-level** permission — it won't appear under Account. Switch the dropdown from "Account" to "Zone" to find it.
 
 ---
 
@@ -103,34 +128,51 @@ The newsletter is outbound-only (no-reply). You only need Email Routing enabled 
 
 ### Worker Secrets (via `wrangler secret put`)
 
+These are encrypted in Cloudflare — never stored in files.
+
 ```bash
-wrangler secret put TURNSTILE_SECRET_KEY
-# → paste the production Turnstile secret key
-wrangler secret put NEWSLETTER_SEND_SECRET
+wrangler secret put TURNSTILE_SECRET_KEY --config apps/api/wrangler.toml
+# → paste your production Turnstile secret key (from step 5)
+wrangler secret put NEWSLETTER_SEND_SECRET --config apps/api/wrangler.toml
 # → generate a random secret (e.g. openssl rand -hex 32)
-wrangler secret put EMAIL_FROM_ADDRESS
+wrangler secret put EMAIL_FROM_ADDRESS --config apps/api/wrangler.toml
 # → no-reply@<your-domain> (must use a domain with Email Routing enabled)
 ```
 
 ### Worker Vars (in `wrangler.toml` `[vars]`)
 
-Already configured — `ENVIRONMENT`, `ALLOWED_ORIGIN`, `SITE_URL`.
+Already configured — no action needed.
 
-### Media Upload (local shell / CI)
+| Variable | Value |
+|---|---|
+| `ENVIRONMENT` | `production` |
+| `ALLOWED_ORIGIN` | `https://blog.hmziq.rs` |
+| `SITE_URL` | `https://blog.hmziq.rs` |
 
-```
+### Local `.env` (for manual deploys from your machine)
+
+Set these in your `.env` file before running `bun run deploy:prod`:
+
+```bash
+# ─── Shared (same for staging and prod) ───────────────────
+CLOUDFLARE_ACCOUNT_ID=f05ef21f6ee2c5e0d688d6358bcd47f6
+CLOUDFLARE_API_TOKEN=<your-api-token>
+R2_ACCOUNT_ID=<same-as-cloudflare-account-id>
+
+# ─── Production-specific ──────────────────────────────────
+R2_ACCESS_KEY_ID=<prod-r2-token>
+R2_SECRET_ACCESS_KEY=<prod-r2-token>
 R2_BUCKET_NAME=blog-media
+R2_PUBLIC_URL=<prod-r2-or-custom-domain-url>
+
+# ─── Astro build-time ─────────────────────────────────────
+PUBLIC_TURNSTILE_SITE_KEY=<your-prod-turnstile-site-key>
+
+# ─── Optional ──────────────────────────────────────────────
+# Firebase vars (PUBLIC_FIREBASE_*) — skip if not using analytics
 ```
 
-Set in shell before running `bun run media:upload`, or as a GitHub Secret for CI.
-
-### Astro Build-Time Vars
-
-```
-PUBLIC_TURNSTILE_SITE_KEY=<prod-turnstile-site-key>
-```
-
-Set in your local `.env` before running `bun run deploy:web:prod`, or in the Astro build environment.
+> `PUBLIC_SITE_URL` is set inline by the deploy script — don't set it in `.env`.
 
 Also update `site.config.ts` and any domain-specific URLs.
 
@@ -202,19 +244,32 @@ Or push to the `master` branch — CI will deploy automatically.
 
 ## GitHub Secrets
 
-Add these to your repository secrets for CI deploys:
+Add these to your repository secrets for CI production deploys.
 
-| Secret                   | Used By               |
-| ------------------------ | --------------------- |
-| `CLOUDFLARE_API_TOKEN`   | All deploys           |
-| `CLOUDFLARE_ACCOUNT_ID`  | All deploys           |
-| `R2_ACCOUNT_ID`          | Media upload          |
-| `R2_ACCESS_KEY_ID`       | Media upload          |
-| `R2_SECRET_ACCESS_KEY`   | Media upload          |
-| `R2_BUCKET_NAME`         | Media upload          |
-| `R2_PUBLIC_URL`          | Media upload + deploy |
-| `SITE_URL`               | Newsletter workflow   |
-| `NEWSLETTER_SEND_SECRET` | Newsletter workflow   |
+### Shared (used by both staging and prod)
+
+| Secret | Value |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Your Cloudflare API token |
+| `CLOUDFLARE_ACCOUNT_ID` | `f05ef21f6ee2c5e0d688d6358bcd47f6` |
+| `R2_ACCOUNT_ID` | Same as Cloudflare account ID |
+
+### Production-only (no prefix)
+
+| Secret | Value |
+|---|---|
+| `R2_ACCESS_KEY_ID` | R2 token scoped to `blog-media` |
+| `R2_SECRET_ACCESS_KEY` | R2 token scoped to `blog-media` |
+| `R2_BUCKET_NAME` | `blog-media` |
+| `R2_PUBLIC_URL` | Your production R2 public URL |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Your production Turnstile site key |
+
+### Newsletter workflow (production only)
+
+| Secret | Value |
+|---|---|
+| `SITE_URL` | `https://blog.hmziq.rs` |
+| `NEWSLETTER_SEND_SECRET` | Same value as the Worker secret |
 
 ---
 
