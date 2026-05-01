@@ -52,7 +52,7 @@ SITE_URL = "https://staging.hmziqblog.pages.dev"
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "blog-db-staging"
-database_id = "00000000-0000-0000-0000-000000000001" # Replace with real D1 staging ID before first deploy
+database_id = "da58dc01-ef3d-48f2-bcf3-c16b0517a935" # Replace with real D1 staging ID before first deploy
 
 [[env.staging.send_email]]
 name = "SEND_EMAIL"
