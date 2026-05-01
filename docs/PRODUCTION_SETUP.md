@@ -1,8 +1,6 @@
 # Production Environment Setup
 
-Complete checklist for setting up the **production** environment.
-
-> **One-time setup:** If you already set up staging, some steps (Email Routing, Turnstile) are already done. These are marked below — skip them if applicable.
+Complete checklist for setting up the **production** environment. Every resource is isolated from staging.
 
 ---
 
@@ -43,65 +41,90 @@ Messages that fail after max retries are automatically routed to the DLQ instead
 wrangler r2 bucket create blog-media
 ```
 
-Generate S3-compatible tokens in the Cloudflare dashboard (**R2 → Manage R2 API tokens**):
+Generate S3-compatible tokens in the Cloudflare dashboard (**R2 → Manage R2 API tokens → Create API token**):
 
-- `R2_ACCOUNT_ID`
-- `R2_ACCESS_KEY_ID`
-- `R2_SECRET_ACCESS_KEY`
-- `R2_BUCKET_NAME=blog-media`
-- `R2_PUBLIC_URL` — use the `*.r2.dev` URL (e.g. `https://pub-abc123.r2.dev`) or a custom domain (e.g. `https://media.yourdomain.com`). Custom domains serve objects at the root path, not under the bucket name.
+- Permissions: **Object Read & Write**
+- Bucket: select **blog-media** only
+- Save the generated credentials:
+  - `R2_ACCESS_KEY_ID` — shown after creation
+  - `R2_SECRET_ACCESS_KEY` — shown once, save immediately
 
----
+Find your account ID in any dashboard URL: `https://dash.cloudflare.com/<ACCOUNT_ID>/...`
 
-## 4. Set Production Worker Secrets
+Enable public access in **R2 → blog-media → Settings → Public access**:
+- Use a custom domain (e.g. `https://media.yourdomain.com`) or the `*.r2.dev` subdomain — this is `R2_PUBLIC_URL`
 
-```bash
-wrangler secret put TURNSTILE_SECRET_KEY
-wrangler secret put NEWSLETTER_SEND_SECRET
-wrangler secret put EMAIL_FROM_ADDRESS
+Variables needed:
+```
+R2_ACCOUNT_ID=<from-dashboard-url>
+R2_ACCESS_KEY_ID=<from-token>
+R2_SECRET_ACCESS_KEY=<from-token>
+R2_BUCKET_NAME=blog-media
+R2_PUBLIC_URL=<r2-dev-or-custom-url>
 ```
 
 ---
 
-## 5. Enable Cloudflare Email Routing (One-Time)
+## 4. Enable Cloudflare Email Routing
 
 1. Go to https://dash.cloudflare.com/
 2. Navigate to **Email → Email Routing**
 3. Verify your domain
-4. Add `newsletter@<your-domain>` as a **destination address** under **Email Routing → Destination addresses**
+4. Add both addresses as **destination addresses** under **Email Routing → Destination addresses**:
+   - `newsletter@<your-domain>` (production)
+   - `newsletter-staging@<your-domain>` (staging)
 
-> Skip if already done for staging. Only needed once per domain.
+> This step is shared with staging. If you already added both addresses during staging setup, skip this step.
 
 ---
 
-## 6. Set Up Cloudflare Turnstile
+## 5. Set Up Cloudflare Turnstile
 
 1. Go to https://dash.cloudflare.com/
 2. Navigate to **Turnstile**
 3. Create a new site (e.g. `blog-prod`)
 4. Copy the **site key** and **secret key**
 
-> Cloudflare recommends creating separate widgets per environment (e.g. `blog-prod` and `blog-staging`) for independent analytics and configuration.
-
 ---
 
-## 7. Configure Environment Variables
+## 6. Configure Environment Variables
 
-Create `.env.production`:
+### Worker Secrets (via `wrangler secret put`)
+
+```bash
+wrangler secret put TURNSTILE_SECRET_KEY
+# → paste the production Turnstile secret key
+wrangler secret put NEWSLETTER_SEND_SECRET
+# → generate a random secret (e.g. openssl rand -hex 32)
+wrangler secret put EMAIL_FROM_ADDRESS
+# → newsletter@<your-domain>
+```
+
+### Worker Vars (in `wrangler.toml` `[vars]`)
+
+Already configured — `ENVIRONMENT`, `ALLOWED_ORIGIN`, `SITE_URL`.
+
+### Media Upload (local shell / CI)
 
 ```
-EMAIL_FROM_ADDRESS=newsletter@<your-domain>
-NEWSLETTER_SEND_SECRET=<random-secret>
-TURNSTILE_SECRET_KEY=<turnstile-secret-key>
-PUBLIC_TURNSTILE_SITE_KEY=<turnstile-site-key>
 R2_BUCKET_NAME=blog-media
 ```
+
+Set in shell before running `bun run media:upload`, or as a GitHub Secret for CI.
+
+### Astro Build-Time Vars
+
+```
+PUBLIC_TURNSTILE_SITE_KEY=<prod-turnstile-site-key>
+```
+
+Set in your local `.env` before running `bun run deploy:web:prod`, or in the Astro build environment.
 
 Also update `site.config.ts` and any domain-specific URLs.
 
 ---
 
-## 8. Configure Custom Domain Routes
+## 7. Configure Custom Domain Routes
 
 Production uses `workers_dev = false` — the API is only accessible via custom domain routes. The routes are already configured in `wrangler.toml`:
 
@@ -115,7 +138,7 @@ If using a different domain, update the pattern accordingly. No `*.workers.dev` 
 
 ---
 
-## 9. Create Production Pages Project
+## 8. Create Production Pages Project
 
 Dashboard → **Pages → Create project**:
 
@@ -130,7 +153,7 @@ bun run deploy:web:prod
 
 ---
 
-## 10. Run Production Migrations
+## 9. Run Production Migrations
 
 ```bash
 bun run db:migrate:prod
@@ -138,7 +161,7 @@ bun run db:migrate:prod
 
 ---
 
-## 11. Deploy to Production
+## 10. Deploy to Production
 
 ```bash
 bun run deploy:prod
@@ -148,7 +171,7 @@ Or push to the `master` branch — CI will deploy automatically.
 
 ---
 
-## 12. Verify Production
+## 11. Verify Production
 
 | Resource    | URL                                        |
 | ----------- | ------------------------------------------ |

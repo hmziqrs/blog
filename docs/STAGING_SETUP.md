@@ -1,8 +1,6 @@
 # Staging Environment Setup
 
-Complete checklist for setting up the **staging** environment.
-
-> **One-time setup:** Email Routing and Turnstile are shared across environments and only need to be done once per account/domain. These are marked below.
+Complete checklist for setting up the **staging** environment. Every resource is isolated from production.
 
 ---
 
@@ -43,63 +41,86 @@ Messages that fail after max retries are automatically routed to the DLQ instead
 wrangler r2 bucket create blog-media-staging
 ```
 
-Generate S3-compatible tokens in the Cloudflare dashboard (**R2 → Manage R2 API tokens**):
+Generate S3-compatible tokens in the Cloudflare dashboard (**R2 → Manage R2 API tokens → Create API token**):
 
-- `R2_ACCOUNT_ID`
-- `R2_ACCESS_KEY_ID`
-- `R2_SECRET_ACCESS_KEY`
-- `R2_BUCKET_NAME=blog-media-staging`
-- `R2_PUBLIC_URL` — use the `*.r2.dev` URL (e.g. `https://pub-abc123.r2.dev`) or a custom domain (e.g. `https://media.yourdomain.com`). Custom domains serve objects at the root path, not under the bucket name.
+- Permissions: **Object Read & Write**
+- Bucket: select **blog-media-staging** only
+- Save the generated credentials:
+  - `R2_ACCESS_KEY_ID` — shown after creation
+  - `R2_SECRET_ACCESS_KEY` — shown once, save immediately
 
----
+Find your account ID in any dashboard URL: `https://dash.cloudflare.com/<ACCOUNT_ID>/...`
 
-## 4. Set Staging Worker Secrets
+Enable public access in **R2 → blog-media-staging → Settings → Public access**:
+- Use the `*.r2.dev` subdomain (e.g. `https://pub-abc123.r2.dev`) — this is `R2_PUBLIC_URL`
 
-```bash
-wrangler secret put TURNSTILE_SECRET_KEY --env staging
-wrangler secret put NEWSLETTER_SEND_SECRET --env staging
-wrangler secret put EMAIL_FROM_ADDRESS --env staging
+Variables needed:
+```
+R2_ACCOUNT_ID=<from-dashboard-url>
+R2_ACCESS_KEY_ID=<from-token>
+R2_SECRET_ACCESS_KEY=<from-token>
+R2_BUCKET_NAME=blog-media-staging
+R2_PUBLIC_URL=<r2-dev-or-custom-url>
 ```
 
 ---
 
-## 5. Enable Cloudflare Email Routing (One-Time)
+## 4. Enable Cloudflare Email Routing
 
 1. Go to https://dash.cloudflare.com/
 2. Navigate to **Email → Email Routing**
 3. Verify your domain
-4. Add `newsletter@<your-domain>` as a **destination address** under **Email Routing → Destination addresses**
-
-> Only needs to be done once per domain.
+4. Add both addresses as **destination addresses** under **Email Routing → Destination addresses**:
+   - `newsletter@<your-domain>` (production)
+   - `newsletter-staging@<your-domain>` (staging)
 
 ---
 
-## 6. Set Up Cloudflare Turnstile
+## 5. Set Up Cloudflare Turnstile
 
 1. Go to https://dash.cloudflare.com/
 2. Navigate to **Turnstile**
 3. Create a new site (e.g. `blog-staging`)
 4. Copy the **site key** and **secret key**
 
-> Cloudflare recommends creating separate widgets per environment (e.g. `blog-prod` and `blog-staging`) for independent analytics and configuration.
-
 ---
 
-## 7. Configure Environment Variables
+## 6. Configure Environment Variables
 
-Create `.env.staging`:
+### Worker Secrets (via `wrangler secret put`)
+
+```bash
+wrangler secret put TURNSTILE_SECRET_KEY --env staging
+# → paste the staging Turnstile secret key
+wrangler secret put NEWSLETTER_SEND_SECRET --env staging
+# → generate a random secret (e.g. openssl rand -hex 32)
+wrangler secret put EMAIL_FROM_ADDRESS --env staging
+# → newsletter-staging@<your-domain>
+```
+
+### Worker Vars (in `wrangler.toml` `env.staging.vars`)
+
+Already configured — `ENVIRONMENT`, `ALLOWED_ORIGIN`, `SITE_URL`.
+
+### Media Upload (local shell / CI)
 
 ```
-EMAIL_FROM_ADDRESS=newsletter@<your-domain>
-NEWSLETTER_SEND_SECRET=<random-secret>
-TURNSTILE_SECRET_KEY=<turnstile-secret-key>
-PUBLIC_TURNSTILE_SITE_KEY=<turnstile-site-key>
 R2_BUCKET_NAME=blog-media-staging
 ```
 
+Set in shell before running `bun run media:upload`, or as a GitHub Secret for CI.
+
+### Astro Build-Time Vars
+
+```
+PUBLIC_TURNSTILE_SITE_KEY=<staging-turnstile-site-key>
+```
+
+Set in your local `.env` before running `bun run deploy:web:staging`, or in the Astro build environment.
+
 ---
 
-## 8. Create Staging Pages Project
+## 7. Create Staging Pages Project
 
 Dashboard → **Pages → Create project**:
 
@@ -114,7 +135,7 @@ bun run deploy:web:staging
 
 ---
 
-## 9. Run Staging Migrations
+## 8. Run Staging Migrations
 
 ```bash
 bun run db:migrate:staging
@@ -122,7 +143,7 @@ bun run db:migrate:staging
 
 ---
 
-## 10. Deploy to Staging
+## 9. Deploy to Staging
 
 ```bash
 bun run deploy:staging
@@ -132,7 +153,7 @@ Or push to the `staging` branch — CI will deploy automatically.
 
 ---
 
-## 11. Verify Staging
+## 10. Verify Staging
 
 | Resource    | URL                                              |
 | ----------- | ------------------------------------------------ |
