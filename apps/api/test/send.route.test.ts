@@ -238,6 +238,22 @@ describe("POST /api/newsletter/send", () => {
     expect(body.error).toBe("Invalid slug format");
   });
 
+  // H2b: Slug not in posts table
+  it("rejects unknown slug not in posts table", async () => {
+    const res = await app.fetch(
+      req("/api/newsletter/send", {
+        method: "POST",
+        headers: { ...AUTH_HEADER, "content-type": "application/json" },
+        body: JSON.stringify({ slug: "nonexistent-post", title: "No", excerpt: "Nope" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("Unknown post slug");
+  });
+
   // L4: Spoofed Content-Type
   it("rejects spoofed Content-Type like application/json-pretend", async () => {
     const res = await app.fetch(

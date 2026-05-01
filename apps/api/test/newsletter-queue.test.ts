@@ -297,4 +297,51 @@ describe("handleQueueBatch", () => {
       env.SEND_EMAIL.send = originalSend;
     }
   });
+
+  // L7: After max retries, blacklist and ack
+  it("blacklists email and acks after max retries exceeded", async () => {
+    const originalSend = env.SEND_EMAIL.send;
+    env.SEND_EMAIL.send = async () => {
+      throw new Error("Permanent SMTP failure");
+    };
+
+    try {
+      const batch = createMessageBatch("newsletter-send", [
+        {
+          id: "msg-max-retry",
+          timestamp: new Date(),
+          attempts: 5,
+          body: {
+            postSlug: "blacklist-post",
+            postTitle: "Blacklist Test",
+            postExcerpt: "Excerpt",
+            subscriberId: "queue-sub-1",
+            subscriberEmail: "blacklist@example.com",
+            unsubscribeToken: "unsub-blk",
+          },
+        },
+      ]);
+
+      const ctx = createExecutionContext();
+      await worker.queue(batch, env, ctx);
+      const result = await getQueueResult(batch, ctx);
+
+      // Should ack (not retry) after max retries
+      expect(result.explicitAcks).toStrictEqual(["msg-max-retry"]);
+      expect(result.retryMessages).toStrictEqual([]);
+
+      // Should be in blacklist
+      const blacklisted = await env.DB.prepare(
+        "SELECT email FROM blacklist WHERE email = ?",
+      )
+        .bind("blacklist@example.com")
+        .first();
+      expect(blacklisted).not.toBeNull();
+    } finally {
+      env.SEND_EMAIL.send = originalSend;
+      await env.DB.prepare("DELETE FROM blacklist WHERE email = ?")
+        .bind("blacklist@example.com")
+        .run();
+    }
+  });
 });
