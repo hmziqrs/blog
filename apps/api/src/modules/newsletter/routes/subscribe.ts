@@ -23,7 +23,8 @@ app.post("/", async (c) => {
   try {
     // M5: Guard against empty or test Turnstile secret keys
     const turnstileSecret = c.env.TURNSTILE_SECRET_KEY;
-    if (!turnstileSecret || /^[123]x0000000000000000000000000000000AA$/.test(turnstileSecret)) {
+    const isTestKey = /^[123]x0000000000000000000000000000000AA$/.test(turnstileSecret ?? "");
+    if (!turnstileSecret || (isTestKey && c.env.ENVIRONMENT !== "staging")) {
       return c.json({ error: "Service misconfigured" }, 503);
     }
 
