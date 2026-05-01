@@ -50,34 +50,29 @@ describe("Queue simulation behavior in test environment", () => {
     expect(result.explicitAcks).toContain("manual-msg");
   });
 
-  it("KV and D1 execute immediately; Queue consumers require manual invocation", async () => {
+  it("D1 executes immediately; Queue consumers require manual invocation", async () => {
     // D1: query executes immediately
     await env.DB.prepare(
       "INSERT INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
-      .bind("kv-d1-sub", "kv-d1@example.com", "hash-kv-d1")
+      .bind("d1-q-sub", "d1-q@example.com", "hash-d1-q")
       .run();
 
     const row = await env.DB.prepare("SELECT id FROM subscribers WHERE id = ?")
-      .bind("kv-d1-sub")
+      .bind("d1-q-sub")
       .first();
     expect(row).not.toBeNull(); // D1 is synchronous
-
-    // KV: put/get execute immediately
-    await env.RATE_LIMIT_KV.put("test:key", "value");
-    const value = await env.RATE_LIMIT_KV.get("test:key");
-    expect(value).toBe("value"); // KV is synchronous in tests
 
     // Queue producer: sendBatch executes immediately (stores in memory)
     await env.NEWSLETTER_QUEUE.sendBatch([
       {
         body: {
-          postSlug: "kv-d1-q",
+          postSlug: "d1-q",
           postTitle: "Comparison",
           postExcerpt: "Excerpt",
-          subscriberId: "kv-d1-sub",
-          subscriberEmail: "kv-d1@example.com",
-          unsubscribeToken: "unsub-kv-d1",
+          subscriberId: "d1-q-sub",
+          subscriberEmail: "d1-q@example.com",
+          unsubscribeToken: "unsub-d1-q",
         },
       },
     ]);
@@ -87,7 +82,7 @@ describe("Queue simulation behavior in test environment", () => {
     const delivery = await env.DB.prepare(
       "SELECT id FROM newsletter_deliveries WHERE post_slug = ?",
     )
-      .bind("kv-d1-q")
+      .bind("d1-q")
       .first();
     expect(delivery).toBeNull(); // consumer was not auto-invoked
   });

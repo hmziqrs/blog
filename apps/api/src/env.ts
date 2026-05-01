@@ -4,7 +4,6 @@ import type { NewsletterMessage } from "./modules/newsletter/queue";
 export type Bindings = {
   DB: D1Database;
   SEND_EMAIL: SendEmail;
-  RATE_LIMIT_KV: KVNamespace;
   NEWSLETTER_QUEUE: Queue<NewsletterMessage>;
   TURNSTILE_SECRET_KEY: string;
   NEWSLETTER_SEND_SECRET: string;

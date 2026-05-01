@@ -92,4 +92,3 @@ blog/
 ## Documentation
 
 - `docs/NEWSLETTER_SETUP.md` — Newsletter system setup and testing
-- `docs/SECURITY_AUDIT.md` — Security audit findings (some fixed, some pending)

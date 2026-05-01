@@ -26,10 +26,6 @@ database_id = "00000000-0000-0000-0000-000000000000" # Replace with real D1 prod
 [[send_email]]
 name = "SEND_EMAIL"
 
-[[kv_namespaces]]
-binding = "RATE_LIMIT_KV"
-id = "<KV-namespace-id>" # Replace with real KV namespace ID before first deploy
-
 [[queues.producers]]
 binding = "NEWSLETTER_QUEUE"
 queue = "newsletter-send"
@@ -61,10 +57,6 @@ database_id = "00000000-0000-0000-0000-000000000001" # Replace with real D1 stag
 
 [[env.staging.send_email]]
 name = "SEND_EMAIL"
-
-[[env.staging.kv_namespaces]]
-binding = "RATE_LIMIT_KV"
-id = "<staging-KV-namespace-id>" # Replace with real KV staging namespace ID before first deploy
 
 [[env.staging.queues.producers]]
 binding = "NEWSLETTER_QUEUE"
