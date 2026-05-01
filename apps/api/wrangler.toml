@@ -58,12 +58,12 @@ SITE_URL = "https://staging.hmziqblog.pages.dev"
 
 [[env.staging.kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "<!-- run: wrangler kv namespace create RATE_LIMIT_KV --env staging -->"
+id = "b792ca50c8eb46eea981f0df548aaa81"
 
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "blog-db-staging"
-database_id = "da58dc01-ef3d-48f2-bcf3-c16b0517a935" # Replace with real D1 staging ID before first deploy
+database_id = "72adfed4-d696-4b04-88a6-9ae61cc21ce1" # Replace with real D1 staging ID before first deploy
 
 [[env.staging.send_email]]
 name = "SEND_EMAIL"
