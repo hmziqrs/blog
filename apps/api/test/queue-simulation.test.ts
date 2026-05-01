@@ -1,9 +1,12 @@
 import { env, createExecutionContext, createMessageBatch, getQueueResult } from "cloudflare:test";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, afterEach } from "vitest";
 import worker from "../src/index";
 import type { NewsletterMessage } from "../src/modules/newsletter/queue";
 
 describe("Queue simulation behavior in test environment", () => {
+  afterEach(async () => {
+    await env.DB.prepare("DELETE FROM subscribers WHERE id = 'd1-q-sub'").run();
+  });
   it("sendBatch on simulated Queue does not throw and stores messages", async () => {
     const msg: NewsletterMessage = {
       issueSlug: "sim-test",
@@ -47,7 +50,7 @@ describe("Queue simulation behavior in test environment", () => {
     await worker.queue(batch, env, ctx);
     const result = await getQueueResult(batch, ctx);
 
-    expect(result.explicitAcks).toContain("manual-msg");
+    expect(result.explicitAcks).toStrictEqual(["manual-msg"]);
   });
 
   it("D1 executes immediately; Queue consumers require manual invocation", async () => {

@@ -141,7 +141,7 @@ describe("handleQueueBatch", () => {
       if (callCount === 1) {
         throw new Error("First send fails");
       }
-      return { messageId: "test-id" } as import("@cloudflare/workers-types").EmailSendResult;
+      return { messageId: "test-id" };
     };
 
     try {
@@ -201,19 +201,17 @@ describe("handleQueueBatch", () => {
   });
 
   it("sends HTML email with raw htmlBody and unsubscribe link", async () => {
-    const sentEmails: { to: string; subject: string; html: string }[] = [];
+    const sentEmails: { to: string; from: string; subject: string; html: string }[] = [];
     const originalSend = env.SEND_EMAIL.send;
     env.SEND_EMAIL.send = async (message) => {
-      const to = message.to;
-      const toStr = Array.isArray(to) ? (to[0] ?? "") : (to ?? "");
-      const htmlRaw = (message as { html?: string | Array<{ content: string }> }).html;
-      const htmlStr = Array.isArray(htmlRaw) ? (htmlRaw[0]?.content ?? "") : (htmlRaw ?? "");
+      const to = Array.isArray(message.to) ? message.to[0] ?? "" : message.to ?? "";
       sentEmails.push({
-        to: toStr,
-        subject: (message as { subject?: string }).subject ?? "",
-        html: htmlStr,
+        to,
+        from: message.from ?? "",
+        subject: message.subject ?? "",
+        html: message.html ?? "",
       });
-      return { messageId: "test-id" } as import("@cloudflare/workers-types").EmailSendResult;
+      return { messageId: "test-id" };
     };
 
     try {
@@ -328,11 +326,12 @@ describe("handleQueueBatch", () => {
       expect(result.explicitAcks).toStrictEqual(["msg-max-retry"]);
       expect(result.retryMessages).toStrictEqual([]);
 
-      // Should be in blacklist
-      const blacklisted = await env.DB.prepare("SELECT email FROM blacklist WHERE email = ?")
+      // Should be in blacklist with reason
+      const blacklisted = await env.DB.prepare("SELECT email, reason FROM blacklist WHERE email = ?")
         .bind("blacklist@example.com")
-        .first();
+        .first<{ email: string; reason: string }>();
       expect(blacklisted).not.toBeNull();
+      expect(blacklisted?.reason).toBe("permanent_delivery_failure");
     } finally {
       env.SEND_EMAIL.send = originalSend;
       await env.DB.prepare("DELETE FROM blacklist WHERE email = ?")
