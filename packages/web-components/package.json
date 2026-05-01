@@ -1,5 +1,5 @@
 {
-  "name": "web-components",
+  "name": "@blog/web-components",
   "version": "1.0.0",
   "description": "Framework-agnostic 3D advertisement banner web component",
   "keywords": [
@@ -24,7 +24,7 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && mkdir -p ../../apps/web/public/web-components && cp dist/*.js ../../apps/web/public/web-components/",
     "dev": "vite build --watch"
   },
   "devDependencies": {

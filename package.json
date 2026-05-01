@@ -18,6 +18,7 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
+    "build:wc": "turbo -F @blog/web-components build",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
     "lint": "oxlint",
