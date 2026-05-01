@@ -4,12 +4,23 @@ import app from "../src/app";
 import worker from "../src/index";
 import type { NewsletterMessage } from "../src/modules/newsletter/queue";
 import type { MessageSendRequest } from "@cloudflare/workers-types";
+import { deriveUnsubscribeToken } from "../src/lib/tokens";
 
 const ctx = createExecutionContext();
 type NewsletterQueueMessage = MessageSendRequest<NewsletterMessage>;
 
 describe("Newsletter end-to-end", () => {
   beforeAll(async () => {
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
+    )
+      .bind("e2e-post", "E2E Test Post", "End-to-end newsletter flow")
+      .run();
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
+    )
+      .bind("dup-post", "Duplicate", "Should not enqueue")
+      .run();
     await env.DB.prepare(
       "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
     )
@@ -58,7 +69,8 @@ describe("Newsletter end-to-end", () => {
       expect(msg.postTitle).toBe("E2E Test Post");
       expect(msg.subscriberId).toBe("e2e-sub");
       expect(msg.subscriberEmail).toBe("e2e@example.com");
-      expect(msg.unsubscribeToken).toBe("unsub-e2e");
+      const expectedToken = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, "e2e-sub");
+      expect(msg.unsubscribeToken).toBe(expectedToken);
 
       // Step 3: Feed captured message into queue consumer
       const queueBatch = createMessageBatch("newsletter-send", [

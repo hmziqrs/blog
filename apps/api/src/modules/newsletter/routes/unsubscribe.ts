@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { Bindings } from "../../../env";
 import { checkUnsubscribeRateLimit } from "../../../lib/rate-limit";
+import { hashToken } from "../../../lib/tokens";
 
 const unsubscribeSchema = z.object({
   token: z.string().min(1, "Unsubscribe token required"),
@@ -13,10 +14,20 @@ async function processUnsubscribe(
   db: Bindings["DB"],
   token: string,
 ): Promise<{ error: string; status: 400 | 404 } | { message: string; status: 200 }> {
-  const subscriber = await db
-    .prepare("SELECT id FROM subscribers WHERE unsubscribe_token = ? AND status = 'active'")
-    .bind(token)
+  // L6: Lookup by SHA-256 hash instead of plaintext token
+  const tokenHash = await hashToken(token);
+  let subscriber = await db
+    .prepare("SELECT id FROM subscribers WHERE unsubscribe_token_hash = ? AND status = 'active'")
+    .bind(tokenHash)
     .first<{ id: string }>();
+
+  // Fallback: plaintext token lookup for pre-migration subscribers
+  if (!subscriber) {
+    subscriber = await db
+      .prepare("SELECT id FROM subscribers WHERE unsubscribe_token = ? AND status = 'active'")
+      .bind(token)
+      .first<{ id: string }>();
+  }
 
   if (!subscriber) {
     return { error: "Invalid unsubscribe token", status: 404 };
@@ -44,7 +55,7 @@ app.post("/", async (c) => {
   }
   const clientIp = ip ?? "unknown";
 
-  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp);
+  const allowed = await checkUnsubscribeRateLimit(c.env.DB, clientIp);
   if (!allowed) {
     return c.json({ error: "Too many requests" }, 429);
   }

@@ -2,6 +2,7 @@ name = "api"
 main = "src/index.ts"
 compatibility_date = "2025-10-11"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = false
 
 [dev]
 port = 8788
@@ -14,7 +15,7 @@ ip = "localhost"
 
 [vars]
 ENVIRONMENT = "production"
-ALLOWED_ORIGIN = "" # prod is same-origin; CORS off
+ALLOWED_ORIGIN = "https://blog.hmziq.rs"
 SITE_URL = "https://blog.hmziq.rs"
 
 [[d1_databases]]
@@ -37,15 +38,21 @@ queue = "newsletter-send"
 queue = "newsletter-send"
 max_batch_size = 10
 max_batch_timeout = 30
+dead_letter_queue = "newsletter-dlq"
+
+[[queues.producers]]
+binding = "NEWSLETTER_DLQ"
+queue = "newsletter-dlq"
 
 # ─── Staging ────────────────────────────────────────────
 [env.staging]
 name = "api-staging"
+workers_dev = false
 
 [env.staging.vars]
 ENVIRONMENT = "staging"
-ALLOWED_ORIGIN = "https://web-staging.pages.dev" # update after first Pages deploy
-SITE_URL = "https://web-staging.pages.dev" # update after first Pages deploy
+ALLOWED_ORIGIN = "https://web-staging.pages.dev"
+SITE_URL = "https://web-staging.pages.dev"
 
 [[env.staging.d1_databases]]
 binding = "DB"
@@ -67,3 +74,8 @@ queue = "newsletter-send-staging"
 queue = "newsletter-send-staging"
 max_batch_size = 10
 max_batch_timeout = 30
+dead_letter_queue = "newsletter-dlq-staging"
+
+[[env.staging.queues.producers]]
+binding = "NEWSLETTER_DLQ"
+queue = "newsletter-dlq-staging"

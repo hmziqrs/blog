@@ -3,6 +3,7 @@ import { describe, expect, it, afterEach, beforeEach } from "vitest";
 import app from "../src/app";
 import worker from "../src/index";
 import type { NewsletterMessage } from "../src/modules/newsletter/queue";
+import { deriveUnsubscribeToken } from "../src/lib/tokens";
 
 const ctx = createExecutionContext();
 
@@ -31,6 +32,15 @@ beforeEach(() => {
 });
 
 describe("Complete end-to-end newsletter flow", () => {
+  beforeEach(async () => {
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
+      .bind("e2e-flow-post", "E2E Flow Post", "This is the complete flow test")
+      .run();
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
+      .bind("unsub-test-post", "After Unsubscribe", "Should not reach unsubscribed user")
+      .run();
+  });
+
   afterEach(async () => {
     globalThis.fetch = originalFetch;
     env.TURNSTILE_SECRET_KEY = originalTurnstile;
@@ -51,8 +61,7 @@ describe("Complete end-to-end newsletter flow", () => {
       .bind("e2e-new@example.com")
       .run();
     await env.DB.prepare("DELETE FROM subscribers WHERE email LIKE 'e2e-%@example.com'").run();
-    const list = await env.RATE_LIMIT_KV.list();
-    await Promise.all(list.keys.map((k: { name: string }) => env.RATE_LIMIT_KV.delete(k.name)));
+    await env.DB.prepare("DELETE FROM rate_limits").run();
   });
 
   it("subscribe → send → queue → consumer → email → delivery record", async () => {
@@ -76,13 +85,13 @@ describe("Complete end-to-end newsletter flow", () => {
     expect(subscribeBody.message).toBe("Subscribed");
 
     const subscriber = await env.DB.prepare(
-      "SELECT id, email, unsubscribe_token FROM subscribers WHERE email = ? AND status = 'active'",
+      "SELECT id, email FROM subscribers WHERE email = ? AND status = 'active'",
     )
       .bind("e2e-new@example.com")
-      .first<{ id: string; email: string; unsubscribe_token: string }>();
+      .first<{ id: string; email: string }>();
     expect(subscriber).not.toBeNull();
     const subscriberId = subscriber!.id;
-    const unsubscribeToken = subscriber!.unsubscribe_token;
+    const unsubscribeToken = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, subscriberId);
 
     const capturedMessages: NewsletterMessage[] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);

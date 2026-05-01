@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Bindings } from "../../../env";
 import { normalizeEmail } from "../../../lib/email";
 import { checkSubscribeRateLimit } from "../../../lib/rate-limit";
+import { deriveUnsubscribeToken, hashToken } from "../../../lib/tokens";
 
 const subscribeSchema = z.object({
   email: z.email("Invalid email address"),
@@ -59,7 +60,7 @@ app.post("/", async (c) => {
 
     // L8: Rate limit check AFTER Turnstile so failed CAPTCHAs don't burn budget
     const email = normalizeEmail(validated.email);
-    const allowed = await checkSubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp, email);
+    const allowed = await checkSubscribeRateLimit(c.env.DB, clientIp, email);
     if (!allowed) {
       return c.json({ error: "Too many requests" }, 429);
     }
@@ -83,12 +84,14 @@ app.post("/", async (c) => {
     }
 
     const id = crypto.randomUUID();
-    const unsubscribeToken = crypto.randomUUID();
+    const token = await deriveUnsubscribeToken(c.env.NEWSLETTER_SEND_SECRET, id);
+    const tokenHash = await hashToken(token);
 
+    // L6: Store hash for lookup; keep plaintext during transition for backward compat
     await c.env.DB.prepare(
-      "INSERT INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?) ON CONFLICT (email) DO NOTHING",
+      "INSERT INTO subscribers (id, email, status, unsubscribe_token, unsubscribe_token_hash) VALUES (?, ?, 'active', ?, ?)",
     )
-      .bind(id, email, unsubscribeToken)
+      .bind(id, email, token, tokenHash)
       .run();
 
     return c.json({ message: "Subscribed" }, 201);

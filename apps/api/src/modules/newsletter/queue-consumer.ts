@@ -2,9 +2,12 @@ import type { Bindings } from "../../env";
 import type { NewsletterMessage } from "./queue";
 import { sendMail } from "../../lib/mailer";
 import { escapeHTML } from "../../lib/email";
+import { deriveUnsubscribeToken } from "../../lib/tokens";
 
 // `MessageBatch` and `ExecutionContext` are global ambient types from
 // @cloudflare/workers-types — no explicit import needed.
+
+const MAX_RETRIES = 5;
 
 function generateHTML(post: NewsletterMessage, siteUrl: string): string {
   const postUrl = `${siteUrl}/posts/${encodeURIComponent(post.postSlug)}`;
@@ -52,8 +55,14 @@ export async function handleQueueBatch(
         continue;
       }
 
+      // Derive token deterministically (L6: don't rely on message token)
+      const token = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, msg.body.subscriberId);
+
       // Send email
-      const html = generateHTML(msg.body, env.SITE_URL);
+      const html = generateHTML(
+        { ...msg.body, unsubscribeToken: token },
+        env.SITE_URL,
+      );
       await sendMail(env.SEND_EMAIL, {
         from: env.EMAIL_FROM_ADDRESS,
         to: msg.body.subscriberEmail,
@@ -69,8 +78,24 @@ export async function handleQueueBatch(
         .run();
 
       msg.ack();
-    } catch {
-      msg.retry();
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "unknown";
+      console.error(
+        `Queue delivery failed for ${msg.body.subscriberEmail} (attempt ${msg.attempts}): ${errorMsg}`,
+      );
+
+      // M6: After max retries, blacklist and ack to prevent infinite churn
+      if (msg.attempts >= MAX_RETRIES) {
+        console.error(`Max retries exceeded for ${msg.body.subscriberEmail}; blacklisting`);
+        await env.DB.prepare(
+          "INSERT OR IGNORE INTO blacklist (email, reason) VALUES (?, ?)",
+        )
+          .bind(msg.body.subscriberEmail, "permanent_delivery_failure")
+          .run();
+        msg.ack();
+      } else {
+        msg.retry();
+      }
     }
   }
 }

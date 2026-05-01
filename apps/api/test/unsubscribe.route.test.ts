@@ -1,6 +1,7 @@
 import { env, createExecutionContext } from "cloudflare:test";
 import { describe, expect, it, afterEach } from "vitest";
 import app from "../src/app";
+import { deriveUnsubscribeToken, hashToken } from "../src/lib/tokens";
 
 const ctx = createExecutionContext();
 
@@ -14,17 +15,17 @@ describe("POST /api/newsletter/unsubscribe", () => {
   afterEach(async () => {
     if (originalEnvironment) env.ENVIRONMENT = originalEnvironment;
     await env.DB.prepare("DELETE FROM subscribers").run();
-    const list = await env.RATE_LIMIT_KV.list();
-    await Promise.all(list.keys.map((k: { name: string }) => env.RATE_LIMIT_KV.delete(k.name)));
+    await env.DB.prepare("DELETE FROM rate_limits").run();
   });
 
   async function createSubscriber(email: string): Promise<string> {
-    const token = crypto.randomUUID();
     const id = crypto.randomUUID();
+    const token = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, id);
+    const tokenHash = await hashToken(token);
     await env.DB.prepare(
-      "INSERT INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      "INSERT INTO subscribers (id, email, status, unsubscribe_token, unsubscribe_token_hash) VALUES (?, ?, 'active', ?, ?)",
     )
-      .bind(id, email, token)
+      .bind(id, email, token, tokenHash)
       .run();
     return token;
   }

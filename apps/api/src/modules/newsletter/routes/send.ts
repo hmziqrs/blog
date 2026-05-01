@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import type { Bindings } from "../../../env";
 import type { NewsletterMessage } from "../queue";
+import { deriveUnsubscribeToken } from "../../../lib/tokens";
 
 interface PostMeta {
   slug: string;
@@ -48,8 +49,15 @@ app.post("/", async (c) => {
       return c.json({ error: "Invalid slug format" }, 400);
     }
 
+    // H2: Validate slug exists in the posts table
+    const knownPost = await c.env.DB.prepare("SELECT slug FROM posts WHERE slug = ?")
+      .bind(post.slug)
+      .first();
+    if (!knownPost) {
+      return c.json({ error: "Unknown post slug" }, 400);
+    }
+
     // INSERT first with ON CONFLICT to prevent duplicate sends under concurrency.
-    // If the row already exists, meta.changes will be 0 and we bail out before enqueuing.
     const insertResult = await c.env.DB.prepare(
       "INSERT INTO newsletter_sent (post_slug) VALUES (?) ON CONFLICT (post_slug) DO NOTHING",
     )
@@ -61,24 +69,26 @@ app.post("/", async (c) => {
     }
 
     const subscribers = await c.env.DB.prepare(
-      "SELECT id, email, unsubscribe_token FROM subscribers WHERE status = 'active'",
-    ).all<{ id: string; email: string; unsubscribe_token: string }>();
+      "SELECT id, email FROM subscribers WHERE status = 'active'",
+    ).all<{ id: string; email: string }>();
 
     const rows = subscribers.results ?? [];
 
-    // Use sendBatch for fewer queue operations and better throughput.
-    // sendBatch is hard-capped at 100 messages and 256 KB total per call,
-    // so chunk explicitly — required for any subscriber count > 100.
-    const messages: MessageSendRequest<NewsletterMessage>[] = rows.map((sub) => ({
-      body: {
-        postSlug: post.slug,
-        postTitle: post.title,
-        postExcerpt: post.excerpt,
-        subscriberId: sub.id,
-        subscriberEmail: sub.email,
-        unsubscribeToken: sub.unsubscribe_token,
-      },
-    }));
+    // Derive unsubscribe tokens deterministically (L6 fix)
+    const messages: MessageSendRequest<NewsletterMessage>[] = [];
+    for (const sub of rows) {
+      const token = await deriveUnsubscribeToken(c.env.NEWSLETTER_SEND_SECRET, sub.id);
+      messages.push({
+        body: {
+          postSlug: post.slug,
+          postTitle: post.title,
+          postExcerpt: post.excerpt,
+          subscriberId: sub.id,
+          subscriberEmail: sub.email,
+          unsubscribeToken: token,
+        },
+      });
+    }
 
     const SEND_BATCH_CHUNK = 100;
     for (let i = 0; i < messages.length; i += SEND_BATCH_CHUNK) {

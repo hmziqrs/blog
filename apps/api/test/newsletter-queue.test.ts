@@ -1,6 +1,7 @@
 import { env, createExecutionContext, createMessageBatch, getQueueResult } from "cloudflare:test";
 import { describe, expect, it, beforeAll, afterEach } from "vitest";
 import worker from "../src/index";
+import { deriveUnsubscribeToken } from "../src/lib/tokens";
 
 describe("handleQueueBatch", () => {
   beforeAll(async () => {
@@ -242,7 +243,8 @@ describe("handleQueueBatch", () => {
       expect(sentEmails[0]!.html).toContain("html-test");
       expect(sentEmails[0]!.html).toContain("&lt;Test&gt;");
       expect(sentEmails[0]!.html).toContain("&lt;script&gt;");
-      expect(sentEmails[0]!.html).toContain("unsub-html");
+      const expectedToken = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, "queue-sub-1");
+      expect(sentEmails[0]!.html).toContain(expectedToken);
       expect(sentEmails[0]!.html).toContain(env.SITE_URL);
     } finally {
       env.SEND_EMAIL.send = originalSend;

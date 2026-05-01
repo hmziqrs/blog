@@ -39,8 +39,7 @@ afterEach(async () => {
   await env.DB.prepare("DELETE FROM subscribers WHERE email LIKE ?")
     .bind("test-%@example.com")
     .run();
-  const list = await env.RATE_LIMIT_KV.list();
-  await Promise.all(list.keys.map((k: { name: string }) => env.RATE_LIMIT_KV.delete(k.name)));
+  await env.DB.prepare("DELETE FROM rate_limits").run();
 });
 
 describe("POST /api/newsletter/subscribe", () => {

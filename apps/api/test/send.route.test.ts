@@ -3,6 +3,7 @@ import { describe, expect, it, beforeAll, afterEach } from "vitest";
 import app from "../src/app";
 import type { NewsletterMessage } from "../src/modules/newsletter/queue";
 import type { D1Result, MessageSendRequest } from "@cloudflare/workers-types";
+import { deriveUnsubscribeToken } from "../src/lib/tokens";
 
 const ctx = createExecutionContext();
 type NewsletterQueueMessage = MessageSendRequest<NewsletterMessage>;
@@ -15,6 +16,38 @@ describe("POST /api/newsletter/send", () => {
   const AUTH_HEADER = { "x-send-secret": "local-dev-secret" };
 
   beforeAll(async () => {
+    // Seed posts table (H2: slug validation)
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
+    )
+      .bind("my-post", "My Post", "An excerpt")
+      .run();
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
+    )
+      .bind("already-sent-post", "Already Sent", "This was already sent")
+      .run();
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
+    )
+      .bind("send-test-post", "Test Newsletter", "This is a test newsletter send")
+      .run();
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
+    )
+      .bind("shape-test-post", "Shape Test", "Shape excerpt")
+      .run();
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
+    )
+      .bind("no-subscribers-post", "No Subscribers", "Nobody here")
+      .run();
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
+    )
+      .bind("chunk-test-post", "Chunk Test", "Chunk excerpt")
+      .run();
+
     await env.DB.prepare(
       "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
     )
@@ -327,11 +360,13 @@ describe("POST /api/newsletter/send", () => {
       expect(first.postTitle).toBe("Shape Test");
       expect(first.postExcerpt).toBe("Shape excerpt");
       expect(first.subscriberEmail).toBe("sendtest-1@example.com");
-      expect(first.unsubscribeToken).toBe("unsub-send-1");
+      const expectedToken1 = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, "send-sub-1");
+      expect(first.unsubscribeToken).toBe(expectedToken1);
 
       const second = batchCalls[0]![1]!.body;
       expect(second.subscriberEmail).toBe("sendtest-2@example.com");
-      expect(second.unsubscribeToken).toBe("unsub-send-2");
+      const expectedToken2 = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, "send-sub-2");
+      expect(second.unsubscribeToken).toBe(expectedToken2);
     } finally {
       env.NEWSLETTER_QUEUE.sendBatch = originalSendBatch;
     }
