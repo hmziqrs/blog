@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { z } from "zod";
 import { normalizeEmail } from "../src/lib/email";
+import { timingSafeEqual } from "../src/modules/newsletter/routes/send";
 
 describe("normalizeEmail", () => {
   test("lowercases the address", () => {
@@ -97,5 +98,31 @@ describe("unsubscribe schema", () => {
 
   test("rejects missing token", () => {
     expect(() => unsubscribeSchema.parse({})).toThrow();
+  });
+});
+
+// H3: timingSafeEqual helper unit tests
+describe("timingSafeEqual", () => {
+  test("equal strings return true", () => {
+    expect(timingSafeEqual("secret123", "secret123")).toBe(true);
+  });
+
+  test("unequal same-length strings return false", () => {
+    expect(timingSafeEqual("secret123", "secret124")).toBe(false);
+    expect(timingSafeEqual("aaaaaaaa", "bbbbbbbb")).toBe(false);
+  });
+
+  test("unequal length strings return false", () => {
+    expect(timingSafeEqual("short", "longer string")).toBe(false);
+    expect(timingSafeEqual("longer string", "short")).toBe(false);
+  });
+
+  test("empty strings are equal", () => {
+    expect(timingSafeEqual("", "")).toBe(true);
+  });
+
+  test("empty vs non-empty returns false", () => {
+    expect(timingSafeEqual("", "x")).toBe(false);
+    expect(timingSafeEqual("x", "")).toBe(false);
   });
 });

@@ -20,7 +20,10 @@ export async function checkSubscribeRateLimit(
     .first<{ count: number }>();
   if ((emailResult?.count ?? 0) >= 2) return false;
 
-  await db.prepare("INSERT INTO rate_limits (ip, timestamp, email) VALUES (?, ?, ?)").bind(ip, now, email).run();
+  await db
+    .prepare("INSERT INTO rate_limits (ip, timestamp, email) VALUES (?, ?, ?)")
+    .bind(ip, now, email)
+    .run();
   return true;
 }
 
@@ -34,6 +37,9 @@ export async function checkUnsubscribeRateLimit(db: D1Database, ip: string): Pro
     .first<{ count: number }>();
   if ((ipResult?.count ?? 0) >= 3) return false;
 
-  await db.prepare("INSERT INTO rate_limits (ip, timestamp, email) VALUES (?, ?, ?)").bind(ip, now, null).run();
+  await db
+    .prepare("INSERT INTO rate_limits (ip, timestamp, email) VALUES (?, ?, ?)")
+    .bind(ip, now, null)
+    .run();
   return true;
 }

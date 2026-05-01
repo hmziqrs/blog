@@ -11,20 +11,16 @@ type NewsletterQueueMessage = MessageSendRequest<NewsletterMessage>;
 
 describe("Newsletter end-to-end", () => {
   beforeAll(async () => {
-    await env.DB.prepare(
-      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
-    )
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
       .bind("e2e-post", "E2E Test Post", "End-to-end newsletter flow")
       .run();
-    await env.DB.prepare(
-      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
-    )
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
       .bind("dup-post", "Duplicate", "Should not enqueue")
       .run();
     await env.DB.prepare(
-      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
-      .bind("e2e-sub", "e2e@example.com", "unsub-e2e")
+      .bind("e2e-sub", "e2e@example.com", "hash-e2e")
       .run();
   });
 

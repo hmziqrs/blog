@@ -53,9 +53,9 @@ describe("Queue simulation behavior in test environment", () => {
   it("KV and D1 execute immediately; Queue consumers require manual invocation", async () => {
     // D1: query executes immediately
     await env.DB.prepare(
-      "INSERT INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      "INSERT INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
-      .bind("kv-d1-sub", "kv-d1@example.com", "unsub-kv-d1")
+      .bind("kv-d1-sub", "kv-d1@example.com", "hash-kv-d1")
       .run();
 
     const row = await env.DB.prepare("SELECT id FROM subscribers WHERE id = ?")

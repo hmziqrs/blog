@@ -87,11 +87,12 @@ app.post("/", async (c) => {
     const token = await deriveUnsubscribeToken(c.env.NEWSLETTER_SEND_SECRET, id);
     const tokenHash = await hashToken(token);
 
-    // L6: Store hash for lookup; keep plaintext during transition for backward compat
+    // ON CONFLICT(email) handles the race where two concurrent requests both
+    // pass the SELECT above and both reach INSERT with the same email.
     await c.env.DB.prepare(
-      "INSERT INTO subscribers (id, email, status, unsubscribe_token, unsubscribe_token_hash) VALUES (?, ?, 'active', ?, ?)",
+      "INSERT INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?) ON CONFLICT(email) DO NOTHING",
     )
-      .bind(id, email, token, tokenHash)
+      .bind(id, email, tokenHash)
       .run();
 
     return c.json({ message: "Subscribed" }, 201);

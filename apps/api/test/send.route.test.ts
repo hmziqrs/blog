@@ -17,46 +17,34 @@ describe("POST /api/newsletter/send", () => {
 
   beforeAll(async () => {
     // Seed posts table (H2: slug validation)
-    await env.DB.prepare(
-      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
-    )
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
       .bind("my-post", "My Post", "An excerpt")
       .run();
-    await env.DB.prepare(
-      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
-    )
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
       .bind("already-sent-post", "Already Sent", "This was already sent")
       .run();
-    await env.DB.prepare(
-      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
-    )
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
       .bind("send-test-post", "Test Newsletter", "This is a test newsletter send")
       .run();
-    await env.DB.prepare(
-      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
-    )
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
       .bind("shape-test-post", "Shape Test", "Shape excerpt")
       .run();
-    await env.DB.prepare(
-      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
-    )
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
       .bind("no-subscribers-post", "No Subscribers", "Nobody here")
       .run();
-    await env.DB.prepare(
-      "INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)",
-    )
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
       .bind("chunk-test-post", "Chunk Test", "Chunk excerpt")
       .run();
 
     await env.DB.prepare(
-      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
-      .bind("send-sub-1", "sendtest-1@example.com", "unsub-send-1")
+      .bind("send-sub-1", "sendtest-1@example.com", "hash-send-1")
       .run();
     await env.DB.prepare(
-      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
-      .bind("send-sub-2", "sendtest-2@example.com", "unsub-send-2")
+      .bind("send-sub-2", "sendtest-2@example.com", "hash-send-2")
       .run();
   });
 
@@ -413,14 +401,153 @@ describe("POST /api/newsletter/send", () => {
       expect(body.queued).toBe(0);
     } finally {
       await env.DB.prepare(
-        "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+        "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
       )
-        .bind("send-sub-1", "sendtest-1@example.com", "unsub-send-1")
+        .bind("send-sub-1", "sendtest-1@example.com", "hash-send-1")
         .run();
       await env.DB.prepare(
-        "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+        "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
       )
-        .bind("send-sub-2", "sendtest-2@example.com", "unsub-send-2")
+        .bind("send-sub-2", "sendtest-2@example.com", "hash-send-2")
+        .run();
+    }
+  });
+
+  // H2a: Concurrent send requests for same slug — only one should enqueue
+  it("prevents duplicate enqueue from concurrent send requests", async () => {
+    // Clean slate for this slug
+    await env.DB.prepare("DELETE FROM newsletter_sent WHERE post_slug = ?")
+      .bind("concurrent-post")
+      .run();
+    await env.DB.prepare("DELETE FROM newsletter_deliveries WHERE post_slug = ?")
+      .bind("concurrent-post")
+      .run();
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
+      .bind("concurrent-post", "Concurrent", "Testing race")
+      .run();
+
+    const batchCalls: NewsletterQueueMessage[][] = [];
+    const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
+    env.NEWSLETTER_QUEUE.sendBatch = async (messages: Iterable<NewsletterQueueMessage>) => {
+      batchCalls.push([...messages]);
+    };
+
+    try {
+      const reqBody = JSON.stringify({
+        slug: "concurrent-post",
+        title: "Concurrent",
+        excerpt: "Testing race",
+      });
+
+      const [res1, res2] = await Promise.all([
+        app.fetch(
+          req("/api/newsletter/send", {
+            method: "POST",
+            headers: { ...AUTH_HEADER, "content-type": "application/json" },
+            body: reqBody,
+          }),
+          env,
+          ctx,
+        ),
+        app.fetch(
+          req("/api/newsletter/send", {
+            method: "POST",
+            headers: { ...AUTH_HEADER, "content-type": "application/json" },
+            body: reqBody,
+          }),
+          env,
+          ctx,
+        ),
+      ]);
+
+      // Both should return 200 (one enqueued, one already sent)
+      expect(res1.status).toBe(200);
+      expect(res2.status).toBe(200);
+
+      // Exactly one of them should have enqueued
+      const bodies = await Promise.all([
+        res1.json() as Promise<{ queued?: number; message?: string }>,
+        res2.json() as Promise<{ queued?: number; message?: string }>,
+      ]);
+      const enqueued = bodies.filter((b) => b.queued !== undefined);
+      const alreadySent = bodies.filter((b) => b.message === "Already sent");
+      expect(enqueued.length).toBe(1);
+      expect(alreadySent.length).toBe(1);
+
+      // Exactly one row in newsletter_sent
+      const count = await env.DB.prepare(
+        "SELECT COUNT(*) as c FROM newsletter_sent WHERE post_slug = ?",
+      )
+        .bind("concurrent-post")
+        .first<{ c: number }>();
+      expect(count?.c).toBe(1);
+    } finally {
+      env.NEWSLETTER_QUEUE.sendBatch = originalSendBatch;
+    }
+  });
+
+  // M6: Unsubscribed emails are not enqueued
+  it("does not enqueue unsubscribed subscribers", async () => {
+    await env.DB.prepare("DELETE FROM subscribers").run();
+    await env.DB.prepare("DELETE FROM newsletter_sent WHERE post_slug = ?")
+      .bind("unsub-filter-post")
+      .run();
+    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
+      .bind("unsub-filter-post", "Unsub Filter", "Testing filter")
+      .run();
+
+    // Insert one active and one unsubscribed subscriber
+    await env.DB.prepare(
+      "INSERT INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
+    )
+      .bind("active-sub", "active@example.com", "hash-a")
+      .run();
+    await env.DB.prepare(
+      "INSERT INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'unsubscribed', ?)",
+    )
+      .bind("unsub-sub", "unsub@example.com", "hash-u")
+      .run();
+
+    const batchCalls: NewsletterQueueMessage[][] = [];
+    const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
+    env.NEWSLETTER_QUEUE.sendBatch = async (messages: Iterable<NewsletterQueueMessage>) => {
+      batchCalls.push([...messages]);
+    };
+
+    try {
+      const res = await app.fetch(
+        req("/api/newsletter/send", {
+          method: "POST",
+          headers: { ...AUTH_HEADER, "content-type": "application/json" },
+          body: JSON.stringify({
+            slug: "unsub-filter-post",
+            title: "Unsub Filter",
+            excerpt: "Testing filter",
+          }),
+        }),
+        env,
+        ctx,
+      );
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as { queued: number };
+      expect(body.queued).toBe(1);
+
+      expect(batchCalls.length).toBe(1);
+      expect(batchCalls[0]!.length).toBe(1);
+      expect(batchCalls[0]![0]!.body.subscriberEmail).toBe("active@example.com");
+    } finally {
+      env.NEWSLETTER_QUEUE.sendBatch = originalSendBatch;
+      // Restore default subscribers for other tests
+      await env.DB.prepare("DELETE FROM subscribers").run();
+      await env.DB.prepare(
+        "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
+      )
+        .bind("send-sub-1", "sendtest-1@example.com", "hash-send-1")
+        .run();
+      await env.DB.prepare(
+        "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
+      )
+        .bind("send-sub-2", "sendtest-2@example.com", "hash-send-2")
         .run();
     }
   });
@@ -429,11 +556,11 @@ describe("POST /api/newsletter/send", () => {
     it("chunks into multiple sendBatch calls when subscribers exceed 100", async () => {
       // Seed 105 subscribers
       const stmt = env.DB.prepare(
-        "INSERT INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+        "INSERT INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
       );
       const batch: Promise<D1Result>[] = [];
       for (let i = 1; i <= 105; i++) {
-        batch.push(stmt.bind(`chunk-sub-${i}`, `chunk-${i}@example.com`, `unsub-chunk-${i}`).run());
+        batch.push(stmt.bind(`chunk-sub-${i}`, `chunk-${i}@example.com`, `hash-chunk-${i}`).run());
       }
       await Promise.all(batch);
 

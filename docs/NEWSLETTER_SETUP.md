@@ -99,6 +99,7 @@ NEWSLETTER_SEND_SECRET=your-secret bun run newsletter:send
 ## Architecture Note
 
 Newsletter delivery is handled asynchronously via **Cloudflare Queues**:
+
 - The `/send` endpoint enqueues messages in batches.
 - `apps/api/src/modules/newsletter/queue-consumer.ts` processes the queue and calls `sendMail()` for each subscriber.
 - This replaces the earlier direct-sending approach and provides better reliability and throughput.

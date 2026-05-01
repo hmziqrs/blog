@@ -3,12 +3,22 @@ CREATE TABLE IF NOT EXISTS subscribers (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   subscribed_at TEXT DEFAULT (datetime('now')),
-  unsubscribe_token TEXT UNIQUE NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active'
+  unsubscribe_token_hash TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'active',
+  unsubscribed_at TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_email ON subscribers(email);
 CREATE INDEX IF NOT EXISTS idx_subscribers_status ON subscribers(status);
+CREATE INDEX IF NOT EXISTS idx_subscribers_token_hash ON subscribers(unsubscribe_token_hash);
+
+-- Posts table (slug validation for /send)
+CREATE TABLE IF NOT EXISTS posts (
+  slug TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  excerpt TEXT NOT NULL,
+  published_at TEXT DEFAULT (datetime('now'))
+);
 
 -- Newsletter tracking table
 CREATE TABLE IF NOT EXISTS newsletter_sent (

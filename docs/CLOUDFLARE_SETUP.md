@@ -14,6 +14,7 @@ wrangler d1 create blog-db-staging
 ```
 
 Copy each `database_id` into `apps/api/wrangler.toml`:
+
 - `[[d1_databases]]` → prod id
 - `[[env.staging.d1_databases]]` → staging id
 
@@ -25,6 +26,7 @@ wrangler kv namespace create RATE_LIMIT_KV --env staging
 ```
 
 Copy each `id` into `wrangler.toml`:
+
 - `[[kv_namespaces]]` → prod id
 - `[[env.staging.kv_namespaces]]` → staging id
 
@@ -42,6 +44,7 @@ wrangler r2 bucket create blog-media
 ```
 
 Generate S3-compatible tokens in Cloudflare dashboard and set:
+
 - `R2_ACCOUNT_ID`
 - `R2_ACCESS_KEY_ID`
 - `R2_SECRET_ACCESS_KEY`
@@ -77,10 +80,12 @@ wrangler secret put EMAIL_FROM_ADDRESS --env staging
 ## 8. Create Pages Projects
 
 Dashboard → Pages → Create:
+
 - **Prod**: `web` (production branch: `master`)
 - **Staging**: `web-staging` (production branch: `staging`)
 
 Or deploy first time via CLI:
+
 ```bash
 bun run deploy:web:staging
 bun run deploy:web:prod
@@ -97,15 +102,15 @@ bun run db:migrate:prod
 
 Add to repo secrets:
 
-| Secret | Used By |
-|--------|---------|
-| `CLOUDFLARE_API_TOKEN` | All deploys |
-| `CLOUDFLARE_ACCOUNT_ID` | All deploys |
-| `R2_ACCOUNT_ID` | Media upload |
-| `R2_ACCESS_KEY_ID` | Media upload |
-| `R2_SECRET_ACCESS_KEY` | Media upload |
-| `R2_BUCKET_NAME` | Media upload |
-| `R2_PUBLIC_URL` | Media upload + deploy |
+| Secret                  | Used By               |
+| ----------------------- | --------------------- |
+| `CLOUDFLARE_API_TOKEN`  | All deploys           |
+| `CLOUDFLARE_ACCOUNT_ID` | All deploys           |
+| `R2_ACCOUNT_ID`         | Media upload          |
+| `R2_ACCESS_KEY_ID`      | Media upload          |
+| `R2_SECRET_ACCESS_KEY`  | Media upload          |
+| `R2_BUCKET_NAME`        | Media upload          |
+| `R2_PUBLIC_URL`         | Media upload + deploy |
 
 ## 11. Deploy
 
@@ -119,8 +124,8 @@ bun run deploy:prod
 
 ## 12. Verify
 
-| Resource | Prod | Staging |
-|----------|------|---------|
-| Web | `https://blog.hmziq.rs` | `https://web-staging.pages.dev` |
-| API | `https://api.<account>.workers.dev` | `https://api-staging.<account>.workers.dev` |
-| Newsletter | `POST /api/newsletter/subscribe` | Same |
+| Resource   | Prod                                | Staging                                     |
+| ---------- | ----------------------------------- | ------------------------------------------- |
+| Web        | `https://blog.hmziq.rs`             | `https://web-staging.pages.dev`             |
+| API        | `https://api.<account>.workers.dev` | `https://api-staging.<account>.workers.dev` |
+| Newsletter | `POST /api/newsletter/subscribe`    | Same                                        |

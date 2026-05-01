@@ -23,9 +23,9 @@ describe("POST /api/newsletter/unsubscribe", () => {
     const token = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, id);
     const tokenHash = await hashToken(token);
     await env.DB.prepare(
-      "INSERT INTO subscribers (id, email, status, unsubscribe_token, unsubscribe_token_hash) VALUES (?, ?, 'active', ?, ?)",
+      "INSERT INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
-      .bind(id, email, token, tokenHash)
+      .bind(id, email, tokenHash)
       .run();
     return token;
   }

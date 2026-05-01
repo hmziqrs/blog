@@ -3,7 +3,7 @@ import { describe, expect, it, afterEach, beforeEach } from "vitest";
 import app from "../src/app";
 import worker from "../src/index";
 import type { NewsletterMessage } from "../src/modules/newsletter/queue";
-import { deriveUnsubscribeToken } from "../src/lib/tokens";
+import { deriveUnsubscribeToken, hashToken } from "../src/lib/tokens";
 
 const ctx = createExecutionContext();
 
@@ -187,10 +187,12 @@ describe("Complete end-to-end newsletter flow", () => {
   });
 
   it("unsubscribe soft-deletes subscriber and they no longer receive emails", async () => {
+    const token = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, "e2e-unsub");
+    const tokenHash = await hashToken(token);
     await env.DB.prepare(
-      "INSERT INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      "INSERT INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
-      .bind("e2e-unsub", "e2e-unsub@example.com", "unsub-token-123")
+      .bind("e2e-unsub", "e2e-unsub@example.com", tokenHash)
       .run();
 
     const unsubRes = await app.fetch(
@@ -200,7 +202,7 @@ describe("Complete end-to-end newsletter flow", () => {
           "content-type": "application/json",
           "CF-Connecting-IP": "10.0.0.1",
         },
-        body: JSON.stringify({ token: "unsub-token-123" }),
+        body: JSON.stringify({ token }),
       }),
       env,
       ctx,

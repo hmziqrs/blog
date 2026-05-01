@@ -59,10 +59,7 @@ export async function handleQueueBatch(
       const token = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, msg.body.subscriberId);
 
       // Send email
-      const html = generateHTML(
-        { ...msg.body, unsubscribeToken: token },
-        env.SITE_URL,
-      );
+      const html = generateHTML({ ...msg.body, unsubscribeToken: token }, env.SITE_URL);
       await sendMail(env.SEND_EMAIL, {
         from: env.EMAIL_FROM_ADDRESS,
         to: msg.body.subscriberEmail,
@@ -87,9 +84,7 @@ export async function handleQueueBatch(
       // M6: After max retries, blacklist and ack to prevent infinite churn
       if (msg.attempts >= MAX_RETRIES) {
         console.error(`Max retries exceeded for ${msg.body.subscriberEmail}; blacklisting`);
-        await env.DB.prepare(
-          "INSERT OR IGNORE INTO blacklist (email, reason) VALUES (?, ?)",
-        )
+        await env.DB.prepare("INSERT OR IGNORE INTO blacklist (email, reason) VALUES (?, ?)")
           .bind(msg.body.subscriberEmail, "permanent_delivery_failure")
           .run();
         msg.ack();

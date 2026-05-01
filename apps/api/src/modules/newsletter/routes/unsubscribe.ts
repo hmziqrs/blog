@@ -14,20 +14,11 @@ async function processUnsubscribe(
   db: Bindings["DB"],
   token: string,
 ): Promise<{ error: string; status: 400 | 404 } | { message: string; status: 200 }> {
-  // L6: Lookup by SHA-256 hash instead of plaintext token
   const tokenHash = await hashToken(token);
-  let subscriber = await db
+  const subscriber = await db
     .prepare("SELECT id FROM subscribers WHERE unsubscribe_token_hash = ? AND status = 'active'")
     .bind(tokenHash)
     .first<{ id: string }>();
-
-  // Fallback: plaintext token lookup for pre-migration subscribers
-  if (!subscriber) {
-    subscriber = await db
-      .prepare("SELECT id FROM subscribers WHERE unsubscribe_token = ? AND status = 'active'")
-      .bind(token)
-      .first<{ id: string }>();
-  }
 
   if (!subscriber) {
     return { error: "Invalid unsubscribe token", status: 404 };

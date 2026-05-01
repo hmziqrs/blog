@@ -6,14 +6,14 @@ import { deriveUnsubscribeToken } from "../src/lib/tokens";
 describe("handleQueueBatch", () => {
   beforeAll(async () => {
     await env.DB.prepare(
-      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
-      .bind("queue-sub-1", "queue-1@example.com", "unsub-q1")
+      .bind("queue-sub-1", "queue-1@example.com", "hash-q1")
       .run();
     await env.DB.prepare(
-      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
-      .bind("queue-sub-2", "queue-2@example.com", "unsub-q2")
+      .bind("queue-sub-2", "queue-2@example.com", "hash-q2")
       .run();
   });
 
@@ -331,9 +331,7 @@ describe("handleQueueBatch", () => {
       expect(result.retryMessages).toStrictEqual([]);
 
       // Should be in blacklist
-      const blacklisted = await env.DB.prepare(
-        "SELECT email FROM blacklist WHERE email = ?",
-      )
+      const blacklisted = await env.DB.prepare("SELECT email FROM blacklist WHERE email = ?")
         .bind("blacklist@example.com")
         .first();
       expect(blacklisted).not.toBeNull();

@@ -365,6 +365,43 @@ describe("POST /api/newsletter/subscribe", () => {
     expect(row?.unsubscribed_at).toBeNull();
   });
 
+  // ─── H2c: Concurrent subscribe same email ────────────────────────────
+
+  it("handles concurrent subscribe requests for same email gracefully", async () => {
+    const reqBody = JSON.stringify({ email: "test-concurrent@example.com", token: "abc123" });
+
+    const [res1, res2] = await Promise.all([
+      app.fetch(
+        req("/api/newsletter/subscribe", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: reqBody,
+        }),
+        env,
+        ctx,
+      ),
+      app.fetch(
+        req("/api/newsletter/subscribe", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: reqBody,
+        }),
+        env,
+        ctx,
+      ),
+    ]);
+
+    // Both should return 201 (M1: no enumeration)
+    expect(res1.status).toBe(201);
+    expect(res2.status).toBe(201);
+
+    // Exactly one row in subscribers
+    const count = await env.DB.prepare("SELECT COUNT(*) as c FROM subscribers WHERE email = ?")
+      .bind("test-concurrent@example.com")
+      .first<{ c: number }>();
+    expect(count?.c).toBe(1);
+  });
+
   // ─── Rate limiting ───────────────────────────────────────────────────
 
   it("rate-limits after 2 requests from same IP", async () => {
