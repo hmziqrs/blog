@@ -176,7 +176,7 @@ Or push to the `staging` branch — CI will deploy automatically.
 | Resource    | URL                                              |
 | ----------- | ------------------------------------------------ |
 | Web         | `https://staging.hmziqblog.pages.dev`            |
-| API         | `https://api-staging.<account>.workers.dev`      |
+| API         | `https://api-staging.hmziq.workers.dev`          |
 | Subscribe   | `POST /api/newsletter/subscribe`                 |
 | Unsubscribe | `POST /api/newsletter/unsubscribe`               |
 
