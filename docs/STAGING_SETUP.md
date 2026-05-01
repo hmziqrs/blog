@@ -75,12 +75,16 @@ R2_PUBLIC_URL=<r2-dev-or-custom-url>
 
 ## 4. Enable Cloudflare Email Routing
 
-1. Go to https://dash.cloudflare.com/
-2. Navigate to **Email → Email Routing**
-3. Verify your domain
-4. Add both addresses as **destination addresses** under **Email Routing → Destination addresses**:
-   - `newsletter@<your-domain>` (production)
-   - `newsletter-staging@<your-domain>` (staging)
+1. In the Cloudflare dashboard, go to **Email Routing** (sidebar or `https://dash.cloudflare.com/?to=/:account/:zone/email/routing`)
+2. Review the DNS records that will be added to your zone, then select **Add records and enable**
+3. Go to **Routing rules**
+4. Under **Custom addresses**, select **Create address**
+5. Enter the custom address: `newsletter-staging@<your-domain>`
+6. In **Destination addresses**, enter your real inbox email
+7. Select **Save**
+8. Cloudflare sends a verification email to the destination — open it and select **Verify email address** > **Go to Email Routing**
+9. The destination now shows **Verified** — select **Continue**
+10. Select **Add records and finish** (Cloudflare auto-adds the required MX and TXT DNS records)
 
 ---
 
