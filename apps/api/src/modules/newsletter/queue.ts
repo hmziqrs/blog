@@ -1,7 +1,7 @@
 export interface NewsletterMessage {
-  postSlug: string;
-  postTitle: string;
-  postExcerpt: string;
+  issueSlug: string;
+  subject: string;
+  htmlBody: string;
   subscriberId: string;
   subscriberEmail: string;
   unsubscribeToken: string;

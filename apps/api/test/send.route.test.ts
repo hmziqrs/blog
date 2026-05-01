@@ -16,26 +16,6 @@ describe("POST /api/newsletter/send", () => {
   const AUTH_HEADER = { "x-send-secret": "local-dev-secret" };
 
   beforeAll(async () => {
-    // Seed posts table (H2: slug validation)
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("my-post", "My Post", "An excerpt")
-      .run();
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("already-sent-post", "Already Sent", "This was already sent")
-      .run();
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("send-test-post", "Test Newsletter", "This is a test newsletter send")
-      .run();
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("shape-test-post", "Shape Test", "Shape excerpt")
-      .run();
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("no-subscribers-post", "No Subscribers", "Nobody here")
-      .run();
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("chunk-test-post", "Chunk Test", "Chunk excerpt")
-      .run();
-
     await env.DB.prepare(
       "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
@@ -60,7 +40,7 @@ describe("POST /api/newsletter/send", () => {
       req("/api/newsletter/send", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug: "my-post", title: "My Post", excerpt: "An excerpt" }),
+        body: JSON.stringify({ slug: "my-post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
       }),
       env,
       ctx,
@@ -76,7 +56,7 @@ describe("POST /api/newsletter/send", () => {
           "content-type": "application/json",
           "x-send-secret": "wrong-secret",
         },
-        body: JSON.stringify({ slug: "my-post", title: "My Post", excerpt: "An excerpt" }),
+        body: JSON.stringify({ slug: "my-post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
       }),
       env,
       ctx,
@@ -94,7 +74,7 @@ describe("POST /api/newsletter/send", () => {
           ...AUTH_HEADER,
           "content-type": "application/json",
         },
-        body: JSON.stringify({ title: "My Post", excerpt: "An excerpt" }),
+        body: JSON.stringify({ subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
       }),
       env,
       ctx,
@@ -102,7 +82,7 @@ describe("POST /api/newsletter/send", () => {
     expect(res.status).toBe(400);
   });
 
-  it("rejects missing title", async () => {
+  it("rejects missing subject", async () => {
     const res = await app.fetch(
       req("/api/newsletter/send", {
         method: "POST",
@@ -110,7 +90,7 @@ describe("POST /api/newsletter/send", () => {
           ...AUTH_HEADER,
           "content-type": "application/json",
         },
-        body: JSON.stringify({ slug: "my-post", excerpt: "An excerpt" }),
+        body: JSON.stringify({ slug: "my-post", htmlBody: "<p>An excerpt</p>" }),
       }),
       env,
       ctx,
@@ -118,7 +98,7 @@ describe("POST /api/newsletter/send", () => {
     expect(res.status).toBe(400);
   });
 
-  it("rejects missing excerpt", async () => {
+  it("rejects missing htmlBody", async () => {
     const res = await app.fetch(
       req("/api/newsletter/send", {
         method: "POST",
@@ -126,7 +106,7 @@ describe("POST /api/newsletter/send", () => {
           ...AUTH_HEADER,
           "content-type": "application/json",
         },
-        body: JSON.stringify({ slug: "my-post", title: "My Post" }),
+        body: JSON.stringify({ slug: "my-post", subject: "My Post" }),
       }),
       env,
       ctx,
@@ -144,8 +124,8 @@ describe("POST /api/newsletter/send", () => {
         },
         body: JSON.stringify({
           slug: "a".repeat(257),
-          title: "My Post",
-          excerpt: "An excerpt",
+          subject: "My Post",
+          htmlBody: "<p>An excerpt</p>",
         }),
       }),
       env,
@@ -154,7 +134,7 @@ describe("POST /api/newsletter/send", () => {
     expect(res.status).toBe(400);
   });
 
-  it("rejects overly long title", async () => {
+  it("rejects overly long subject", async () => {
     const res = await app.fetch(
       req("/api/newsletter/send", {
         method: "POST",
@@ -164,8 +144,8 @@ describe("POST /api/newsletter/send", () => {
         },
         body: JSON.stringify({
           slug: "my-post",
-          title: "A".repeat(257),
-          excerpt: "An excerpt",
+          subject: "A".repeat(257),
+          htmlBody: "<p>An excerpt</p>",
         }),
       }),
       env,
@@ -174,7 +154,7 @@ describe("POST /api/newsletter/send", () => {
     expect(res.status).toBe(400);
   });
 
-  it("rejects overly long excerpt", async () => {
+  it("rejects overly long htmlBody", async () => {
     const res = await app.fetch(
       req("/api/newsletter/send", {
         method: "POST",
@@ -184,8 +164,8 @@ describe("POST /api/newsletter/send", () => {
         },
         body: JSON.stringify({
           slug: "my-post",
-          title: "My Post",
-          excerpt: "x".repeat(4097),
+          subject: "My Post",
+          htmlBody: "x".repeat(100_001),
         }),
       }),
       env,
@@ -216,7 +196,7 @@ describe("POST /api/newsletter/send", () => {
       req("/api/newsletter/send", {
         method: "POST",
         headers: { ...AUTH_HEADER, "content-type": "application/json" },
-        body: JSON.stringify({ slug: "My Post", title: "My Post", excerpt: "An excerpt" }),
+        body: JSON.stringify({ slug: "My Post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
       }),
       env,
       ctx,
@@ -226,29 +206,13 @@ describe("POST /api/newsletter/send", () => {
     expect(body.error).toBe("Invalid slug format");
   });
 
-  // H2b: Slug not in posts table
-  it("rejects unknown slug not in posts table", async () => {
-    const res = await app.fetch(
-      req("/api/newsletter/send", {
-        method: "POST",
-        headers: { ...AUTH_HEADER, "content-type": "application/json" },
-        body: JSON.stringify({ slug: "nonexistent-post", title: "No", excerpt: "Nope" }),
-      }),
-      env,
-      ctx,
-    );
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as { error: string };
-    expect(body.error).toBe("Unknown post slug");
-  });
-
   // L4: Spoofed Content-Type
   it("rejects spoofed Content-Type like application/json-pretend", async () => {
     const res = await app.fetch(
       req("/api/newsletter/send", {
         method: "POST",
         headers: { ...AUTH_HEADER, "content-type": "application/json-pretend" },
-        body: JSON.stringify({ slug: "my-post", title: "My Post", excerpt: "An excerpt" }),
+        body: JSON.stringify({ slug: "my-post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
       }),
       env,
       ctx,
@@ -265,7 +229,7 @@ describe("POST /api/newsletter/send", () => {
           "x-send-secret": "wrong-dev-secrax", // 16 chars, same length as "local-dev-secret"
           "content-type": "application/json",
         },
-        body: JSON.stringify({ slug: "my-post", title: "My Post", excerpt: "An excerpt" }),
+        body: JSON.stringify({ slug: "my-post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
       }),
       env,
       ctx,
@@ -275,8 +239,8 @@ describe("POST /api/newsletter/send", () => {
 
   // ─── Idempotency ───────────────────────────────────────────────────
 
-  it("returns 'Already sent' when post was already sent", async () => {
-    await env.DB.prepare("INSERT INTO newsletter_sent (post_slug) VALUES (?)")
+  it("returns 'Already sent' when issue was already sent", async () => {
+    await env.DB.prepare("INSERT INTO newsletter_sent (issue_slug) VALUES (?)")
       .bind("already-sent-post")
       .run();
 
@@ -289,8 +253,8 @@ describe("POST /api/newsletter/send", () => {
         },
         body: JSON.stringify({
           slug: "already-sent-post",
-          title: "Already Sent",
-          excerpt: "This was already sent",
+          subject: "Already Sent",
+          htmlBody: "<p>This was already sent</p>",
         }),
       }),
       env,
@@ -313,8 +277,8 @@ describe("POST /api/newsletter/send", () => {
         },
         body: JSON.stringify({
           slug: "send-test-post",
-          title: "Test Newsletter",
-          excerpt: "This is a test newsletter send",
+          subject: "Test Newsletter",
+          htmlBody: "<p>This is a test newsletter send</p>",
         }),
       }),
       env,
@@ -324,7 +288,7 @@ describe("POST /api/newsletter/send", () => {
     const body = (await res.json()) as { queued: number };
     expect(body.queued).toBe(2);
 
-    const sentRow = await env.DB.prepare("SELECT id FROM newsletter_sent WHERE post_slug = ?")
+    const sentRow = await env.DB.prepare("SELECT id FROM newsletter_sent WHERE issue_slug = ?")
       .bind("send-test-post")
       .first();
     expect(sentRow).not.toBeNull();
@@ -347,8 +311,8 @@ describe("POST /api/newsletter/send", () => {
           },
           body: JSON.stringify({
             slug: "shape-test-post",
-            title: "Shape Test",
-            excerpt: "Shape excerpt",
+            subject: "Shape Test",
+            htmlBody: "<p>Shape excerpt</p>",
           }),
         }),
         env,
@@ -360,9 +324,9 @@ describe("POST /api/newsletter/send", () => {
       expect(batchCalls[0]!.length).toBe(2);
 
       const first = batchCalls[0]![0]!.body;
-      expect(first.postSlug).toBe("shape-test-post");
-      expect(first.postTitle).toBe("Shape Test");
-      expect(first.postExcerpt).toBe("Shape excerpt");
+      expect(first.issueSlug).toBe("shape-test-post");
+      expect(first.subject).toBe("Shape Test");
+      expect(first.htmlBody).toBe("<p>Shape excerpt</p>");
       expect(first.subscriberEmail).toBe("sendtest-1@example.com");
       const expectedToken1 = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, "send-sub-1");
       expect(first.unsubscribeToken).toBe(expectedToken1);
@@ -389,8 +353,8 @@ describe("POST /api/newsletter/send", () => {
           },
           body: JSON.stringify({
             slug: "no-subscribers-post",
-            title: "No Subscribers",
-            excerpt: "Nobody here",
+            subject: "No Subscribers",
+            htmlBody: "<p>Nobody here</p>",
           }),
         }),
         env,
@@ -416,14 +380,11 @@ describe("POST /api/newsletter/send", () => {
   // H2a: Concurrent send requests for same slug — only one should enqueue
   it("prevents duplicate enqueue from concurrent send requests", async () => {
     // Clean slate for this slug
-    await env.DB.prepare("DELETE FROM newsletter_sent WHERE post_slug = ?")
+    await env.DB.prepare("DELETE FROM newsletter_sent WHERE issue_slug = ?")
       .bind("concurrent-post")
       .run();
-    await env.DB.prepare("DELETE FROM newsletter_deliveries WHERE post_slug = ?")
+    await env.DB.prepare("DELETE FROM newsletter_deliveries WHERE issue_slug = ?")
       .bind("concurrent-post")
-      .run();
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("concurrent-post", "Concurrent", "Testing race")
       .run();
 
     const batchCalls: NewsletterQueueMessage[][] = [];
@@ -435,8 +396,8 @@ describe("POST /api/newsletter/send", () => {
     try {
       const reqBody = JSON.stringify({
         slug: "concurrent-post",
-        title: "Concurrent",
-        excerpt: "Testing race",
+        subject: "Concurrent",
+        htmlBody: "<p>Testing race</p>",
       });
 
       const [res1, res2] = await Promise.all([
@@ -476,7 +437,7 @@ describe("POST /api/newsletter/send", () => {
 
       // Exactly one row in newsletter_sent
       const count = await env.DB.prepare(
-        "SELECT COUNT(*) as c FROM newsletter_sent WHERE post_slug = ?",
+        "SELECT COUNT(*) as c FROM newsletter_sent WHERE issue_slug = ?",
       )
         .bind("concurrent-post")
         .first<{ c: number }>();
@@ -489,11 +450,8 @@ describe("POST /api/newsletter/send", () => {
   // M6: Unsubscribed emails are not enqueued
   it("does not enqueue unsubscribed subscribers", async () => {
     await env.DB.prepare("DELETE FROM subscribers").run();
-    await env.DB.prepare("DELETE FROM newsletter_sent WHERE post_slug = ?")
+    await env.DB.prepare("DELETE FROM newsletter_sent WHERE issue_slug = ?")
       .bind("unsub-filter-post")
-      .run();
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("unsub-filter-post", "Unsub Filter", "Testing filter")
       .run();
 
     // Insert one active and one unsubscribed subscriber
@@ -521,8 +479,8 @@ describe("POST /api/newsletter/send", () => {
           headers: { ...AUTH_HEADER, "content-type": "application/json" },
           body: JSON.stringify({
             slug: "unsub-filter-post",
-            title: "Unsub Filter",
-            excerpt: "Testing filter",
+            subject: "Unsub Filter",
+            htmlBody: "<p>Testing filter</p>",
           }),
         }),
         env,
@@ -580,8 +538,8 @@ describe("POST /api/newsletter/send", () => {
             },
             body: JSON.stringify({
               slug: "chunk-test-post",
-              title: "Chunk Test",
-              excerpt: "Chunk excerpt",
+              subject: "Chunk Test",
+              htmlBody: "<p>Chunk excerpt</p>",
             }),
           }),
           env,

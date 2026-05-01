@@ -2,12 +2,10 @@ import { describe, expect, test } from "bun:test";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { generateHTML, parsePost, getLatestPost } from "../newsletter-utils.ts";
+import { parseNewsletterIssue } from "../newsletter-utils.ts";
 
-// ─── parsePost ─────────────────────────────────────────────────────────────────
-
-function withTempPost(filename: string, content: string, fn: (dir: string) => void) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "blog-test-"));
+function withTempIssue(filename: string, content: string, fn: (dir: string) => void) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "blog-nl-test-"));
   fs.writeFileSync(path.join(dir, filename), content);
   try {
     fn(dir);
@@ -16,116 +14,95 @@ function withTempPost(filename: string, content: string, fn: (dir: string) => vo
   }
 }
 
-describe("parsePost", () => {
-  test("parses title and pubDate from frontmatter", () => {
-    withTempPost(
-      "hello.md",
-      `---\ntitle: "Hello World"\npubDate: "2026-01-15"\n---\n\nBody content here.`,
+describe("parseNewsletterIssue", () => {
+  test("parses title, subject, and date from frontmatter", () => {
+    withTempIssue(
+      "test-issue.md",
+      `---\ntitle: "Test Issue"\ndate: "2026-05-02"\n---\n\nHello world.`,
       (dir) => {
-        const post = parsePost("hello.md", dir);
-        expect(post).not.toBeNull();
-        expect(post!.slug).toBe("hello");
-        expect(post!.title).toBe("Hello World");
-        expect(post!.pubDate.getUTCFullYear()).toBe(2026);
+        const issue = parseNewsletterIssue("test-issue", dir);
+        expect(issue).not.toBeNull();
+        expect(issue!.slug).toBe("test-issue");
+        expect(issue!.title).toBe("Test Issue");
+        expect(issue!.subject).toBe("Test Issue");
+        expect(issue!.date.getUTCFullYear()).toBe(2026);
       },
     );
   });
 
+  test("uses custom subject when provided", () => {
+    withTempIssue(
+      "custom-subject.md",
+      `---\ntitle: "Internal Title"\nsubject: "Email Subject Line"\ndate: "2026-05-02"\n---\n\nBody.`,
+      (dir) => {
+        const issue = parseNewsletterIssue("custom-subject", dir);
+        expect(issue!.subject).toBe("Email Subject Line");
+        expect(issue!.title).toBe("Internal Title");
+      },
+    );
+  });
+
+  test("defaults subject to title when missing", () => {
+    withTempIssue(
+      "no-subject.md",
+      `---\ntitle: "My Issue"\ndate: "2026-05-02"\n---\n\nBody.`,
+      (dir) => {
+        const issue = parseNewsletterIssue("no-subject", dir);
+        expect(issue!.subject).toBe("My Issue");
+      },
+    );
+  });
+
+  test("returns null for missing file", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "blog-nl-test-"));
+    try {
+      expect(parseNewsletterIssue("nonexistent", dir)).toBeNull();
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   test("returns null for missing frontmatter", () => {
-    withTempPost("bad.md", "No frontmatter here.", (dir) => {
-      expect(parsePost("bad.md", dir)).toBeNull();
+    withTempIssue("bad.md", "No frontmatter here.", (dir) => {
+      expect(parseNewsletterIssue("bad", dir)).toBeNull();
     });
   });
 
-  test("defaults title to 'New Post' when missing", () => {
-    withTempPost("no-title.md", `---\npubDate: "2026-01-01"\n---\n\nBody.`, (dir) => {
-      const post = parsePost("no-title.md", dir);
-      expect(post!.title).toBe("New Post");
-    });
+  test("renders markdown body to HTML", () => {
+    withTempIssue(
+      "md-body.md",
+      `---\ntitle: "Test"\ndate: "2026-05-02"\n---\n\n**Bold** and *italic*.`,
+      (dir) => {
+        const issue = parseNewsletterIssue("md-body", dir);
+        expect(issue!.htmlBody).toContain("<strong>Bold</strong>");
+        expect(issue!.htmlBody).toContain("<em>italic</em>");
+      },
+    );
   });
 
-  test("defaults pubDate to epoch when missing", () => {
-    withTempPost("no-date.md", `---\ntitle: "Something"\n---\n\nBody.`, (dir) => {
-      const post = parsePost("no-date.md", dir);
-      expect(post!.pubDate.getTime()).toBe(0);
-    });
+  test("parses posts list and appends featured posts section", () => {
+    withTempIssue(
+      "with-posts.md",
+      `---\ntitle: "Digest"\ndate: "2026-05-02"\nposts:\n  - "my-first-post"\n  - "another-post"\n---\n\nCheck these out.`,
+      (dir) => {
+        const issue = parseNewsletterIssue("with-posts", dir);
+        expect(issue!.posts).toEqual(["my-first-post", "another-post"]);
+        expect(issue!.htmlBody).toContain("Featured Posts");
+        expect(issue!.htmlBody).toContain("/posts/my-first-post");
+        expect(issue!.htmlBody).toContain("/posts/another-post");
+      },
+    );
   });
 
-  test("generates excerpt from body", () => {
-    const body = "A".repeat(300);
-    withTempPost("long.md", `---\ntitle: "Long"\npubDate: "2026-01-01"\n---\n\n${body}`, (dir) => {
-      const post = parsePost("long.md", dir);
-      expect(post!.excerpt.length).toBeLessThanOrEqual(205); // 200 + "…"
-    });
-  });
-});
-
-// ─── getLatestPost ─────────────────────────────────────────────────────────────
-
-describe("getLatestPost", () => {
-  test("returns null for empty directory", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "blog-test-"));
-    try {
-      expect(getLatestPost(dir)).toBeNull();
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  });
-
-  test("returns null for non-existent directory", () => {
-    expect(getLatestPost("/does/not/exist")).toBeNull();
-  });
-
-  test("picks post with latest pubDate, not filename order", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "blog-test-"));
-    try {
-      fs.writeFileSync(
-        path.join(dir, "aaa.md"),
-        `---\ntitle: "Older"\npubDate: "2026-01-01"\n---\n\nBody.`,
-      );
-      fs.writeFileSync(
-        path.join(dir, "zzz.md"),
-        `---\ntitle: "Newer"\npubDate: "2026-06-01"\n---\n\nBody.`,
-      );
-      const post = getLatestPost(dir);
-      expect(post!.title).toBe("Newer");
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  });
-});
-
-// ─── generateHTML ──────────────────────────────────────────────────────────────
-
-describe("generateHTML", () => {
-  const post = {
-    slug: "my-post",
-    title: "My Post",
-    excerpt: "A short excerpt.",
-    pubDate: new Date("2026-01-01"),
-  };
-
-  test("contains the post title", () => {
-    const html = generateHTML(post, "token-abc", "https://example.com");
-    expect(html).toContain("My Post");
-  });
-
-  test("contains a link to the post", () => {
-    const html = generateHTML(post, "token-abc", "https://example.com");
-    expect(html).toContain("https://example.com/posts/my-post");
-  });
-
-  test("contains a per-subscriber unsubscribe link", () => {
-    const html = generateHTML(post, "token-abc", "https://example.com");
-    expect(html).toContain("token=token-abc");
-    expect(html).toContain("/newsletter/unsubscribe");
-  });
-
-  test("different tokens produce different unsubscribe links", () => {
-    const html1 = generateHTML(post, "token-1", "https://example.com");
-    const html2 = generateHTML(post, "token-2", "https://example.com");
-    expect(html1).not.toBe(html2);
-    expect(html1).toContain("token=token-1");
-    expect(html2).toContain("token=token-2");
+  test("defaults posts to empty array when missing", () => {
+    withTempIssue(
+      "no-posts.md",
+      `---\ntitle: "Test"\ndate: "2026-05-02"\n---\n\nJust text.`,
+      (dir) => {
+        const issue = parseNewsletterIssue("no-posts", dir);
+        expect(issue!.posts).toEqual([]);
+        expect(issue!.htmlBody).not.toContain("Featured Posts");
+      },
+    );
   });
 });

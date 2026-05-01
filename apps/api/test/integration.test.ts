@@ -11,12 +11,6 @@ type NewsletterQueueMessage = MessageSendRequest<NewsletterMessage>;
 
 describe("Newsletter end-to-end", () => {
   beforeAll(async () => {
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("e2e-post", "E2E Test Post", "End-to-end newsletter flow")
-      .run();
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("dup-post", "Duplicate", "Should not enqueue")
-      .run();
     await env.DB.prepare(
       "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token_hash) VALUES (?, ?, 'active', ?)",
     )
@@ -47,8 +41,8 @@ describe("Newsletter end-to-end", () => {
           },
           body: JSON.stringify({
             slug: "e2e-post",
-            title: "E2E Test Post",
-            excerpt: "End-to-end newsletter flow",
+            subject: "E2E Test Post",
+            htmlBody: "<p>End-to-end newsletter flow</p>",
           }),
         }),
         env,
@@ -61,8 +55,9 @@ describe("Newsletter end-to-end", () => {
       // Step 2: Verify a message was enqueued with correct shape
       expect(capturedBatch.length).toBe(1);
       const msg = capturedBatch[0]!.body;
-      expect(msg.postSlug).toBe("e2e-post");
-      expect(msg.postTitle).toBe("E2E Test Post");
+      expect(msg.issueSlug).toBe("e2e-post");
+      expect(msg.subject).toBe("E2E Test Post");
+      expect(msg.htmlBody).toBe("<p>End-to-end newsletter flow</p>");
       expect(msg.subscriberId).toBe("e2e-sub");
       expect(msg.subscriberEmail).toBe("e2e@example.com");
       const expectedToken = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, "e2e-sub");
@@ -87,7 +82,7 @@ describe("Newsletter end-to-end", () => {
 
       // Step 4: Verify delivery recorded in D1
       const delivery = await env.DB.prepare(
-        "SELECT status FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
+        "SELECT status FROM newsletter_deliveries WHERE issue_slug = ? AND subscriber_id = ?",
       )
         .bind("e2e-post", "e2e-sub")
         .first<{ status: string }>();
@@ -99,8 +94,8 @@ describe("Newsletter end-to-end", () => {
     }
   });
 
-  it("send endpoint does not enqueue duplicate for already-sent post", async () => {
-    await env.DB.prepare("INSERT INTO newsletter_sent (post_slug) VALUES (?)")
+  it("send endpoint does not enqueue duplicate for already-sent issue", async () => {
+    await env.DB.prepare("INSERT INTO newsletter_sent (issue_slug) VALUES (?)")
       .bind("dup-post")
       .run();
 
@@ -120,8 +115,8 @@ describe("Newsletter end-to-end", () => {
           },
           body: JSON.stringify({
             slug: "dup-post",
-            title: "Duplicate",
-            excerpt: "Should not enqueue",
+            subject: "Duplicate",
+            htmlBody: "<p>Should not enqueue</p>",
           }),
         }),
         env,

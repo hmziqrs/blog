@@ -42,8 +42,8 @@ async function stats() {
   const [pending] = await queryD1<{ count: number }>(
     "SELECT COUNT(*) as count FROM subscribers WHERE status = 'pending'",
   );
-  const recentSends = await queryD1<{ post_slug: string; sent_at: string }>(
-    "SELECT post_slug, sent_at FROM newsletter_sent ORDER BY sent_at DESC LIMIT 5",
+  const recentSends = await queryD1<{ issue_slug: string; sent_at: string }>(
+    "SELECT issue_slug, sent_at FROM newsletter_sent ORDER BY sent_at DESC LIMIT 5",
   );
 
   console.log(`Active subscribers:  ${active?.count ?? 0}`);
@@ -52,7 +52,7 @@ async function stats() {
   if (recentSends.length === 0) {
     console.log("  (none)");
   } else {
-    for (const s of recentSends) console.log(`  ${s.sent_at}  ${s.post_slug}`);
+    for (const s of recentSends) console.log(`  ${s.sent_at}  ${s.issue_slug}`);
   }
 }
 
@@ -72,14 +72,14 @@ async function subscribers() {
 }
 
 async function sends() {
-  const rows = await queryD1<{ post_slug: string; sent_at: string }>(
-    "SELECT post_slug, sent_at FROM newsletter_sent ORDER BY sent_at DESC LIMIT 20",
+  const rows = await queryD1<{ issue_slug: string; sent_at: string }>(
+    "SELECT issue_slug, sent_at FROM newsletter_sent ORDER BY sent_at DESC LIMIT 20",
   );
   if (rows.length === 0) {
     console.log("No newsletters sent yet.");
     return;
   }
-  for (const r of rows) console.log(`${r.sent_at}  ${r.post_slug}`);
+  for (const r of rows) console.log(`${r.sent_at}  ${r.issue_slug}`);
 }
 
 async function main() {

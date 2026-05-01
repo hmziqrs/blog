@@ -59,6 +59,7 @@
     "@types/node": "^22.10.2",
     "daisyui": "^5.5.19",
     "image-size": "^2.0.2",
+    "marked": "^18.0.3",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
     "turbo": "^2.6.3",

@@ -6,9 +6,9 @@ import type { NewsletterMessage } from "../src/modules/newsletter/queue";
 describe("Queue simulation behavior in test environment", () => {
   it("sendBatch on simulated Queue does not throw and stores messages", async () => {
     const msg: NewsletterMessage = {
-      postSlug: "sim-test",
-      postTitle: "Simulated Queue Test",
-      postExcerpt: "Testing queue producer simulation",
+      issueSlug: "sim-test",
+      subject: "Simulated Queue Test",
+      htmlBody: "<p>Testing queue producer simulation</p>",
       subscriberId: "sub-1",
       subscriberEmail: "sim@example.com",
       unsubscribeToken: "unsub-sim",
@@ -20,9 +20,9 @@ describe("Queue simulation behavior in test environment", () => {
 
   it("Queue consumer is NOT auto-invoked — must call worker.queue manually", async () => {
     const msg: NewsletterMessage = {
-      postSlug: "manual-test",
-      postTitle: "Manual Consumer Test",
-      postExcerpt: "Consumers must be invoked manually in tests",
+      issueSlug: "manual-test",
+      subject: "Manual Consumer Test",
+      htmlBody: "<p>Consumers must be invoked manually in tests</p>",
       subscriberId: "sub-2",
       subscriberEmail: "manual@example.com",
       unsubscribeToken: "unsub-manual",
@@ -67,9 +67,9 @@ describe("Queue simulation behavior in test environment", () => {
     await env.NEWSLETTER_QUEUE.sendBatch([
       {
         body: {
-          postSlug: "d1-q",
-          postTitle: "Comparison",
-          postExcerpt: "Excerpt",
+          issueSlug: "d1-q",
+          subject: "Comparison",
+          htmlBody: "<p>Excerpt</p>",
           subscriberId: "d1-q-sub",
           subscriberEmail: "d1-q@example.com",
           unsubscribeToken: "unsub-d1-q",
@@ -80,7 +80,7 @@ describe("Queue simulation behavior in test environment", () => {
     // But the consumer handler is NOT automatically called.
     // No delivery record exists until we manually invoke worker.queue.
     const delivery = await env.DB.prepare(
-      "SELECT id FROM newsletter_deliveries WHERE post_slug = ?",
+      "SELECT id FROM newsletter_deliveries WHERE issue_slug = ?",
     )
       .bind("d1-q")
       .first();

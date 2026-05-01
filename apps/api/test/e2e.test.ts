@@ -32,29 +32,20 @@ beforeEach(() => {
 });
 
 describe("Complete end-to-end newsletter flow", () => {
-  beforeEach(async () => {
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("e2e-flow-post", "E2E Flow Post", "This is the complete flow test")
-      .run();
-    await env.DB.prepare("INSERT OR IGNORE INTO posts (slug, title, excerpt) VALUES (?, ?, ?)")
-      .bind("unsub-test-post", "After Unsubscribe", "Should not reach unsubscribed user")
-      .run();
-  });
-
   afterEach(async () => {
     globalThis.fetch = originalFetch;
     env.TURNSTILE_SECRET_KEY = originalTurnstile;
     env.ENVIRONMENT = originalEnvironment;
-    await env.DB.prepare("DELETE FROM newsletter_deliveries WHERE post_slug = ?")
+    await env.DB.prepare("DELETE FROM newsletter_deliveries WHERE issue_slug = ?")
       .bind("e2e-flow-post")
       .run();
-    await env.DB.prepare("DELETE FROM newsletter_deliveries WHERE post_slug = ?")
+    await env.DB.prepare("DELETE FROM newsletter_deliveries WHERE issue_slug = ?")
       .bind("unsub-test-post")
       .run();
-    await env.DB.prepare("DELETE FROM newsletter_sent WHERE post_slug = ?")
+    await env.DB.prepare("DELETE FROM newsletter_sent WHERE issue_slug = ?")
       .bind("e2e-flow-post")
       .run();
-    await env.DB.prepare("DELETE FROM newsletter_sent WHERE post_slug = ?")
+    await env.DB.prepare("DELETE FROM newsletter_sent WHERE issue_slug = ?")
       .bind("unsub-test-post")
       .run();
     await env.DB.prepare("DELETE FROM subscribers WHERE email = ?")
@@ -71,7 +62,7 @@ describe("Complete end-to-end newsletter flow", () => {
     await env.RATE_LIMIT_KV.delete("rl:email:e2e-rl3@example.com");
   });
 
-  it("subscribe → send → queue → consumer → email → delivery record", async () => {
+  it("subscribe -> send -> queue -> consumer -> email -> delivery record", async () => {
     const subscribeRes = await app.fetch(
       new Request("http://localhost/api/newsletter/subscribe", {
         method: "POST",
@@ -117,8 +108,8 @@ describe("Complete end-to-end newsletter flow", () => {
             },
             body: JSON.stringify({
               slug: "e2e-flow-post",
-              title: "E2E Flow Post",
-              excerpt: "This is the complete flow test",
+              subject: "E2E Flow Post",
+              htmlBody: "<p>This is the complete flow test</p>",
             }),
           }),
           env,
@@ -135,8 +126,9 @@ describe("Complete end-to-end newsletter flow", () => {
 
     expect(capturedMessages.length).toBe(1);
     const msg = capturedMessages[0]!;
-    expect(msg.postSlug).toBe("e2e-flow-post");
-    expect(msg.postTitle).toBe("E2E Flow Post");
+    expect(msg.issueSlug).toBe("e2e-flow-post");
+    expect(msg.subject).toBe("E2E Flow Post");
+    expect(msg.htmlBody).toBe("<p>This is the complete flow test</p>");
     expect(msg.subscriberId).toBe(subscriberId);
     expect(msg.subscriberEmail).toBe("e2e-new@example.com");
     expect(msg.unsubscribeToken).toBe(unsubscribeToken);
@@ -175,12 +167,12 @@ describe("Complete end-to-end newsletter flow", () => {
 
       expect(sentEmails.length).toBe(1);
       expect(sentEmails[0]!.to).toBe("e2e-new@example.com");
-      expect(sentEmails[0]!.subject).toBe("New Post: E2E Flow Post");
-      expect(sentEmails[0]!.html).toContain("e2e-flow-post");
+      expect(sentEmails[0]!.subject).toBe("E2E Flow Post");
+      expect(sentEmails[0]!.html).toContain("<p>This is the complete flow test</p>");
       expect(sentEmails[0]!.html).toContain(unsubscribeToken);
 
       const delivery = await env.DB.prepare(
-        "SELECT status, subscriber_id FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
+        "SELECT status, subscriber_id FROM newsletter_deliveries WHERE issue_slug = ? AND subscriber_id = ?",
       )
         .bind("e2e-flow-post", subscriberId)
         .first<{ status: string; subscriber_id: string }>();
@@ -239,8 +231,8 @@ describe("Complete end-to-end newsletter flow", () => {
           },
           body: JSON.stringify({
             slug: "unsub-test-post",
-            title: "After Unsubscribe",
-            excerpt: "Should not reach unsubscribed user",
+            subject: "After Unsubscribe",
+            htmlBody: "<p>Should not reach unsubscribed user</p>",
           }),
         }),
         env,
@@ -252,7 +244,7 @@ describe("Complete end-to-end newsletter flow", () => {
       expect(forUnsubUser.length).toBe(0);
     } finally {
       env.NEWSLETTER_QUEUE.sendBatch = originalSendBatch;
-      await env.DB.prepare("DELETE FROM newsletter_sent WHERE post_slug = ?")
+      await env.DB.prepare("DELETE FROM newsletter_sent WHERE issue_slug = ?")
         .bind("unsub-test-post")
         .run();
     }

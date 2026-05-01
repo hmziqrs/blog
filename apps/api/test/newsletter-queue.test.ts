@@ -28,9 +28,9 @@ describe("handleQueueBatch", () => {
         timestamp: new Date(),
         attempts: 1,
         body: {
-          postSlug: "queue-test-post",
-          postTitle: "Queue Test",
-          postExcerpt: "Excerpt",
+          issueSlug: "queue-test-post",
+          subject: "Queue Test",
+          htmlBody: "<p>Excerpt</p>",
           subscriberId: "queue-sub-1",
           subscriberEmail: "queue-1@example.com",
           unsubscribeToken: "unsub-q1",
@@ -48,7 +48,7 @@ describe("handleQueueBatch", () => {
     expect(result.retryMessages).toStrictEqual([]);
 
     const delivery = await env.DB.prepare(
-      "SELECT status FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
+      "SELECT status FROM newsletter_deliveries WHERE issue_slug = ? AND subscriber_id = ?",
     )
       .bind("queue-test-post", "queue-sub-1")
       .first<{ status: string }>();
@@ -63,9 +63,9 @@ describe("handleQueueBatch", () => {
         timestamp: new Date(),
         attempts: 1,
         body: {
-          postSlug: "queue-test-post-2",
-          postTitle: "Queue Test 2",
-          postExcerpt: "Excerpt",
+          issueSlug: "queue-test-post-2",
+          subject: "Queue Test 2",
+          htmlBody: "<p>Excerpt</p>",
           subscriberId: "nonexistent-sub",
           subscriberEmail: "nobody@example.com",
           unsubscribeToken: "unsub-none",
@@ -82,7 +82,7 @@ describe("handleQueueBatch", () => {
     expect(result.retryMessages).toStrictEqual([]);
 
     const delivery = await env.DB.prepare(
-      "SELECT id FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
+      "SELECT id FROM newsletter_deliveries WHERE issue_slug = ? AND subscriber_id = ?",
     )
       .bind("queue-test-post-2", "nonexistent-sub")
       .first();
@@ -103,9 +103,9 @@ describe("handleQueueBatch", () => {
           timestamp: new Date(),
           attempts: 1,
           body: {
-            postSlug: "fail-post",
-            postTitle: "Fail Test",
-            postExcerpt: "Excerpt",
+            issueSlug: "fail-post",
+            subject: "Fail Test",
+            htmlBody: "<p>Excerpt</p>",
             subscriberId: "queue-sub-1",
             subscriberEmail: "queue-1@example.com",
             unsubscribeToken: "unsub-q1",
@@ -122,7 +122,7 @@ describe("handleQueueBatch", () => {
       expect(result.retryMessages).toStrictEqual([{ msgId: "msg-retry" }]);
 
       const delivery = await env.DB.prepare(
-        "SELECT id FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
+        "SELECT id FROM newsletter_deliveries WHERE issue_slug = ? AND subscriber_id = ?",
       )
         .bind("fail-post", "queue-sub-1")
         .first();
@@ -151,9 +151,9 @@ describe("handleQueueBatch", () => {
           timestamp: new Date(),
           attempts: 1,
           body: {
-            postSlug: "mixed-post",
-            postTitle: "Mixed",
-            postExcerpt: "Excerpt",
+            issueSlug: "mixed-post",
+            subject: "Mixed",
+            htmlBody: "<p>Excerpt</p>",
             subscriberId: "queue-sub-1",
             subscriberEmail: "queue-1@example.com",
             unsubscribeToken: "unsub-q1",
@@ -164,9 +164,9 @@ describe("handleQueueBatch", () => {
           timestamp: new Date(),
           attempts: 1,
           body: {
-            postSlug: "mixed-post",
-            postTitle: "Mixed",
-            postExcerpt: "Excerpt",
+            issueSlug: "mixed-post",
+            subject: "Mixed",
+            htmlBody: "<p>Excerpt</p>",
             subscriberId: "queue-sub-2",
             subscriberEmail: "queue-2@example.com",
             unsubscribeToken: "unsub-q2",
@@ -183,14 +183,14 @@ describe("handleQueueBatch", () => {
       expect(result.retryMessages).toStrictEqual([{ msgId: "msg-fail" }]);
 
       const okDelivery = await env.DB.prepare(
-        "SELECT status FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
+        "SELECT status FROM newsletter_deliveries WHERE issue_slug = ? AND subscriber_id = ?",
       )
         .bind("mixed-post", "queue-sub-2")
         .first<{ status: string }>();
       expect(okDelivery?.status).toBe("sent");
 
       const failDelivery = await env.DB.prepare(
-        "SELECT id FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
+        "SELECT id FROM newsletter_deliveries WHERE issue_slug = ? AND subscriber_id = ?",
       )
         .bind("mixed-post", "queue-sub-1")
         .first();
@@ -200,7 +200,7 @@ describe("handleQueueBatch", () => {
     }
   });
 
-  it("sends HTML email with escaped content and unsubscribe link", async () => {
+  it("sends HTML email with raw htmlBody and unsubscribe link", async () => {
     const sentEmails: { to: string; subject: string; html: string }[] = [];
     const originalSend = env.SEND_EMAIL.send;
     env.SEND_EMAIL.send = async (message) => {
@@ -223,9 +223,9 @@ describe("handleQueueBatch", () => {
           timestamp: new Date(),
           attempts: 1,
           body: {
-            postSlug: "html-test",
-            postTitle: "HTML <Test>",
-            postExcerpt: "Excerpt with <script>alert(1)</script>",
+            issueSlug: "html-test",
+            subject: "HTML <Test>",
+            htmlBody: "<p>Hello <strong>world</strong></p>",
             subscriberId: "queue-sub-1",
             subscriberEmail: "html@example.com",
             unsubscribeToken: "unsub-html",
@@ -239,10 +239,8 @@ describe("handleQueueBatch", () => {
 
       expect(sentEmails.length).toBe(1);
       expect(sentEmails[0]!.to).toBe("html@example.com");
-      expect(sentEmails[0]!.subject).toBe("New Post: HTML <Test>");
-      expect(sentEmails[0]!.html).toContain("html-test");
-      expect(sentEmails[0]!.html).toContain("&lt;Test&gt;");
-      expect(sentEmails[0]!.html).toContain("&lt;script&gt;");
+      expect(sentEmails[0]!.subject).toBe("HTML <Test>");
+      expect(sentEmails[0]!.html).toContain("<p>Hello <strong>world</strong></p>");
       const expectedToken = await deriveUnsubscribeToken(env.NEWSLETTER_SEND_SECRET, "queue-sub-1");
       expect(sentEmails[0]!.html).toContain(expectedToken);
       expect(sentEmails[0]!.html).toContain(env.SITE_URL);
@@ -264,9 +262,9 @@ describe("handleQueueBatch", () => {
           timestamp: new Date(),
           attempts: 1,
           body: {
-            postSlug: "same-batch",
-            postTitle: "Same Batch",
-            postExcerpt: "Excerpt",
+            issueSlug: "same-batch",
+            subject: "Same Batch",
+            htmlBody: "<p>Excerpt</p>",
             subscriberId: "nonexistent-sub",
             subscriberEmail: "nobody@example.com",
             unsubscribeToken: "unsub-none",
@@ -277,9 +275,9 @@ describe("handleQueueBatch", () => {
           timestamp: new Date(),
           attempts: 1,
           body: {
-            postSlug: "same-batch",
-            postTitle: "Same Batch",
-            postExcerpt: "Excerpt",
+            issueSlug: "same-batch",
+            subject: "Same Batch",
+            htmlBody: "<p>Excerpt</p>",
             subscriberId: "queue-sub-1",
             subscriberEmail: "queue-1@example.com",
             unsubscribeToken: "unsub-q1",
@@ -312,9 +310,9 @@ describe("handleQueueBatch", () => {
           timestamp: new Date(),
           attempts: 5,
           body: {
-            postSlug: "blacklist-post",
-            postTitle: "Blacklist Test",
-            postExcerpt: "Excerpt",
+            issueSlug: "blacklist-post",
+            subject: "Blacklist Test",
+            htmlBody: "<p>Excerpt</p>",
             subscriberId: "queue-sub-1",
             subscriberEmail: "blacklist@example.com",
             unsubscribeToken: "unsub-blk",
