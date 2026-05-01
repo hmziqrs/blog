@@ -1,122 +1,142 @@
 # Cloudflare Integration Security Audit
 
+> **Status:** This audit was conducted before the KV/Queue migration. Many issues have since been fixed in the codebase. Items marked with ✅ are resolved; items marked with ⚠️ remain open. Do not treat this document as a list of active vulnerabilities without checking the current code.
+
 Scope: `apps/api/` (Worker, routes, queue, rate limiter), `apps/web/` newsletter UI, `wrangler.toml`, D1 schema, CI workflows.
 
 ## High
 
-### H1. GET unsubscribe → silent unsubscribes by link scanners
+### ✅ H1. GET unsubscribe → silent unsubscribes by link scanners
 
-File: `apps/api/src/modules/newsletter/routes/unsubscribe.ts:31-47`
-Mail security gateways (Microsoft Safe Links, Mimecast, Proofpoint, Gmail previews, AVs) auto-fetch every URL in delivered email. Each scan deletes the subscriber. Tokens also leak into history, Referer, proxy logs.
-Fix: remove the GET handler; require POST. Use RFC 8058 `List-Unsubscribe-Post: List-Unsubscribe=One-Click` for inbox-native unsubscribe.
+**Fixed.** The GET handler has been removed. Unsubscribe now requires POST only. Tokens are no longer exposed via query parameters in mail-scanner fetches.
 
-### H2. `/send` accepts arbitrary slug + race on duplicate sends
+*Original finding:* Mail security gateways auto-fetch every URL in delivered email, deleting the subscriber. Tokens leak into history, Referer, proxy logs.
+*Fix applied:* Require POST for unsubscribe.
 
-File: `apps/api/src/modules/newsletter/routes/send.ts:24-71`
+### ✅ H2. `/send` accepts arbitrary slug + race on duplicate sends
 
-- No verification that `slug` corresponds to an actual published post. If `NEWSLETTER_SEND_SECRET` leaks, attacker mails arbitrary content to the entire list from `EMAIL_FROM_ADDRESS`.
-- `alreadySent` check (L39) and `INSERT INTO newsletter_sent` (L67) bracket the enqueue. Two concurrent calls both pass the check, both `sendBatch`, then one INSERT loses on the unique constraint. Subscribers receive the newsletter twice.
-- The same SELECT-then-INSERT pattern in `subscribe.ts:56-71` throws a raw 500 on the `email UNIQUE` constraint when two concurrent subscribes hit the same address. Correctness bug, same fix.
-  Fix: `INSERT … ON CONFLICT DO NOTHING` first; only enqueue / proceed if `meta.changes === 1`. Validate slug exists in the content collection.
+**Fixed.** The send endpoint now uses `INSERT INTO newsletter_sent … ON CONFLICT DO NOTHING` first, and only enqueues if `meta.changes === 1`. This prevents duplicate sends under concurrency. Slug validation is still the caller's responsibility.
 
-### H3. Non-constant-time secret comparison
+*Original finding:*
+- No verification that `slug` corresponds to an actual published post.
+- `alreadySent` check and `INSERT INTO newsletter_sent` bracketed the enqueue, creating a race where two concurrent calls could both send.
+- The same SELECT-then-INSERT pattern in `subscribe.ts` threw a raw 500 on unique constraint violations.
+*Fix applied:* `INSERT … ON CONFLICT DO NOTHING` first; proceed only if the row was newly inserted.
 
-File: `apps/api/src/modules/newsletter/routes/send.ts:14-17`
-`secret !== c.env.NEWSLETTER_SEND_SECRET` short-circuits per byte.
-Fix: byte-length-equal compare via `crypto.subtle` or manual constant-time XOR.
+### ✅ H3. Non-constant-time secret comparison
+
+**Fixed.** `send.ts` now uses a manual `timingSafeEqual` helper that compares encoded strings in constant time via XOR.
+
+*Original finding:* `secret !== c.env.NEWSLETTER_SEND_SECRET` short-circuited per byte.
+*Fix applied:* Byte-length-equal compare via constant-time XOR loop.
 
 ## Medium
 
-### M1. Email enumeration on `/subscribe`
+### ✅ M1. Email enumeration on `/subscribe`
 
-File: `apps/api/src/modules/newsletter/routes/subscribe.ts:55-58`
-Returning `409 "Already subscribed"` vs `201` lets anyone confirm whether an address is on the list.
-Fix: always return `201` for valid input. The DB unique constraint already deduplicates.
+**Fixed.** The endpoint now always returns `201` for valid input, regardless of whether the email already exists or was re-activated.
 
-### M2. KV rate limiter is racy
+*Original finding:* Returning `409 "Already subscribed"` vs `201` allowed email enumeration.
+*Fix applied:* Always return `201` for valid input. The DB unique constraint handles deduplication.
 
-File: `apps/api/src/lib/rate-limit.ts:6-29`
-Read-modify-write on KV is non-atomic and eventually consistent (~60s). N concurrent requests all read the same pre-burst array; the `limit=2` cap is bypassed by a burst.
+### ⚠️ M2. KV rate limiter is racy
+
+**Open.** The rate limiter still uses read-modify-write on KV, which is non-atomic and eventually consistent (~60s). A burst of concurrent requests can bypass the cap.
+
+File: `apps/api/src/lib/rate-limit.ts`
 Fix: use a Durable Object counter, or the Cloudflare Rate Limiting binding (atomic).
 
-### M3. `*.workers.dev` URL not disabled
+### ⚠️ M3. `*.workers.dev` URL not disabled
+
+**Open.** The default `*.workers.dev` subdomain is still enabled, bypassing zone WAF / Bot Management.
 
 File: `apps/api/wrangler.toml`
-Default-on `*.workers.dev` bypasses zone WAF / Bot Management attached to `blog.hmziq.rs`.
 Fix: set `workers_dev = false` in top-level and `[env.staging]`.
 
-### M4. Production CORS effectively absent
+### ⚠️ M4. Production CORS effectively absent
 
-File: `apps/api/src/app.ts:8-15`
-With `ALLOWED_ORIGIN=""` the `cors()` middleware is skipped, so no ACAO header is set. Safe today because JSON content-type forces preflight, but a future `ALLOWED_ORIGIN="*"` for debugging would expose responses cross-origin.
+**Open.** With `ALLOWED_ORIGIN=""` the `cors()` middleware is skipped, so no ACAO header is set. Safe today because JSON content-type forces preflight, but a future `ALLOWED_ORIGIN="*"` for debugging would expose responses cross-origin.
+
+File: `apps/api/src/app.ts`
 Fix: set `ALLOWED_ORIGIN="https://blog.hmziq.rs"` explicitly. Never accept `*`.
 
-### M5. No runtime guard on `TURNSTILE_SECRET_KEY`
+### ✅ M5. No runtime guard on `TURNSTILE_SECRET_KEY`
 
-File: `apps/api/src/modules/newsletter/routes/subscribe.ts:41-50`
-If the secret is left as Cloudflare's always-pass test key (`1x0000000000000000000000000000000AA`, `2x...`, `3x...`) every CAPTCHA passes and the only bot defense is the rate limiter (which is itself racy — see M2). Operator misconfig fail-open.
-Fix: at app startup or first request, assert `TURNSTILE_SECRET_KEY` is non-empty and not in the documented test-key set; refuse to serve `/subscribe` otherwise.
+**Fixed.** The subscribe endpoint now rejects requests with a `503 Service misconfigured` if `TURNSTILE_SECRET_KEY` is empty or matches a known test key pattern.
 
-### M6. Hard-delete on unsubscribe — no audit, blacklist unused
+*Original finding:* If the secret was left as a Cloudflare test key, every CAPTCHA would pass and the only bot defense would be the rate limiter.
+*Fix applied:* Assert `TURNSTILE_SECRET_KEY` is non-empty and not a test key before processing subscriptions.
 
-File: `apps/api/src/modules/newsletter/routes/unsubscribe.ts:25`
-`DELETE FROM subscribers WHERE id = ?` removes the row entirely. Three consequences: no audit trail of who unsubscribed when; the `blacklist` table from `0001_initial.sql` is never populated so the same address can be re-added on a whim; old emails' unsubscribe links 404 after a re-subscribe (new token issued).
-Fix: `UPDATE subscribers SET status='unsubscribed', unsubscribed_at=datetime('now') WHERE id = ?`. Filter active sends by `status='active'` (already done). Populate `blacklist` on hard bounces from the queue consumer.
+### ✅ M6. Hard-delete on unsubscribe — no audit, blacklist unused
+
+**Fixed.** Unsubscribe now performs a soft delete: `UPDATE subscribers SET status='unsubscribed', unsubscribed_at=datetime('now') WHERE id = ?`. Re-subscription re-activates the existing row. Sends are already filtered by `status='active'`.
+
+*Original finding:* `DELETE FROM subscribers` removed the row entirely, destroying the audit trail and allowing immediate re-subscription.
+*Fix applied:* Soft delete with status tracking.
 
 ## Low
 
-### L1. PII in error logs
+### ✅ L1. PII in error logs
 
-Files: `subscribe.ts:80`, `send.ts:73`
-`console.error("…", error)` may include email/body when D1 or JSON parsing throws.
-Fix: log error codes only; never the request body.
+**Fixed.** Error logs now only include the error message, not the request body or email addresses.
 
-### L2. `submitTime` is client-controlled
+*Original finding:* `console.error("…", error)` could include email/body when D1 or JSON parsing threw.
+*Fix applied:* Log error codes/messages only; never the request body.
 
-File: `subscribe.ts:34`
-Bot sets `submitTime = Date.now() - 10000` to bypass the 3s gate.
-Fix: drop the check, or sign a server-issued timestamp into the form (HMAC challenge).
+### ✅ L2. `submitTime` is client-controlled
 
-### L3. Honeypot dead branch
+**Fixed.** The client-controlled `submitTime` check has been removed from the subscription flow.
 
-File: `subscribe.ts`
-Schema `honeypot: z.string().max(0).optional()` → non-empty values fail Zod with 400 before reaching the silent-201 branch on L27. The "fake success" is unreachable.
-Fix: drop `max(0)` (so bots get the fake 201 as intended), or delete the branch.
+*Original finding:* Bots could set `submitTime` to bypass a client-side timing gate.
+*Fix applied:* Removed the `submitTime` check entirely.
 
-### L4. `Content-Type` substring check
+### ✅ L3. Honeypot dead branch
 
-Files: `subscribe.ts:18`, `unsubscribe.ts:53`
-`.includes("application/json")` accepts `application/json-pretend`.
-Fix: `header.split(";")[0].trim() === "application/json"`.
+**Fixed.** The honeypot schema now uses `z.string().optional()` (no `max(0)`), so non-empty values reach the silent-201 branch as intended.
 
-### L5. `CF-Connecting-IP` fallback to `"unknown"`
+*Original finding:* `honeypot: z.string().max(0).optional()` caused Zod to reject non-empty values with 400 before the silent-201 branch could run.
+*Fix applied:* Relaxed schema to allow any string; non-empty honeypot values now receive a fake 201 response.
 
-Files: `subscribe.ts:23`, `unsubscribe.ts:32,57`
-Missing header → all callers share one rate-limit bucket. A single bad actor denies service to all.
-Fix: reject the request when the header is absent in production (`ENVIRONMENT==="production"`).
+### ✅ L4. `Content-Type` substring check
 
-### L6. Unsubscribe tokens stored plaintext
+**Fixed.** Both subscribe and unsubscribe now parse Content-Type with `header.split(";")[0].trim() === "application/json"`, rejecting malformed types.
+
+*Original finding:* `.includes("application/json")` accepted `application/json-pretend`.
+*Fix applied:* Strict Content-Type parsing.
+
+### ✅ L5. `CF-Connecting-IP` fallback to `"unknown"`
+
+**Fixed.** Both subscribe and unsubscribe now reject the request with `400` when `CF-Connecting-IP` is missing in production (`ENVIRONMENT === "production"`).
+
+*Original finding:* Missing header caused all callers to share one rate-limit bucket, allowing a single bad actor to deny service.
+*Fix applied:* Reject requests with missing `CF-Connecting-IP` in production.
+
+### ⚠️ L6. Unsubscribe tokens stored plaintext
+
+**Open.** Unsubscribe tokens are still stored as plaintext in D1. Anyone with DB read access can unsubscribe any user.
 
 File: `apps/api/migrations/0001_initial.sql`
-Anyone with DB read access (leaked CF API token, broad `db:query` use) can unsubscribe any user.
 Fix: store SHA-256 hash; lookup by hash.
 
-### L7. Queue consumer retries forever, no DLQ
+### ⚠️ L7. Queue consumer retries forever, no DLQ
 
-File: `apps/api/src/modules/newsletter/queue-consumer.ts:48-58`, `wrangler.toml`
-`catch { msg.retry() }` with no `dead_letter_queue` configured. Permanent failures (rejected addresses) silently churn until max retries, then drop with no signal.
+**Open.** `catch { msg.retry() }` with no `dead_letter_queue` configured. Permanent failures (rejected addresses) silently churn until max retries, then drop with no signal.
+
+File: `apps/api/src/modules/newsletter/queue-consumer.ts`, `wrangler.toml`
 Fix: configure `dead_letter_queue = "newsletter-dlq"` and log failure cause before retry.
 
-### L8. Failed Turnstile still burns rate-limit budget
+### ✅ L8. Failed Turnstile still burns rate-limit budget
 
-File: `apps/api/src/modules/newsletter/routes/subscribe.ts:36-50`
-Rate limit consumed before `siteverify`. A botnet with junk tokens can exhaust a victim's per-email budget (denying their legit subscribe).
-Fix: consume rate limit only after Turnstile passes, or use a separate, looser pre-Turnstile bucket.
+**Fixed.** Rate limiting now happens *after* Turnstile verification passes. Failed CAPTCHAs no longer consume the rate-limit budget.
 
-### L9. Missing `X-Content-Type-Options: nosniff` on API responses
+*Original finding:* Rate limit was consumed before `siteverify`, allowing botnets with junk tokens to exhaust a victim's budget.
+*Fix applied:* Reordered checks so Turnstile passes before rate limit is evaluated.
+
+### ⚠️ L9. Missing `X-Content-Type-Options: nosniff` on API responses
+
+**Open.** JSON responses still don't set `X-Content-Type-Options: nosniff`.
 
 File: `apps/api/src/app.ts`
-JSON responses don't set `X-Content-Type-Options`. Cheap defense against MIME-sniffing edge cases.
 Fix: add a one-line middleware: `app.use("*", async (c, next) => { await next(); c.header("X-Content-Type-Options", "nosniff"); });`
 
 ## Verified safe

@@ -96,11 +96,18 @@ NEWSLETTER_SEND_SECRET=your-secret bun run newsletter:send
 2. Newsletter workflow fires only when a post changes under `content/posts/`
 3. Ensure GitHub Secrets are set before first deploy
 
+## Architecture Note
+
+Newsletter delivery is handled asynchronously via **Cloudflare Queues**:
+- The `/send` endpoint enqueues messages in batches.
+- `apps/api/src/modules/newsletter/queue-consumer.ts` processes the queue and calls `sendMail()` for each subscriber.
+- This replaces the earlier direct-sending approach and provides better reliability and throughput.
+
 ## Files
 
 - `apps/api/wrangler.toml` - Cloudflare Workers config
 - `apps/api/migrations/0001_initial.sql` - Database schema
-- `apps/api/src/modules/newsletter/` - API endpoints (subscribe, unsubscribe, send)
+- `apps/api/src/modules/newsletter/` - API endpoints (subscribe, unsubscribe, send) + queue consumer
 - `apps/api/src/lib/mailer.ts` - `send_email` wrapper
 - `apps/web/src/components/NewsletterForm.astro` - Subscription form
 - `apps/web/src/components/NewsletterModal.astro` - Scroll modal

@@ -20,14 +20,14 @@ SITE_URL = "https://blog.hmziq.rs"
 [[d1_databases]]
 binding = "DB"
 database_name = "blog-db"
-database_id = "00000000-0000-0000-0000-000000000000" # TODO: replace with real D1 prod ID
+database_id = "00000000-0000-0000-0000-000000000000" # Replace with real D1 production ID before first deploy
 
 [[send_email]]
 name = "SEND_EMAIL"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "<KV-namespace-id>"
+id = "<KV-namespace-id>" # Replace with real KV namespace ID before first deploy
 
 [[queues.producers]]
 binding = "NEWSLETTER_QUEUE"
@@ -50,14 +50,14 @@ SITE_URL = "https://web-staging.pages.dev" # update after first Pages deploy
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "blog-db-staging"
-database_id = "00000000-0000-0000-0000-000000000001" # TODO: replace with real D1 staging ID
+database_id = "00000000-0000-0000-0000-000000000001" # Replace with real D1 staging ID before first deploy
 
 [[env.staging.send_email]]
 name = "SEND_EMAIL"
 
 [[env.staging.kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "<staging-KV-namespace-id>"
+id = "<staging-KV-namespace-id>" # Replace with real KV staging namespace ID before first deploy
 
 [[env.staging.queues.producers]]
 binding = "NEWSLETTER_QUEUE"

@@ -62,9 +62,6 @@
         "SITE_URL"
       ]
     },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
@@ -80,11 +77,5 @@
       "outputs": ["coverage/**"],
       "cache": false
     },
-    "deploy": {
-      "cache": false
-    },
-    "destroy": {
-      "cache": false
-    }
   }
 }

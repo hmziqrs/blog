@@ -23,14 +23,14 @@ Astro generates zero-JS static HTML by default. For a blog, that means fast page
 
 ## Content Collections
 
-Posts live in `src/content/posts/` as Markdown files. Frontmatter is validated with Zod 4:
+Posts live in `content/posts/` as Markdown files. Frontmatter is validated with Zod 4:
 
 ```typescript
 import { defineCollection } from "astro:content";
 import { z } from "zod";
 
 const posts = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/content/posts" }),
+  loader: glob({ pattern: "**/*.md", base: "./content/posts" }),
   schema: z.object({
     title: z.string(),
     date: z.coerce.date(),
