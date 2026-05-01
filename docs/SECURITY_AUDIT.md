@@ -13,7 +13,8 @@ Fix: remove the GET handler; require POST. Use RFC 8058 `List-Unsubscribe-Post: 
 File: `apps/api/src/modules/newsletter/routes/send.ts:24-71`
 - No verification that `slug` corresponds to an actual published post. If `NEWSLETTER_SEND_SECRET` leaks, attacker mails arbitrary content to the entire list from `EMAIL_FROM_ADDRESS`.
 - `alreadySent` check (L39) and `INSERT INTO newsletter_sent` (L67) bracket the enqueue. Two concurrent calls both pass the check, both `sendBatch`, then one INSERT loses on the unique constraint. Subscribers receive the newsletter twice.
-Fix: `INSERT INTO newsletter_sent (post_slug) VALUES (?) ON CONFLICT DO NOTHING` first; only enqueue if `meta.changes === 1`. Validate slug exists in the content collection.
+- The same SELECT-then-INSERT pattern in `subscribe.ts:56-71` throws a raw 500 on the `email UNIQUE` constraint when two concurrent subscribes hit the same address. Correctness bug, same fix.
+Fix: `INSERT … ON CONFLICT DO NOTHING` first; only enqueue / proceed if `meta.changes === 1`. Validate slug exists in the content collection.
 
 ### H3. Non-constant-time secret comparison
 File: `apps/api/src/modules/newsletter/routes/send.ts:14-17`
@@ -41,6 +42,16 @@ Fix: set `workers_dev = false` in top-level and `[env.staging]`.
 File: `apps/api/src/app.ts:8-15`
 With `ALLOWED_ORIGIN=""` the `cors()` middleware is skipped, so no ACAO header is set. Safe today because JSON content-type forces preflight, but a future `ALLOWED_ORIGIN="*"` for debugging would expose responses cross-origin.
 Fix: set `ALLOWED_ORIGIN="https://blog.hmziq.rs"` explicitly. Never accept `*`.
+
+### M5. No runtime guard on `TURNSTILE_SECRET_KEY`
+File: `apps/api/src/modules/newsletter/routes/subscribe.ts:41-50`
+If the secret is left as Cloudflare's always-pass test key (`1x0000000000000000000000000000000AA`, `2x...`, `3x...`) every CAPTCHA passes and the only bot defense is the rate limiter (which is itself racy — see M2). Operator misconfig fail-open.
+Fix: at app startup or first request, assert `TURNSTILE_SECRET_KEY` is non-empty and not in the documented test-key set; refuse to serve `/subscribe` otherwise.
+
+### M6. Hard-delete on unsubscribe — no audit, blacklist unused
+File: `apps/api/src/modules/newsletter/routes/unsubscribe.ts:25`
+`DELETE FROM subscribers WHERE id = ?` removes the row entirely. Three consequences: no audit trail of who unsubscribed when; the `blacklist` table from `0001_initial.sql` is never populated so the same address can be re-added on a whim; old emails' unsubscribe links 404 after a re-subscribe (new token issued).
+Fix: `UPDATE subscribers SET status='unsubscribed', unsubscribed_at=datetime('now') WHERE id = ?`. Filter active sends by `status='active'` (already done). Populate `blacklist` on hard bounces from the queue consumer.
 
 ## Low
 
@@ -83,6 +94,11 @@ Fix: configure `dead_letter_queue = "newsletter-dlq"` and log failure cause befo
 File: `apps/api/src/modules/newsletter/routes/subscribe.ts:36-50`
 Rate limit consumed before `siteverify`. A botnet with junk tokens can exhaust a victim's per-email budget (denying their legit subscribe).
 Fix: consume rate limit only after Turnstile passes, or use a separate, looser pre-Turnstile bucket.
+
+### L9. Missing `X-Content-Type-Options: nosniff` on API responses
+File: `apps/api/src/app.ts`
+JSON responses don't set `X-Content-Type-Options`. Cheap defense against MIME-sniffing edge cases.
+Fix: add a one-line middleware: `app.use("*", async (c, next) => { await next(); c.header("X-Content-Type-Options", "nosniff"); });`
 
 ## Verified safe
 
