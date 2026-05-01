@@ -46,8 +46,8 @@ name = "api-staging"
 
 [env.staging.vars]
 ENVIRONMENT = "staging"
-ALLOWED_ORIGIN = "https://web-staging.pages.dev"
-SITE_URL = "https://web-staging.pages.dev"
+ALLOWED_ORIGIN = "https://staging.hmziqblog.pages.dev"
+SITE_URL = "https://staging.hmziqblog.pages.dev"
 
 [[env.staging.d1_databases]]
 binding = "DB"

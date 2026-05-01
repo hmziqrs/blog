@@ -156,7 +156,7 @@ If using a different domain, update the pattern accordingly.
 
 Dashboard → **Pages → Create project**:
 
-- **Project name**: `web`
+- **Project name**: `hmziqblog`
 - **Production branch**: `master`
 
 Or deploy the first time via CLI:
@@ -164,6 +164,8 @@ Or deploy the first time via CLI:
 ```bash
 bun run deploy:web:prod
 ```
+
+> This is the single Pages project for both production and staging. Pushing to the `staging` branch creates a preview deployment at `staging.hmziqblog.pages.dev` — no separate project needed.
 
 ---
 

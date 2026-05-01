@@ -139,18 +139,17 @@ Set in your local `.env` before running `bun run deploy:web:staging`, or in the 
 
 ---
 
-## 7. Create Staging Pages Project
+## 7. Staging Pages Deployment
 
-Dashboard → **Pages → Create project**:
+Staging uses the **same Pages project** as production (`hmziqblog`). The `staging` branch is deployed as a **preview deployment** — it gets a dedicated URL at `staging.hmziqblog.pages.dev` without affecting the production site.
 
-- **Project name**: `web-staging`
-- **Production branch**: `staging`
-
-Or deploy the first time via CLI:
+No separate Pages project is needed. The first deploy via CLI creates the preview automatically:
 
 ```bash
 bun run deploy:web:staging
 ```
+
+> Preview deployments are a built-in Cloudflare Pages feature. Any branch that is not the production branch gets a unique preview URL. The `--branch=staging` flag in the deploy command creates a branch alias at `staging.hmziqblog.pages.dev`.
 
 ---
 
@@ -176,7 +175,7 @@ Or push to the `staging` branch — CI will deploy automatically.
 
 | Resource    | URL                                              |
 | ----------- | ------------------------------------------------ |
-| Web         | `https://web-staging.pages.dev`                  |
+| Web         | `https://staging.hmziqblog.pages.dev`            |
 | API         | `https://api-staging.<account>.workers.dev`      |
 | Subscribe   | `POST /api/newsletter/subscribe`                 |
 | Unsubscribe | `POST /api/newsletter/unsubscribe`               |
