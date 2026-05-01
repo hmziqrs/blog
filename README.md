@@ -87,8 +87,9 @@ blog/
 - Update `site.config.ts` to change site identity, URLs, navigation, and optional pages.
 - `packages/site` stays generic; concrete copy belongs in `site.config.ts`.
 - The web app supports a configurable `basePath`, so the blog can live at `/` or under a path such as `/blog`.
-- See `docs/NEWSLETTER_SETUP.md` for setting up the newsletter system.
+- See `docs/STAGING_SETUP.md` and `docs/PRODUCTION_SETUP.md` for environment setup.
 
 ## Documentation
 
-- `docs/NEWSLETTER_SETUP.md` — Newsletter system setup and testing
+- `docs/STAGING_SETUP.md` — Staging environment setup
+- `docs/PRODUCTION_SETUP.md` — Production environment setup
