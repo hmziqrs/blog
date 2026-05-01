@@ -12,7 +12,7 @@ describe("POST /api/newsletter/unsubscribe", () => {
   afterEach(async () => {
     await env.DB.prepare("DELETE FROM subscribers").run();
     const list = await env.RATE_LIMIT_KV.list();
-    await Promise.all(list.keys.map((k) => env.RATE_LIMIT_KV.delete(k.name)));
+    await Promise.all(list.keys.map((k: { name: string }) => env.RATE_LIMIT_KV.delete(k.name)));
   });
 
   async function createSubscriber(email: string): Promise<string> {
@@ -82,7 +82,7 @@ describe("POST /api/newsletter/unsubscribe", () => {
       ctx,
     );
     expect(res.status).toBe(200);
-    const body = await res.json<{ message: string }>();
+    const body = (await res.json()) as { message: string };
     expect(body.message).toBe("Successfully unsubscribed");
   });
 
@@ -116,7 +116,7 @@ describe("POST /api/newsletter/unsubscribe", () => {
       ctx,
     );
     expect(res.status).toBe(404);
-    const body = await res.json<{ error: string }>();
+    const body = (await res.json()) as { error: string };
     expect(body.error).toBe("Invalid unsubscribe token");
   });
 
@@ -165,7 +165,7 @@ describe("POST /api/newsletter/unsubscribe", () => {
       ctx,
     );
     expect(res.status).toBe(200);
-    const body = await res.json<{ message: string }>();
+    const body = (await res.json()) as { message: string };
     expect(body.message).toBe("Successfully unsubscribed");
   });
 

@@ -140,6 +140,7 @@ describe("handleQueueBatch", () => {
       if (callCount === 1) {
         throw new Error("First send fails");
       }
+      return { messageId: "test-id" } as import("@cloudflare/workers-types").EmailSendResult;
     };
 
     try {
@@ -201,8 +202,15 @@ describe("handleQueueBatch", () => {
   it("sends HTML email with escaped content and unsubscribe link", async () => {
     const sentEmails: { to: string; subject: string; html: string }[] = [];
     const originalSend = env.SEND_EMAIL.send;
-    env.SEND_EMAIL.send = async (opts: { to: string; subject: string; html?: string }) => {
-      sentEmails.push({ to: opts.to, subject: opts.subject, html: opts.html ?? "" });
+    env.SEND_EMAIL.send = async (message) => {
+      const to = message.to;
+      const toStr = Array.isArray(to) ? (to[0] ?? "") : (to ?? "");
+      sentEmails.push({
+        to: toStr,
+        subject: (message as { subject?: string }).subject ?? "",
+        html: (message as { html?: Array<{ content: string }> }).html?.[0]?.content ?? "",
+      });
+      return { messageId: "test-id" } as import("@cloudflare/workers-types").EmailSendResult;
     };
 
     try {
@@ -227,13 +235,13 @@ describe("handleQueueBatch", () => {
       await getQueueResult(batch, ctx);
 
       expect(sentEmails.length).toBe(1);
-      expect(sentEmails[0].to).toBe("html@example.com");
-      expect(sentEmails[0].subject).toBe("New Post: HTML <Test>");
-      expect(sentEmails[0].html).toContain("html-test");
-      expect(sentEmails[0].html).toContain("&lt;Test&gt;");
-      expect(sentEmails[0].html).toContain("&lt;script&gt;");
-      expect(sentEmails[0].html).toContain("unsub-html");
-      expect(sentEmails[0].html).toContain(env.SITE_URL);
+      expect(sentEmails[0]!.to).toBe("html@example.com");
+      expect(sentEmails[0]!.subject).toBe("New Post: HTML <Test>");
+      expect(sentEmails[0]!.html).toContain("html-test");
+      expect(sentEmails[0]!.html).toContain("&lt;Test&gt;");
+      expect(sentEmails[0]!.html).toContain("&lt;script&gt;");
+      expect(sentEmails[0]!.html).toContain("unsub-html");
+      expect(sentEmails[0]!.html).toContain(env.SITE_URL);
     } finally {
       env.SEND_EMAIL.send = originalSend;
     }

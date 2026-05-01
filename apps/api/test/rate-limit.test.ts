@@ -98,7 +98,7 @@ describe("checkSubscribeRateLimit", () => {
     expect(list.keys.length).toBe(1);
     // expiration is stored internally by KV; we can't directly read it,
     // but we can verify the key exists and the value is valid JSON.
-    const raw = await env.RATE_LIMIT_KV.get(list.keys[0].name);
+    const raw = await env.RATE_LIMIT_KV.get(list.keys[0]!.name);
     const arr = JSON.parse(raw!) as number[];
     expect(Array.isArray(arr)).toBe(true);
     expect(arr[0]).toBeGreaterThanOrEqual(now);

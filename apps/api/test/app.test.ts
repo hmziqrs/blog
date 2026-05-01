@@ -12,7 +12,7 @@ describe("App-level", () => {
   it("returns 404 for unknown routes", async () => {
     const res = await app.fetch(req("/api/nonexistent"), env, ctx);
     expect(res.status).toBe(404);
-    const body = await res.json<{ error: string }>();
+    const body = (await res.json()) as { error: string };
     expect(body.error).toBe("Not found");
   });
 

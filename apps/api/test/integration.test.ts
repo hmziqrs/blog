@@ -3,8 +3,10 @@ import { describe, expect, it, beforeAll, afterEach } from "vitest";
 import app from "../src/app";
 import worker from "../src/index";
 import type { NewsletterMessage } from "../src/modules/newsletter/queue";
+import type { MessageSendRequest } from "@cloudflare/workers-types";
 
 const ctx = createExecutionContext();
+type NewsletterQueueMessage = MessageSendRequest<NewsletterMessage>;
 
 describe("Newsletter end-to-end", () => {
   beforeAll(async () => {
@@ -46,12 +48,12 @@ describe("Newsletter end-to-end", () => {
         ctx,
       );
       expect(sendRes.status).toBe(200);
-      const sendBody = await sendRes.json<{ queued: number }>();
+      const sendBody = (await sendRes.json()) as { queued: number };
       expect(sendBody.queued).toBe(1);
 
       // Step 2: Verify a message was enqueued with correct shape
       expect(capturedBatch.length).toBe(1);
-      const msg = capturedBatch[0].body;
+      const msg = capturedBatch[0]!.body;
       expect(msg.postSlug).toBe("e2e-post");
       expect(msg.postTitle).toBe("E2E Test Post");
       expect(msg.subscriberId).toBe("e2e-sub");
@@ -94,9 +96,9 @@ describe("Newsletter end-to-end", () => {
       .bind("dup-post")
       .run();
 
-    const batchCalls: unknown[][] = [];
+    const batchCalls: NewsletterQueueMessage[][] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-    env.NEWSLETTER_QUEUE.sendBatch = async (messages: unknown[]) => {
+    env.NEWSLETTER_QUEUE.sendBatch = async (messages: Iterable<NewsletterQueueMessage>) => {
       batchCalls.push([...messages]);
     };
 
@@ -118,7 +120,7 @@ describe("Newsletter end-to-end", () => {
         ctx,
       );
       expect(sendRes.status).toBe(200);
-      const body = await sendRes.json<{ message?: string; queued?: number }>();
+      const body = (await sendRes.json()) as { message?: string; queued?: number };
       expect(body.message).toBe("Already sent");
 
       // Queue should not have been touched

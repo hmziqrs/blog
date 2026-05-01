@@ -26,7 +26,7 @@ describe("Complete end-to-end newsletter flow", () => {
       .run();
     await env.DB.prepare("DELETE FROM subscribers WHERE email LIKE 'e2e-%@example.com'").run();
     const list = await env.RATE_LIMIT_KV.list();
-    await Promise.all(list.keys.map((k) => env.RATE_LIMIT_KV.delete(k.name)));
+    await Promise.all(list.keys.map((k: { name: string }) => env.RATE_LIMIT_KV.delete(k.name)));
   });
 
   it("subscribe → send → queue → consumer → email → delivery record", async () => {
@@ -47,7 +47,7 @@ describe("Complete end-to-end newsletter flow", () => {
       ctx,
     );
     expect(subscribeRes.status).toBe(201);
-    const subscribeBody = await subscribeRes.json<{ message: string }>();
+    const subscribeBody = (await subscribeRes.json()) as { message: string };
     expect(subscribeBody.message).toBe("Subscribed");
 
     // Verify subscriber exists in D1
@@ -67,35 +67,36 @@ describe("Complete end-to-end newsletter flow", () => {
       for (const m of messages) capturedMessages.push(m.body);
     };
 
-    let sendRes: Response;
-    try {
-      sendRes = await app.fetch(
-        new Request("http://localhost/api/newsletter/send", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "x-send-secret": "local-dev-secret",
-          },
-          body: JSON.stringify({
-            slug: "e2e-flow-post",
-            title: "E2E Flow Post",
-            excerpt: "This is the complete flow test",
+    const sendRes = await (async () => {
+      try {
+        return await app.fetch(
+          new Request("http://localhost/api/newsletter/send", {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              "x-send-secret": "local-dev-secret",
+            },
+            body: JSON.stringify({
+              slug: "e2e-flow-post",
+              title: "E2E Flow Post",
+              excerpt: "This is the complete flow test",
+            }),
           }),
-        }),
-        env,
-        ctx,
-      );
-    } finally {
-      env.NEWSLETTER_QUEUE.sendBatch = originalSendBatch;
-    }
+          env,
+          ctx,
+        );
+      } finally {
+        env.NEWSLETTER_QUEUE.sendBatch = originalSendBatch;
+      }
+    })();
 
-    expect(sendRes!.status).toBe(200);
-    const sendBody = await sendRes!.json<{ queued: number }>();
+    expect(sendRes.status).toBe(200);
+    const sendBody = (await sendRes.json()) as { queued: number };
     expect(sendBody.queued).toBe(1);
 
     // Verify the exact message shape
     expect(capturedMessages.length).toBe(1);
-    const msg = capturedMessages[0];
+    const msg = capturedMessages[0]!;
     expect(msg.postSlug).toBe("e2e-flow-post");
     expect(msg.postTitle).toBe("E2E Flow Post");
     expect(msg.subscriberId).toBe(subscriberId);
@@ -105,8 +106,15 @@ describe("Complete end-to-end newsletter flow", () => {
     // ─── Phase 3: Process queue message ───────────────────────────────
     const sentEmails: { to: string; subject: string; html: string }[] = [];
     const originalSend = env.SEND_EMAIL.send;
-    env.SEND_EMAIL.send = async (opts: { to: string; subject: string; html?: string }) => {
-      sentEmails.push({ to: opts.to, subject: opts.subject, html: opts.html ?? "" });
+    env.SEND_EMAIL.send = async (message) => {
+      const to = message.to;
+      const toStr = Array.isArray(to) ? (to[0] ?? "") : (to ?? "");
+      sentEmails.push({
+        to: toStr,
+        subject: (message as { subject?: string }).subject ?? "",
+        html: (message as { html?: Array<{ content: string }> }).html?.[0]?.content ?? "",
+      });
+      return { messageId: "test-id" } as import("@cloudflare/workers-types").EmailSendResult;
     };
 
     try {
@@ -128,10 +136,10 @@ describe("Complete end-to-end newsletter flow", () => {
 
       // ─── Phase 4: Verify email was sent ─────────────────────────────
       expect(sentEmails.length).toBe(1);
-      expect(sentEmails[0].to).toBe("e2e-new@example.com");
-      expect(sentEmails[0].subject).toBe("New Post: E2E Flow Post");
-      expect(sentEmails[0].html).toContain("e2e-flow-post");
-      expect(sentEmails[0].html).toContain(unsubscribeToken);
+      expect(sentEmails[0]!.to).toBe("e2e-new@example.com");
+      expect(sentEmails[0]!.subject).toBe("New Post: E2E Flow Post");
+      expect(sentEmails[0]!.html).toContain("e2e-flow-post");
+      expect(sentEmails[0]!.html).toContain(unsubscribeToken);
 
       // ─── Phase 5: Verify delivery recorded in D1 ────────────────────
       const delivery = await env.DB.prepare(

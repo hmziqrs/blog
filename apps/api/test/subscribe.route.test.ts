@@ -15,7 +15,7 @@ describe("POST /api/newsletter/subscribe", () => {
       .bind("test-%@example.com")
       .run();
     const list = await env.RATE_LIMIT_KV.list();
-    await Promise.all(list.keys.map((k) => env.RATE_LIMIT_KV.delete(k.name)));
+    await Promise.all(list.keys.map((k: { name: string }) => env.RATE_LIMIT_KV.delete(k.name)));
   });
 
   // ─── Validation ────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ describe("POST /api/newsletter/subscribe", () => {
       ctx,
     );
     expect(res.status).toBe(415);
-    const body = await res.json<{ error: string }>();
+    const body = (await res.json()) as { error: string };
     expect(body.error).toContain("application/json");
   });
 
@@ -112,7 +112,7 @@ describe("POST /api/newsletter/subscribe", () => {
       ctx,
     );
     expect(res.status).toBe(400);
-    const body = await res.json<{ error: string }>();
+    const body = (await res.json()) as { error: string };
     expect(body.error).toBe("Bot detected");
 
     // Verify no DB entry was created
@@ -171,7 +171,7 @@ describe("POST /api/newsletter/subscribe", () => {
       ctx,
     );
     expect(res.status).toBe(201);
-    const body = await res.json<{ message: string }>();
+    const body = (await res.json()) as { message: string };
     expect(body.message).toBe("Subscribed");
   });
 
@@ -239,7 +239,7 @@ describe("POST /api/newsletter/subscribe", () => {
       ctx,
     );
     expect(res.status).toBe(409);
-    const body = await res.json<{ error: string }>();
+    const body = (await res.json()) as { error: string };
     expect(body.error).toBe("Already subscribed");
   });
 

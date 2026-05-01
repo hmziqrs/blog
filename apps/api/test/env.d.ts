@@ -4,7 +4,7 @@ declare module "cloudflare:workers" {
     TEST_MIGRATIONS: import("cloudflare:test").D1Migration[];
     RATE_LIMIT_KV: KVNamespace;
     NEWSLETTER_QUEUE: Queue<import("../src/modules/newsletter/queue").NewsletterMessage>;
-    SEND_EMAIL: { send: (opts: { to: string; subject: string; html?: string }) => Promise<void> };
+    SEND_EMAIL: import("@cloudflare/workers-types").SendEmail;
     TURNSTILE_SECRET_KEY: string;
     NEWSLETTER_SEND_SECRET: string;
     EMAIL_FROM_ADDRESS: string;
@@ -20,7 +20,7 @@ declare module "cloudflare:test" {
     TEST_MIGRATIONS: D1Migration[];
     RATE_LIMIT_KV: KVNamespace;
     NEWSLETTER_QUEUE: Queue<import("../src/modules/newsletter/queue").NewsletterMessage>;
-    SEND_EMAIL: { send: (opts: { to: string; subject: string; html?: string }) => Promise<void> };
+    SEND_EMAIL: import("@cloudflare/workers-types").SendEmail;
     TURNSTILE_SECRET_KEY: string;
     NEWSLETTER_SEND_SECRET: string;
     EMAIL_FROM_ADDRESS: string;
@@ -51,7 +51,7 @@ declare module "cloudflare:test" {
     TEST_MIGRATIONS: D1Migration[];
     RATE_LIMIT_KV: KVNamespace;
     NEWSLETTER_QUEUE: Queue<import("../src/modules/newsletter/queue").NewsletterMessage>;
-    SEND_EMAIL: { send: (opts: { to: string; subject: string; html?: string }) => Promise<void> };
+    SEND_EMAIL: import("@cloudflare/workers-types").SendEmail;
     TURNSTILE_SECRET_KEY: string;
     NEWSLETTER_SEND_SECRET: string;
     EMAIL_FROM_ADDRESS: string;

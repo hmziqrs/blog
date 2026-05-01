@@ -2,8 +2,10 @@ import { env, createExecutionContext } from "cloudflare:test";
 import { describe, expect, it, beforeAll, afterEach } from "vitest";
 import app from "../src/app";
 import type { NewsletterMessage } from "../src/modules/newsletter/queue";
+import type { D1Result, MessageSendRequest } from "@cloudflare/workers-types";
 
 const ctx = createExecutionContext();
+type NewsletterQueueMessage = MessageSendRequest<NewsletterMessage>;
 
 function req(path: string, init?: RequestInit) {
   return new Request(`http://localhost${path}`, init);
@@ -211,7 +213,7 @@ describe("POST /api/newsletter/send", () => {
       ctx,
     );
     expect(res.status).toBe(200);
-    const body = await res.json<{ message: string }>();
+    const body = (await res.json()) as { message: string };
     expect(body.message).toBe("Already sent");
   });
 
@@ -235,7 +237,7 @@ describe("POST /api/newsletter/send", () => {
       ctx,
     );
     expect(res.status).toBe(200);
-    const body = await res.json<{ queued: number }>();
+    const body = (await res.json()) as { queued: number };
     expect(body.queued).toBe(2);
 
     const sentRow = await env.DB.prepare("SELECT id FROM newsletter_sent WHERE post_slug = ?")
@@ -271,16 +273,16 @@ describe("POST /api/newsletter/send", () => {
       expect(res.status).toBe(200);
 
       expect(batchCalls.length).toBe(1);
-      expect(batchCalls[0].length).toBe(2);
+      expect(batchCalls[0]!.length).toBe(2);
 
-      const first = batchCalls[0][0].body;
+      const first = batchCalls[0]![0]!.body;
       expect(first.postSlug).toBe("shape-test-post");
       expect(first.postTitle).toBe("Shape Test");
       expect(first.postExcerpt).toBe("Shape excerpt");
       expect(first.subscriberEmail).toBe("sendtest-1@example.com");
       expect(first.unsubscribeToken).toBe("unsub-send-1");
 
-      const second = batchCalls[0][1].body;
+      const second = batchCalls[0]![1]!.body;
       expect(second.subscriberEmail).toBe("sendtest-2@example.com");
       expect(second.unsubscribeToken).toBe("unsub-send-2");
     } finally {
@@ -309,7 +311,7 @@ describe("POST /api/newsletter/send", () => {
         ctx,
       );
       expect(res.status).toBe(200);
-      const body = await res.json<{ queued: number }>();
+      const body = (await res.json()) as { queued: number };
       expect(body.queued).toBe(0);
     } finally {
       await env.DB.prepare(
@@ -331,15 +333,15 @@ describe("POST /api/newsletter/send", () => {
       const stmt = env.DB.prepare(
         "INSERT INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
       );
-      const batch: Promise<unknown>[] = [];
+      const batch: Promise<D1Result>[] = [];
       for (let i = 1; i <= 105; i++) {
         batch.push(stmt.bind(`chunk-sub-${i}`, `chunk-${i}@example.com`, `unsub-chunk-${i}`).run());
       }
       await Promise.all(batch);
 
-      const batchCalls: unknown[][] = [];
+      const batchCalls: NewsletterQueueMessage[][] = [];
       const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-      env.NEWSLETTER_QUEUE.sendBatch = async (messages: unknown[]) => {
+      env.NEWSLETTER_QUEUE.sendBatch = async (messages: Iterable<NewsletterQueueMessage>) => {
         batchCalls.push([...messages]);
       };
 
@@ -361,12 +363,12 @@ describe("POST /api/newsletter/send", () => {
           ctx,
         );
         expect(res.status).toBe(200);
-        const body = await res.json<{ queued: number }>();
+        const body = (await res.json()) as { queued: number };
         expect(body.queued).toBe(107); // 105 + 2 pre-existing
 
         expect(batchCalls.length).toBe(2);
-        expect(batchCalls[0].length).toBe(100);
-        expect(batchCalls[1].length).toBe(7);
+        expect(batchCalls[0]!.length).toBe(100);
+        expect(batchCalls[1]!.length).toBe(7);
       } finally {
         env.NEWSLETTER_QUEUE.sendBatch = originalSendBatch;
         await env.DB.prepare(
