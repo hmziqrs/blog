@@ -13,15 +13,12 @@ Scope: `apps/api/` (Worker, routes, queue, rate limiter), `apps/web/` newsletter
 *Original finding:* Mail security gateways auto-fetch every URL in delivered email, deleting the subscriber. Tokens leak into history, Referer, proxy logs.
 *Fix applied:* Require POST for unsubscribe.
 
-### ✅ H2. `/send` accepts arbitrary slug + race on duplicate sends
+### ⚠️ H2. `/send` accepts arbitrary slug + race on duplicate sends
 
-**Fixed.** The send endpoint now uses `INSERT INTO newsletter_sent … ON CONFLICT DO NOTHING` first, and only enqueues if `meta.changes === 1`. This prevents duplicate sends under concurrency. Slug validation is still the caller's responsibility.
+**Partially fixed.** The race condition is resolved: `send.ts` now uses `INSERT INTO newsletter_sent … ON CONFLICT DO NOTHING` first, and only enqueues if `meta.changes === 1`. However, **slug validation against the content collection is still not implemented** — the endpoint trusts the caller to provide a valid slug.
 
-*Original finding:*
-- No verification that `slug` corresponds to an actual published post.
-- `alreadySent` check and `INSERT INTO newsletter_sent` bracketed the enqueue, creating a race where two concurrent calls could both send.
-- The same SELECT-then-INSERT pattern in `subscribe.ts` threw a raw 500 on unique constraint violations.
-*Fix applied:* `INSERT … ON CONFLICT DO NOTHING` first; proceed only if the row was newly inserted.
+*Race fix applied:* `INSERT … ON CONFLICT DO NOTHING` first; proceed only if the row was newly inserted.
+*Still open:* Verify `slug` exists in the content collection before enqueuing.
 
 ### ✅ H3. Non-constant-time secret comparison
 
@@ -67,12 +64,12 @@ Fix: set `ALLOWED_ORIGIN="https://blog.hmziq.rs"` explicitly. Never accept `*`.
 *Original finding:* If the secret was left as a Cloudflare test key, every CAPTCHA would pass and the only bot defense would be the rate limiter.
 *Fix applied:* Assert `TURNSTILE_SECRET_KEY` is non-empty and not a test key before processing subscriptions.
 
-### ✅ M6. Hard-delete on unsubscribe — no audit, blacklist unused
+### ⚠️ M6. Hard-delete on unsubscribe — no audit, blacklist unused
 
-**Fixed.** Unsubscribe now performs a soft delete: `UPDATE subscribers SET status='unsubscribed', unsubscribed_at=datetime('now') WHERE id = ?`. Re-subscription re-activates the existing row. Sends are already filtered by `status='active'`.
+**Partially fixed.** Unsubscribe now performs a soft delete (`UPDATE subscribers SET status='unsubscribed'…`), preserving the audit trail. However, the `blacklist` table from `0001_initial.sql` is **never populated** — the queue consumer does not handle hard bounces or insert into `blacklist`.
 
-*Original finding:* `DELETE FROM subscribers` removed the row entirely, destroying the audit trail and allowing immediate re-subscription.
 *Fix applied:* Soft delete with status tracking.
+*Still open:* Populate `blacklist` on hard bounces in `queue-consumer.ts`.
 
 ## Low
 
@@ -85,10 +82,10 @@ Fix: set `ALLOWED_ORIGIN="https://blog.hmziq.rs"` explicitly. Never accept `*`.
 
 ### ✅ L2. `submitTime` is client-controlled
 
-**Fixed.** The client-controlled `submitTime` check has been removed from the subscription flow.
+**Not applicable / Fixed.** No `submitTime` check exists in the current subscription flow. If this was previously implemented, it has been removed.
 
 *Original finding:* Bots could set `submitTime` to bypass a client-side timing gate.
-*Fix applied:* Removed the `submitTime` check entirely.
+*Current state:* No `submitTime` field is read or validated in `subscribe.ts`.
 
 ### ✅ L3. Honeypot dead branch
 
@@ -132,12 +129,12 @@ Fix: configure `dead_letter_queue = "newsletter-dlq"` and log failure cause befo
 *Original finding:* Rate limit was consumed before `siteverify`, allowing botnets with junk tokens to exhaust a victim's budget.
 *Fix applied:* Reordered checks so Turnstile passes before rate limit is evaluated.
 
-### ⚠️ L9. Missing `X-Content-Type-Options: nosniff` on API responses
+### ✅ L9. Missing `X-Content-Type-Options: nosniff` on API responses
 
-**Open.** JSON responses still don't set `X-Content-Type-Options: nosniff`.
+**Fixed.** `app.ts` now sets `X-Content-Type-Options: nosniff` on all `/api/*` responses via a middleware.
 
-File: `apps/api/src/app.ts`
-Fix: add a one-line middleware: `app.use("*", async (c, next) => { await next(); c.header("X-Content-Type-Options", "nosniff"); });`
+*Original finding:* JSON responses didn't set the header.
+*Fix applied:* One-line middleware after `cors()` that adds the header.
 
 ## Verified safe
 
@@ -155,10 +152,10 @@ Each fix lands in the same PR as its test. Existing infra: `vitest`, `apps/api/t
 
 | ID  | Test file                                              | Case                                                                       | Pass criteria                                                                                       |
 | --- | ------------------------------------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| H1  | `unsubscribe.route.test.ts`                            | `GET /api/newsletter/unsubscribe?token=…`                                  | Returns 405; row unchanged                                                                          |
+| H1  | `unsubscribe.route.test.ts`                            | `GET /api/newsletter/unsubscribe?token=…`                                  | Returns 404 (no GET handler); row unchanged                                                         |
 | H1  | `unsubscribe.route.test.ts`                            | `POST` with valid token                                                    | Returns 200; row soft-deleted (see M6)                                                              |
 | H2a | `send.route.test.ts`                                   | Two concurrent `POST /send` same slug                                      | Exactly one `sendBatch` call; one 200 enqueued, one 200 "already sent"; `newsletter_sent` has 1 row |
-| H2b | `send.route.test.ts`                                   | `POST /send` with slug not in content collection                           | Returns 400; queue not called                                                                       |
+| H2b | `send.route.test.ts`                                   | `POST /send` with slug not in content collection                           | Returns 400; queue not called ⚠️ *Not yet implemented*                                              |
 | H2c | `subscribe.route.test.ts`                              | Two concurrent `POST /subscribe` same email                                | One 201, one 201 (per M1); `subscribers` has 1 row; no 500                                          |
 | H3  | `send.route.test.ts`                                   | Wrong secret of equal length to env value                                  | Returns 401                                                                                         |
 | H3  | unit (`newsletter.test.ts`)                            | `timingSafeEqual` helper                                                   | Equal strings → true; unequal-same-length → false; unequal-length → false                           |
