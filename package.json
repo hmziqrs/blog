@@ -34,6 +34,7 @@
     "media:rewrite": "bun run scripts/media-pipeline.ts rewrite",
     "newsletter:send": "bun run scripts/send-newsletter.ts",
     "newsletter:admin": "bun run scripts/newsletter-admin.ts",
+    "newsletter:status": "bun run scripts/newsletter-admin.ts status",
     "db:create": "wrangler d1 create blog-db",
     "db:create:staging": "wrangler d1 create blog-db-staging",
     "db:migrate:local": "wrangler d1 migrations apply blog-db --local --config apps/api/wrangler.toml",

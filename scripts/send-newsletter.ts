@@ -1,25 +1,9 @@
-import { parseNewsletterIssue } from "./newsletter-utils.ts";
+import { parseNewsletterIssue, listNewsletterIssues, getSentSlugs } from "./newsletter-utils.ts";
 
 const SITE_URL = process.env.SITE_URL ?? "";
 const NEWSLETTER_SEND_SECRET = process.env.NEWSLETTER_SEND_SECRET ?? "";
 
-async function main() {
-  const issueSlug = process.argv[2];
-  if (!issueSlug) {
-    console.error("Usage: bun run newsletter:send <issue-slug>");
-    process.exit(1);
-  }
-
-  if (!NEWSLETTER_SEND_SECRET) {
-    console.error("NEWSLETTER_SEND_SECRET is required");
-    process.exit(1);
-  }
-
-  if (!SITE_URL) {
-    console.error("SITE_URL is required");
-    process.exit(1);
-  }
-
+async function sendIssue(issueSlug: string) {
   const issue = parseNewsletterIssue(issueSlug);
   if (!issue) {
     console.error(`Newsletter issue "${issueSlug}" not found in content/newsletters/`);
@@ -49,6 +33,44 @@ async function main() {
 
   const result = (await response.json()) as { queued?: number; message?: string };
   console.log(result.message ?? `Queued: ${result.queued ?? 0}`);
+}
+
+async function main() {
+  if (!NEWSLETTER_SEND_SECRET) {
+    console.error("NEWSLETTER_SEND_SECRET is required");
+    process.exit(1);
+  }
+  if (!SITE_URL) {
+    console.error("SITE_URL is required");
+    process.exit(1);
+  }
+
+  const explicitSlug = process.argv[2];
+  if (explicitSlug) {
+    await sendIssue(explicitSlug);
+    return;
+  }
+
+  console.log("No slug provided, auto-detecting next unsent issue...");
+
+  const issues = listNewsletterIssues();
+  if (issues.length === 0) {
+    console.log("No newsletter issues found in content/newsletters/");
+    process.exit(0);
+  }
+
+  const sentSlugs = await getSentSlugs();
+  const sentSet = new Set(sentSlugs);
+  const unsent = issues.filter((i) => !sentSet.has(i.slug));
+
+  if (unsent.length === 0) {
+    console.log("No unsent issues found.");
+    process.exit(0);
+  }
+
+  const next = unsent[0];
+  console.log(`Found unsent issue: "${next.subject}" (${next.slug}) from ${next.date.toISOString().slice(0, 10)}`);
+  await sendIssue(next.slug);
 }
 
 main().catch((err) => {

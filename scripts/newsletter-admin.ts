@@ -2,38 +2,9 @@
 //   bun run scripts/newsletter-admin.ts stats
 //   bun run scripts/newsletter-admin.ts subscribers
 //   bun run scripts/newsletter-admin.ts sends
+//   bun run scripts/newsletter-admin.ts status
 
-const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID ?? "";
-const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN ?? "";
-const D1_DATABASE_ID = process.env.D1_DATABASE_ID ?? "";
-
-async function queryD1<T = Record<string, unknown>>(
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
-  const response = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}/query`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ sql, params }),
-    },
-  );
-
-  if (!response.ok) throw new Error(`D1 query failed: ${response.statusText}`);
-
-  const data = await response.json<{
-    success: boolean;
-    errors: Array<{ message: string }>;
-    result: Array<{ results: T[] }>;
-  }>();
-  if (!data.success) throw new Error(`D1 error: ${data.errors[0].message}`);
-
-  return data.result[0].results;
-}
+import { queryD1, listNewsletterIssues, getSentSlugs } from "./newsletter-utils.ts";
 
 async function stats() {
   const [active] = await queryD1<{ count: number }>(
@@ -82,8 +53,39 @@ async function sends() {
   for (const r of rows) console.log(`${r.sent_at}  ${r.issue_slug}`);
 }
 
+async function status() {
+  const issues = listNewsletterIssues();
+  const sentSlugs = await getSentSlugs();
+  const sentSet = new Set(sentSlugs);
+
+  if (issues.length === 0) {
+    console.log("No newsletter issues found in content/newsletters/");
+    return;
+  }
+
+  console.log(`${"slug".padEnd(25)} ${"date".padEnd(12)} ${"title".padEnd(30)} status`);
+  console.log("-".repeat(80));
+
+  let sentCount = 0;
+  let unsentCount = 0;
+
+  for (const issue of issues) {
+    const isSent = sentSet.has(issue.slug);
+    if (isSent) sentCount++;
+    else unsentCount++;
+
+    const sentLabel = isSent ? "sent" : "unsent";
+    const dateStr = issue.date.toISOString().slice(0, 10);
+    const title = issue.title.length > 28 ? issue.title.slice(0, 27) + "…" : issue.title;
+    console.log(`${issue.slug.padEnd(25)} ${dateStr.padEnd(12)} ${title.padEnd(30)} ${sentLabel}`);
+  }
+
+  console.log("-".repeat(80));
+  console.log(`Total: ${issues.length}  |  Sent: ${sentCount}  |  Unsent: ${unsentCount}`);
+}
+
 async function main() {
-  if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN || !D1_DATABASE_ID) {
+  if (!process.env.CLOUDFLARE_ACCOUNT_ID || !process.env.CLOUDFLARE_API_TOKEN || !process.env.D1_DATABASE_ID) {
     console.error("Set CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, D1_DATABASE_ID");
     process.exit(1);
   }
@@ -100,8 +102,11 @@ async function main() {
     case "sends":
       await sends();
       break;
+    case "status":
+      await status();
+      break;
     default:
-      console.error(`Unknown command: ${cmd}. Use: stats | subscribers | sends`);
+      console.error(`Unknown command: ${cmd}. Use: stats | subscribers | sends | status`);
       process.exit(1);
   }
 }

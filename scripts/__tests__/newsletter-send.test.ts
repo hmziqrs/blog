@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { parseNewsletterIssue } from "../newsletter-utils.ts";
+import { parseNewsletterIssue, listNewsletterIssues } from "../newsletter-utils.ts";
 
 function withTempIssue(filename: string, content: string, fn: (dir: string) => void) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "blog-nl-test-"));
@@ -104,5 +104,39 @@ describe("parseNewsletterIssue", () => {
         expect(issue!.htmlBody).not.toContain("Featured Posts");
       },
     );
+  });
+});
+
+describe("listNewsletterIssues", () => {
+  test("returns empty array for non-existent directory", () => {
+    const issues = listNewsletterIssues("/nonexistent/path");
+    expect(issues).toEqual([]);
+  });
+
+  test("scans directory and returns parsed issues sorted by date", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "blog-nl-test-"));
+    fs.writeFileSync(path.join(dir, "later.md"), `---\ntitle: "Later"\ndate: "2026-06-01"\n---\n\nBody.`);
+    fs.writeFileSync(path.join(dir, "earlier.md"), `---\ntitle: "Earlier"\ndate: "2026-05-01"\n---\n\nBody.`);
+    try {
+      const issues = listNewsletterIssues(dir);
+      expect(issues).toHaveLength(2);
+      expect(issues[0].slug).toBe("earlier");
+      expect(issues[1].slug).toBe("later");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("skips files that fail to parse", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "blog-nl-test-"));
+    fs.writeFileSync(path.join(dir, "good.md"), `---\ntitle: "Good"\ndate: "2026-05-01"\n---\n\nBody.`);
+    fs.writeFileSync(path.join(dir, "bad.md"), "No frontmatter.");
+    try {
+      const issues = listNewsletterIssues(dir);
+      expect(issues).toHaveLength(1);
+      expect(issues[0].slug).toBe("good");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
