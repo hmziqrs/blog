@@ -1,6 +1,7 @@
 import { env, createExecutionContext } from "cloudflare:test";
 import { describe, expect, it, beforeAll, afterEach } from "vitest";
-import app from "../src/index";
+import app from "../src/app";
+import type { NewsletterMessage } from "../src/modules/newsletter/queue";
 
 const ctx = createExecutionContext();
 
@@ -12,8 +13,6 @@ describe("POST /api/newsletter/send", () => {
   const AUTH_HEADER = { "x-send-secret": "local-dev-secret" };
 
   beforeAll(async () => {
-    // Seed active subscribers for send tests
-    // Use namespaced emails to avoid collision with other test cleanups
     await env.DB.prepare(
       "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
     )
@@ -218,7 +217,7 @@ describe("POST /api/newsletter/send", () => {
 
   // ─── Happy path ────────────────────────────────────────────────────
 
-  it("sends newsletter to all active subscribers and records deliveries", async () => {
+  it("queues newsletter messages for all active subscribers", async () => {
     const res = await app.fetch(
       req("/api/newsletter/send", {
         method: "POST",
@@ -236,27 +235,144 @@ describe("POST /api/newsletter/send", () => {
       ctx,
     );
     expect(res.status).toBe(200);
-    const body = await res.json<{ sent: number; failed: number }>();
-    // SendEmail binding in local mode simulates success for all recipients
-    expect(body.sent).toBe(2);
-    expect(body.failed).toBe(0);
+    const body = await res.json<{ queued: number }>();
+    expect(body.queued).toBe(2);
 
-    // Verify newsletter_sent entry
     const sentRow = await env.DB.prepare("SELECT id FROM newsletter_sent WHERE post_slug = ?")
       .bind("send-test-post")
       .first();
     expect(sentRow).not.toBeNull();
+  });
 
-    // Verify newsletter_deliveries: one 'sent' entry per subscriber
-    const deliveries = await env.DB.prepare(
-      "SELECT subscriber_id, status FROM newsletter_deliveries WHERE post_slug = ?",
-    )
-      .bind("send-test-post")
-      .all<{ subscriber_id: string; status: string }>();
+  it("enqueues correct message shape per subscriber", async () => {
+    const batchCalls: { body: NewsletterMessage }[][] = [];
+    const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
+    env.NEWSLETTER_QUEUE.sendBatch = async (messages: { body: NewsletterMessage }[]) => {
+      batchCalls.push([...messages]);
+    };
 
-    expect(deliveries.results.length).toBe(2);
-    for (const d of deliveries.results) {
-      expect(d.status).toBe("sent");
+    try {
+      const res = await app.fetch(
+        req("/api/newsletter/send", {
+          method: "POST",
+          headers: {
+            ...AUTH_HEADER,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            slug: "shape-test-post",
+            title: "Shape Test",
+            excerpt: "Shape excerpt",
+          }),
+        }),
+        env,
+        ctx,
+      );
+      expect(res.status).toBe(200);
+
+      expect(batchCalls.length).toBe(1);
+      expect(batchCalls[0].length).toBe(2);
+
+      const first = batchCalls[0][0].body;
+      expect(first.postSlug).toBe("shape-test-post");
+      expect(first.postTitle).toBe("Shape Test");
+      expect(first.postExcerpt).toBe("Shape excerpt");
+      expect(first.subscriberEmail).toBe("sendtest-1@example.com");
+      expect(first.unsubscribeToken).toBe("unsub-send-1");
+
+      const second = batchCalls[0][1].body;
+      expect(second.subscriberEmail).toBe("sendtest-2@example.com");
+      expect(second.unsubscribeToken).toBe("unsub-send-2");
+    } finally {
+      env.NEWSLETTER_QUEUE.sendBatch = originalSendBatch;
     }
+  });
+
+  it("returns queued: 0 when there are no subscribers", async () => {
+    await env.DB.prepare("DELETE FROM subscribers").run();
+
+    try {
+      const res = await app.fetch(
+        req("/api/newsletter/send", {
+          method: "POST",
+          headers: {
+            ...AUTH_HEADER,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            slug: "no-subscribers-post",
+            title: "No Subscribers",
+            excerpt: "Nobody here",
+          }),
+        }),
+        env,
+        ctx,
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json<{ queued: number }>();
+      expect(body.queued).toBe(0);
+    } finally {
+      await env.DB.prepare(
+        "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      )
+        .bind("send-sub-1", "sendtest-1@example.com", "unsub-send-1")
+        .run();
+      await env.DB.prepare(
+        "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      )
+        .bind("send-sub-2", "sendtest-2@example.com", "unsub-send-2")
+        .run();
+    }
+  });
+
+  describe("sendBatch chunking", () => {
+    it("chunks into multiple sendBatch calls when subscribers exceed 100", async () => {
+      // Seed 105 subscribers
+      const stmt = env.DB.prepare(
+        "INSERT INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
+      );
+      const batch: Promise<unknown>[] = [];
+      for (let i = 1; i <= 105; i++) {
+        batch.push(stmt.bind(`chunk-sub-${i}`, `chunk-${i}@example.com`, `unsub-chunk-${i}`).run());
+      }
+      await Promise.all(batch);
+
+      const batchCalls: unknown[][] = [];
+      const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
+      env.NEWSLETTER_QUEUE.sendBatch = async (messages: unknown[]) => {
+        batchCalls.push([...messages]);
+      };
+
+      try {
+        const res = await app.fetch(
+          req("/api/newsletter/send", {
+            method: "POST",
+            headers: {
+              ...AUTH_HEADER,
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              slug: "chunk-test-post",
+              title: "Chunk Test",
+              excerpt: "Chunk excerpt",
+            }),
+          }),
+          env,
+          ctx,
+        );
+        expect(res.status).toBe(200);
+        const body = await res.json<{ queued: number }>();
+        expect(body.queued).toBe(107); // 105 + 2 pre-existing
+
+        expect(batchCalls.length).toBe(2);
+        expect(batchCalls[0].length).toBe(100);
+        expect(batchCalls[1].length).toBe(7);
+      } finally {
+        env.NEWSLETTER_QUEUE.sendBatch = originalSendBatch;
+        await env.DB.prepare(
+          "DELETE FROM subscribers WHERE email LIKE 'chunk-%@example.com'",
+        ).run();
+      }
+    });
   });
 });

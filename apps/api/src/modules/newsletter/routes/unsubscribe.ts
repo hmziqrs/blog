@@ -30,7 +30,7 @@ async function processUnsubscribe(
 app.get("/", async (c) => {
   const ip = c.req.header("CF-Connecting-IP") ?? "unknown";
 
-  const allowed = await checkUnsubscribeRateLimit(c.env.DB, ip);
+  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, ip);
   if (!allowed) {
     return c.json({ error: "Too many requests" }, 429);
   }
@@ -55,7 +55,7 @@ app.post("/", async (c) => {
 
   const ip = c.req.header("CF-Connecting-IP") ?? "unknown";
 
-  const allowed = await checkUnsubscribeRateLimit(c.env.DB, ip);
+  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, ip);
   if (!allowed) {
     return c.json({ error: "Too many requests" }, 429);
   }

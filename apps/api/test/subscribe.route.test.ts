@@ -1,6 +1,6 @@
 import { env, createExecutionContext } from "cloudflare:test";
-import { describe, expect, it, beforeAll, afterEach } from "vitest";
-import app from "../src/index";
+import { describe, expect, it, afterEach } from "vitest";
+import app from "../src/app";
 
 const ctx = createExecutionContext();
 
@@ -10,9 +10,12 @@ function req(path: string, init?: RequestInit) {
 
 describe("POST /api/newsletter/subscribe", () => {
   afterEach(async () => {
-    // Clean up: delete any test subscribers and rate limits
-    await env.DB.prepare("DELETE FROM subscribers WHERE email LIKE ?").bind("test-%@example.com").run();
-    await env.DB.prepare("DELETE FROM rate_limits").run();
+    // Clean up: delete any test subscribers and KV rate limits
+    await env.DB.prepare("DELETE FROM subscribers WHERE email LIKE ?")
+      .bind("test-%@example.com")
+      .run();
+    const list = await env.RATE_LIMIT_KV.list();
+    await Promise.all(list.keys.map((k) => env.RATE_LIMIT_KV.delete(k.name)));
   });
 
   // ─── Validation ────────────────────────────────────────────────────
@@ -126,7 +129,11 @@ describe("POST /api/newsletter/subscribe", () => {
       req("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: "user@example.com", token: "abc123", submitTime: Date.now() }),
+        body: JSON.stringify({
+          email: "user@example.com",
+          token: "abc123",
+          submitTime: Date.now(),
+        }),
       }),
       env,
       ctx,
@@ -316,25 +323,5 @@ describe("POST /api/newsletter/subscribe", () => {
       ctx,
     );
     expect(res3.status).toBe(429);
-  });
-
-  it("records rate-limit entries in DB", async () => {
-    await app.fetch(
-      new Request("http://localhost/api/newsletter/subscribe", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "CF-Connecting-IP": "5.5.5.5",
-        },
-        body: JSON.stringify({ email: "test-rldb@example.com", token: "abc123" }),
-      }),
-      env,
-      ctx,
-    );
-
-    const row = await env.DB.prepare("SELECT COUNT(*) as c FROM rate_limits WHERE ip = ?")
-      .bind("5.5.5.5")
-      .first<{ c: number }>();
-    expect(row?.c).toBe(1);
   });
 });

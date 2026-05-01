@@ -56,6 +56,7 @@ The sections below have been **cross-checked against latest Cloudflare and Hono 
 ### 1. `apps/api/wrangler.toml`
 
 Add KV namespace:
+
 ```toml
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
@@ -67,6 +68,7 @@ id = "<staging-KV-namespace-id>"
 ```
 
 Add Queue producer + consumer:
+
 ```toml
 [[queues.producers]]
 binding = "NEWSLETTER_QUEUE"
@@ -79,6 +81,7 @@ max_batch_timeout = 30
 ```
 
 Add staging Queue bindings (use a separate `newsletter-send-staging` queue so staging cannot drain prod messages):
+
 ```toml
 [[env.staging.queues.producers]]
 binding = "NEWSLETTER_QUEUE"
@@ -134,6 +137,7 @@ export default app;
 ### 3. `apps/api/src/index.ts`
 
 Change from `export default app` to:
+
 ```ts
 import app from "./app";
 import type { Bindings } from "./env";
@@ -159,6 +163,7 @@ export default {
 ### 4. `apps/api/src/env.ts`
 
 Add to `Bindings`:
+
 ```ts
 RATE_LIMIT_KV: KVNamespace;
 NEWSLETTER_QUEUE: Queue<NewsletterMessage>;
@@ -195,11 +200,7 @@ Full rewrite to KV. Key pattern: `rl:ip:${ip}` and `rl:email:${email}`. Store JS
 const WINDOW_MS = 60 * 60 * 1000;
 const WINDOW_SECONDS = 60 * 60;
 
-async function checkAndRecord(
-  kv: KVNamespace,
-  key: string,
-  limit: number,
-): Promise<boolean> {
+async function checkAndRecord(kv: KVNamespace, key: string, limit: number): Promise<boolean> {
   const now = Date.now();
   const raw = await kv.get(key);
 
@@ -239,10 +240,7 @@ export async function checkSubscribeRateLimit(
   return true;
 }
 
-export async function checkUnsubscribeRateLimit(
-  kv: KVNamespace,
-  ip: string,
-): Promise<boolean> {
+export async function checkUnsubscribeRateLimit(kv: KVNamespace, ip: string): Promise<boolean> {
   return checkAndRecord(kv, `rl:ip:${ip}`, 3);
 }
 ```
@@ -260,6 +258,7 @@ export async function checkUnsubscribeRateLimit(
 ### 7. `apps/api/src/modules/newsletter/routes/send.ts`
 
 HTTP endpoint now:
+
 1. Validates auth + post meta
 2. Checks `newsletter_sent` for duplicates
 3. Queries active subscribers from D1
@@ -293,9 +292,7 @@ for (let i = 0; i < messages.length; i += SEND_BATCH_CHUNK) {
   await c.env.NEWSLETTER_QUEUE.sendBatch(messages.slice(i, i + SEND_BATCH_CHUNK));
 }
 
-await c.env.DB.prepare("INSERT INTO newsletter_sent (post_slug) VALUES (?)")
-  .bind(post.slug)
-  .run();
+await c.env.DB.prepare("INSERT INTO newsletter_sent (post_slug) VALUES (?)").bind(post.slug).run();
 
 return c.json({ queued: messages.length }, 200);
 ```
@@ -353,7 +350,7 @@ export async function handleQueueBatch(
     try {
       // Verify subscriber still active
       const sub = await env.DB.prepare(
-        "SELECT id FROM subscribers WHERE id = ? AND status = 'active'"
+        "SELECT id FROM subscribers WHERE id = ? AND status = 'active'",
       )
         .bind(msg.body.subscriberId)
         .first<{ id: string }>();
@@ -374,7 +371,7 @@ export async function handleQueueBatch(
 
       // Record delivery
       await env.DB.prepare(
-        "INSERT OR IGNORE INTO newsletter_deliveries (post_slug, subscriber_id, status, sent_at) VALUES (?, ?, 'sent', datetime('now'))"
+        "INSERT OR IGNORE INTO newsletter_deliveries (post_slug, subscriber_id, status, sent_at) VALUES (?, ?, 'sent', datetime('now'))",
       )
         .bind(msg.body.postSlug, msg.body.subscriberId)
         .run();
@@ -418,6 +415,7 @@ const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, ip);
 ### 11. `apps/api/test/env.d.ts`
 
 Add to `ProvidedEnv`:
+
 ```ts
 declare module "cloudflare:test" {
   interface ProvidedEnv {
@@ -454,38 +452,62 @@ import { checkSubscribeRateLimit, checkUnsubscribeRateLimit } from "../src/lib/r
 
 describe("checkSubscribeRateLimit", () => {
   it("allows first request from an IP", async () => {
-    const allowed = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.1", "user1@example.com");
+    const allowed = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.1.1.1",
+      "user1@example.com",
+    );
     expect(allowed).toBe(true);
   });
 
   it("allows second request from same IP (different email)", async () => {
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.2", "user-a@example.com");
-    const allowed = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.2", "user-b@example.com");
+    const allowed = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.1.1.2",
+      "user-b@example.com",
+    );
     expect(allowed).toBe(true);
   });
 
   it("blocks third request from same IP", async () => {
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.3", "user-x@example.com");
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.3", "user-y@example.com");
-    const allowed = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.3", "user-z@example.com");
+    const allowed = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.1.1.3",
+      "user-z@example.com",
+    );
     expect(allowed).toBe(false);
   });
 
   it("allows first request for an email", async () => {
-    const allowed = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.1", "unique@example.com");
+    const allowed = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.2.2.1",
+      "unique@example.com",
+    );
     expect(allowed).toBe(true);
   });
 
   it("allows second request for same email from different IP", async () => {
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.2", "same-email@example.com");
-    const allowed = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.3", "same-email@example.com");
+    const allowed = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.2.2.3",
+      "same-email@example.com",
+    );
     expect(allowed).toBe(true);
   });
 
   it("blocks third request for same email", async () => {
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.4", "blocked-email@example.com");
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.5", "blocked-email@example.com");
-    const allowed = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.6", "blocked-email@example.com");
+    const allowed = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.2.2.6",
+      "blocked-email@example.com",
+    );
     expect(allowed).toBe(false);
   });
 
@@ -558,7 +580,7 @@ import worker from "../src/index";
 describe("handleQueueBatch", () => {
   beforeAll(async () => {
     await env.DB.prepare(
-      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)"
+      "INSERT OR IGNORE INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
     )
       .bind("queue-sub-1", "queue-1@example.com", "unsub-q1")
       .run();
@@ -590,7 +612,7 @@ describe("handleQueueBatch", () => {
     expect(result.retryMessages).toStrictEqual([]);
 
     const delivery = await env.DB.prepare(
-      "SELECT status FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?"
+      "SELECT status FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
     )
       .bind("queue-test-post", "queue-sub-1")
       .first<{ status: string }>();
@@ -623,7 +645,7 @@ describe("handleQueueBatch", () => {
     expect(result.retryMessages).toStrictEqual([]);
 
     const delivery = await env.DB.prepare(
-      "SELECT id FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?"
+      "SELECT id FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
     )
       .bind("queue-test-post-2", "nonexistent-sub")
       .first();
@@ -650,22 +672,26 @@ describe("handleQueueBatch", () => {
 ### 15. Update existing route tests
 
 #### `subscribe.route.test.ts`
+
 - **Import change:** `import app from "../src/index"` → `import app from "../src/app"`
 - **Cleanup:** Remove **only** the `await env.DB.prepare("DELETE FROM rate_limits").run()` line from `afterEach`. **Keep** the `DELETE FROM subscribers WHERE email LIKE 'test-%@example.com'` line — KV is per-file isolated, but the D1 subscriber rows are not, so the subscriber cleanup is still required.
 - **Remove test:** `"records rate-limit entries in DB"` — this test queries the `rate_limits` D1 table and is no longer relevant.
 - **Rate-limit 429 tests:** Keep as-is. They should still pass because the routes will still return 429; only the backend storage changes.
 
 #### `unsubscribe.route.test.ts`
+
 - **Import change:** `import app from "../src/index"` → `import app from "../src/app"`
 - **Cleanup:** Remove **only** the `await env.DB.prepare("DELETE FROM rate_limits").run()` line from `afterEach`. **Keep** the `DELETE FROM subscribers` line.
 
 #### `send.route.test.ts`
+
 - **Import change:** `import app from "../src/index"` → `import app from "../src/app"`
 - **Assertion change:** `{ sent: number; failed: number }` → `{ queued: number }`
 - **Remove synchronous delivery check:** Delete the `newsletter_deliveries` assertion from the send route test. Delivery now happens asynchronously in the queue consumer.
 - **Add queue consumer test:** Use the separate `newsletter-queue.test.ts` (step 13) to verify delivery.
 
 #### `app.test.ts`
+
 - **Import change:** `import app from "../src/index"` → `import app from "../src/app"`
 
 ---
@@ -673,6 +699,7 @@ describe("handleQueueBatch", () => {
 ### 16. `scripts/send-newsletter.ts`
 
 Update response parsing:
+
 ```ts
 const result = (await response.json()) as { queued?: number; message?: string };
 console.log(result.message ?? `Queued: ${result.queued ?? 0}`);
@@ -685,6 +712,7 @@ Remove the `if ((result.failed ?? 0) > 0) process.exit(1)` line since `failed` n
 ### 17. `package.json` helper script
 
 Add to `apps/api/package.json`:
+
 ```json
 "queue:create": "wrangler queues create newsletter-send",
 "queue:create:staging": "wrangler queues create newsletter-send-staging"

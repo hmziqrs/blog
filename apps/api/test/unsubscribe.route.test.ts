@@ -1,18 +1,19 @@
 import { env, createExecutionContext } from "cloudflare:test";
 import { describe, expect, it, afterEach } from "vitest";
-import app from "../src/index";
+import app from "../src/app";
 
 const ctx = createExecutionContext();
+
+function req(path: string, init?: RequestInit) {
+  return new Request(`http://localhost${path}`, init);
+}
 
 describe("POST /api/newsletter/unsubscribe", () => {
   afterEach(async () => {
     await env.DB.prepare("DELETE FROM subscribers").run();
-    await env.DB.prepare("DELETE FROM rate_limits").run();
+    const list = await env.RATE_LIMIT_KV.list();
+    await Promise.all(list.keys.map((k) => env.RATE_LIMIT_KV.delete(k.name)));
   });
-
-  function req(path: string, init?: RequestInit) {
-    return new Request(`http://localhost${path}`, init);
-  }
 
   async function createSubscriber(email: string): Promise<string> {
     const token = crypto.randomUUID();
@@ -169,20 +170,12 @@ describe("POST /api/newsletter/unsubscribe", () => {
   });
 
   it("GET returns 400 for missing token", async () => {
-    const res = await app.fetch(
-      req("/api/newsletter/unsubscribe"),
-      env,
-      ctx,
-    );
+    const res = await app.fetch(req("/api/newsletter/unsubscribe"), env, ctx);
     expect(res.status).toBe(400);
   });
 
   it("GET returns 404 for invalid token", async () => {
-    const res = await app.fetch(
-      req("/api/newsletter/unsubscribe?token=nonexistent"),
-      env,
-      ctx,
-    );
+    const res = await app.fetch(req("/api/newsletter/unsubscribe?token=nonexistent"), env, ctx);
     expect(res.status).toBe(404);
   });
 });

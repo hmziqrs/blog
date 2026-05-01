@@ -34,7 +34,7 @@ app.post("/", async (c) => {
 
     const email = normalizeEmail(validated.email);
 
-    const allowed = await checkSubscribeRateLimit(c.env.DB, ip, email);
+    const allowed = await checkSubscribeRateLimit(c.env.RATE_LIMIT_KV, ip, email);
     if (!allowed) {
       return c.json({ error: "Too many requests" }, 429);
     }

@@ -41,10 +41,8 @@ async function main() {
     process.exit(1);
   }
 
-  const result = (await response.json()) as { sent?: number; failed?: number; message?: string };
-  console.log(result.message ?? `Done. Sent: ${result.sent ?? 0}, Failed: ${result.failed ?? 0}`);
-
-  if ((result.failed ?? 0) > 0) process.exit(1);
+  const result = (await response.json()) as { queued?: number; message?: string };
+  console.log(result.message ?? `Queued: ${result.queued ?? 0}`);
 }
 
 main().catch((err) => {

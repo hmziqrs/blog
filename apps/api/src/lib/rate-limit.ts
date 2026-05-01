@@ -1,51 +1,46 @@
-import type { D1Database } from "@cloudflare/workers-types";
+const WINDOW_MS = 60 * 60 * 1000;
+const WINDOW_SECONDS = 60 * 60;
+
+async function checkAndRecord(kv: KVNamespace, key: string, limit: number): Promise<boolean> {
+  const now = Date.now();
+  const raw = await kv.get(key);
+
+  let timestamps: number[] = [];
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) timestamps = parsed;
+    } catch {
+      // corrupt / non-JSON value — treat as empty so a single bad write
+      // can't permanently 500 the rate limiter
+    }
+  }
+
+  const pruned = timestamps.filter((t) => now - t < WINDOW_MS);
+
+  if (pruned.length >= limit) {
+    return false;
+  }
+
+  pruned.push(now);
+  await kv.put(key, JSON.stringify(pruned), { expirationTtl: WINDOW_SECONDS });
+  return true;
+}
 
 export async function checkSubscribeRateLimit(
-  db: D1Database,
+  kv: KVNamespace,
   ip: string,
   email: string,
 ): Promise<boolean> {
-  const now = Date.now();
-  const oneHourAgo = now - 60 * 60 * 1000;
+  const ipOk = await checkAndRecord(kv, `rl:ip:${ip}`, 2);
+  if (!ipOk) return false;
 
-  await db.prepare("DELETE FROM rate_limits WHERE timestamp < ?").bind(oneHourAgo).run();
-
-  const ipCount = await db
-    .prepare("SELECT COUNT(*) as count FROM rate_limits WHERE ip = ? AND timestamp > ?")
-    .bind(ip, oneHourAgo)
-    .first<{ count: number }>();
-
-  if ((ipCount?.count ?? 0) >= 2) return false;
-
-  const emailCount = await db
-    .prepare("SELECT COUNT(*) as count FROM rate_limits WHERE email = ? AND timestamp > ?")
-    .bind(email, oneHourAgo)
-    .first<{ count: number }>();
-
-  if ((emailCount?.count ?? 0) >= 2) return false;
-
-  await db
-    .prepare("INSERT INTO rate_limits (ip, email, timestamp) VALUES (?, ?, ?)")
-    .bind(ip, email, now)
-    .run();
+  const emailOk = await checkAndRecord(kv, `rl:email:${email}`, 2);
+  if (!emailOk) return false;
 
   return true;
 }
 
-export async function checkUnsubscribeRateLimit(db: D1Database, ip: string): Promise<boolean> {
-  const now = Date.now();
-  const oneHourAgo = now - 60 * 60 * 1000;
-
-  await db.prepare("DELETE FROM rate_limits WHERE timestamp < ?").bind(oneHourAgo).run();
-
-  const count = await db
-    .prepare("SELECT COUNT(*) as count FROM rate_limits WHERE ip = ? AND timestamp > ?")
-    .bind(ip, oneHourAgo)
-    .first<{ count: number }>();
-
-  if ((count?.count ?? 0) >= 3) return false;
-
-  await db.prepare("INSERT INTO rate_limits (ip, timestamp) VALUES (?, ?)").bind(ip, now).run();
-
-  return true;
+export async function checkUnsubscribeRateLimit(kv: KVNamespace, ip: string): Promise<boolean> {
+  return checkAndRecord(kv, `rl:ip:${ip}`, 3);
 }

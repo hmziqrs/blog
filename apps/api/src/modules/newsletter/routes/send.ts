@@ -1,40 +1,11 @@
 import { Hono } from "hono";
 import type { Bindings } from "../../../env";
-import { escapeHTML } from "../../../lib/email";
-import { sendMail } from "../../../lib/mailer";
+import type { NewsletterMessage } from "../queue";
 
 interface PostMeta {
   slug: string;
   title: string;
   excerpt: string;
-}
-
-function generateHTML(post: PostMeta, unsubscribeToken: string, siteUrl: string): string {
-  const postUrl = `${siteUrl}/posts/${encodeURIComponent(post.slug)}`;
-  const unsubscribeUrl = `${siteUrl}/newsletter/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`;
-
-  const safeTitle = escapeHTML(post.title);
-  const safeExcerpt = escapeHTML(post.excerpt);
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>New Post: ${safeTitle}</title>
-</head>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px;">
-    <h2 style="color: #333; margin-top: 0;">New Post Published</h2>
-    <h3 style="color: #666; margin-bottom: 10px;">${safeTitle}</h3>
-    <p style="color: #555; line-height: 1.6;">${safeExcerpt}</p>
-    <a href="${postUrl}" style="display: inline-block; background: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">Read Full Post</a>
-  </div>
-  <p style="color: #999; font-size: 12px; margin-top: 30px;">
-    You're receiving this because you subscribed to Hmziq's blog newsletter.
-    <a href="${unsubscribeUrl}" style="color: #999;">Unsubscribe</a>
-  </p>
-</body>
-</html>`;
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -75,45 +46,31 @@ app.post("/", async (c) => {
     ).all<{ id: string; email: string; unsubscribe_token: string }>();
 
     const rows = subscribers.results ?? [];
-    let sent = 0;
-    let failed = 0;
 
-    const BATCH_SIZE = 10;
-    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-      const batch = rows.slice(i, i + BATCH_SIZE);
-      await Promise.all(
-        batch.map(async (sub) => {
-          const html = generateHTML(post, sub.unsubscribe_token, c.env.SITE_URL);
-          try {
-            await sendMail(c.env.SEND_EMAIL, {
-              from: c.env.EMAIL_FROM_ADDRESS,
-              to: sub.email,
-              subject: `New Post: ${post.title}`,
-              html,
-            });
-            sent++;
-            await c.env.DB.prepare(
-              "INSERT OR IGNORE INTO newsletter_deliveries (post_slug, subscriber_id, status, sent_at) VALUES (?, ?, 'sent', datetime('now'))",
-            )
-              .bind(post.slug, sub.id)
-              .run();
-          } catch {
-            failed++;
-            await c.env.DB.prepare(
-              "INSERT OR IGNORE INTO newsletter_deliveries (post_slug, subscriber_id, status) VALUES (?, ?, 'failed')",
-            )
-              .bind(post.slug, sub.id)
-              .run();
-          }
-        }),
-      );
+    // Use sendBatch for fewer queue operations and better throughput.
+    // sendBatch is hard-capped at 100 messages and 256 KB total per call,
+    // so chunk explicitly — required for any subscriber count > 100.
+    const messages: MessageSendRequest<NewsletterMessage>[] = rows.map((sub) => ({
+      body: {
+        postSlug: post.slug,
+        postTitle: post.title,
+        postExcerpt: post.excerpt,
+        subscriberId: sub.id,
+        subscriberEmail: sub.email,
+        unsubscribeToken: sub.unsubscribe_token,
+      },
+    }));
+
+    const SEND_BATCH_CHUNK = 100;
+    for (let i = 0; i < messages.length; i += SEND_BATCH_CHUNK) {
+      await c.env.NEWSLETTER_QUEUE.sendBatch(messages.slice(i, i + SEND_BATCH_CHUNK));
     }
 
     await c.env.DB.prepare("INSERT INTO newsletter_sent (post_slug) VALUES (?)")
       .bind(post.slug)
       .run();
 
-    return c.json({ sent, failed }, 200);
+    return c.json({ queued: messages.length }, 200);
   } catch (error) {
     console.error("Newsletter send error:", error);
     return c.json({ error: "Internal server error" }, 500);
