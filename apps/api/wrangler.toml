@@ -18,6 +18,10 @@ ENVIRONMENT = "production"
 ALLOWED_ORIGIN = "https://blog.hmziq.rs"
 SITE_URL = "https://blog.hmziq.rs"
 
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "<!-- run: wrangler kv namespace create RATE_LIMIT_KV -->"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "blog-db"
@@ -50,6 +54,10 @@ routes = []
 ENVIRONMENT = "staging"
 ALLOWED_ORIGIN = "https://staging.hmziqblog.pages.dev"
 SITE_URL = "https://staging.hmziqblog.pages.dev"
+
+[[env.staging.kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "<!-- run: wrangler kv namespace create RATE_LIMIT_KV --env staging -->"
 
 [[env.staging.d1_databases]]
 binding = "DB"

@@ -61,7 +61,14 @@ describe("Complete end-to-end newsletter flow", () => {
       .bind("e2e-new@example.com")
       .run();
     await env.DB.prepare("DELETE FROM subscribers WHERE email LIKE 'e2e-%@example.com'").run();
-    await env.DB.prepare("DELETE FROM rate_limits").run();
+    // Clear KV rate-limit keys from previous test runs
+    const rlKeys = ["99.99.99.99", "100.100.100.100"];
+    for (const ip of rlKeys) {
+      await env.RATE_LIMIT_KV.delete(`rl:ip:${ip}`);
+    }
+    await env.RATE_LIMIT_KV.delete("rl:email:e2e-rl1@example.com");
+    await env.RATE_LIMIT_KV.delete("rl:email:e2e-rl2@example.com");
+    await env.RATE_LIMIT_KV.delete("rl:email:e2e-rl3@example.com");
   });
 
   it("subscribe → send → queue → consumer → email → delivery record", async () => {

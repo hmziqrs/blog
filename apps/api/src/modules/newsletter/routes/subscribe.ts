@@ -61,7 +61,7 @@ app.post("/", async (c) => {
 
     // L8: Rate limit check AFTER Turnstile so failed CAPTCHAs don't burn budget
     const email = normalizeEmail(validated.email);
-    const allowed = await checkSubscribeRateLimit(c.env.DB, clientIp, email);
+    const allowed = await checkSubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp, email);
     if (!allowed) {
       return c.json({ error: "Too many requests" }, 429);
     }

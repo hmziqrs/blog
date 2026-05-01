@@ -46,7 +46,7 @@ app.post("/", async (c) => {
   }
   const clientIp = ip ?? "unknown";
 
-  const allowed = await checkUnsubscribeRateLimit(c.env.DB, clientIp);
+  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp);
   if (!allowed) {
     return c.json({ error: "Too many requests" }, 429);
   }

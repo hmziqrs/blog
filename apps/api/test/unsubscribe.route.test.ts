@@ -15,7 +15,8 @@ describe("POST /api/newsletter/unsubscribe", () => {
   afterEach(async () => {
     if (originalEnvironment) env.ENVIRONMENT = originalEnvironment;
     await env.DB.prepare("DELETE FROM subscribers").run();
-    await env.DB.prepare("DELETE FROM rate_limits").run();
+    await env.RATE_LIMIT_KV.delete("rl:ip:1.1.1.1");
+    await env.RATE_LIMIT_KV.delete("rl:ip:9.9.9.9");
   });
 
   async function createSubscriber(email: string): Promise<string> {

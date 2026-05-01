@@ -1,6 +1,7 @@
 declare module "cloudflare:workers" {
   interface ProvidedEnv {
     DB: D1Database;
+    RATE_LIMIT_KV: KVNamespace;
     TEST_MIGRATIONS: import("cloudflare:test").D1Migration[];
     NEWSLETTER_QUEUE: Queue<import("../src/modules/newsletter/queue").NewsletterMessage>;
     SEND_EMAIL: import("@cloudflare/workers-types").SendEmail;
@@ -16,6 +17,7 @@ declare module "cloudflare:workers" {
 declare module "cloudflare:test" {
   export const env: {
     DB: D1Database;
+    RATE_LIMIT_KV: KVNamespace;
     TEST_MIGRATIONS: D1Migration[];
     NEWSLETTER_QUEUE: Queue<import("../src/modules/newsletter/queue").NewsletterMessage>;
     SEND_EMAIL: import("@cloudflare/workers-types").SendEmail;
@@ -46,6 +48,7 @@ declare module "cloudflare:test" {
 
   interface ProvidedEnv {
     DB: D1Database;
+    RATE_LIMIT_KV: KVNamespace;
     TEST_MIGRATIONS: D1Migration[];
     NEWSLETTER_QUEUE: Queue<import("../src/modules/newsletter/queue").NewsletterMessage>;
     SEND_EMAIL: import("@cloudflare/workers-types").SendEmail;
