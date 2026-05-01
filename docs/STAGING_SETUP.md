@@ -47,7 +47,25 @@ Copy the `database_id` into `apps/api/wrangler.toml` under `[[env.staging.d1_dat
 
 ---
 
-## 2. Create Staging Queues
+## 2. Create Staging KV Namespace
+
+Rate limiting uses Cloudflare Workers KV with TTL-based expiry.
+
+```bash
+wrangler kv namespace create RATE_LIMIT_KV --env staging
+```
+
+Copy the returned `id` into `apps/api/wrangler.toml` under `[[env.staging.kv_namespaces]]`.
+
+> Also create a preview namespace for local development:
+> ```bash
+> wrangler kv namespace create RATE_LIMIT_KV --preview
+> ```
+> Copy the returned `id` as `preview_id` in the top-level `[[kv_namespaces]]` block.
+
+---
+
+## 3. Create Staging Queues
 
 The main queue and its dead letter queue (DLQ) must both be created:
 
@@ -62,7 +80,7 @@ Messages that fail after max retries are automatically routed to the DLQ instead
 
 ---
 
-## 3. Create Staging R2 Bucket
+## 4. Create Staging R2 Bucket
 
 ```bash
 wrangler r2 bucket create blog-media-staging
@@ -100,7 +118,7 @@ R2_PUBLIC_URL=<r2-dev-or-custom-url>
 
 ---
 
-## 4. Enable Cloudflare Email Routing
+## 5. Enable Cloudflare Email Routing
 
 The newsletter is outbound-only (no-reply). You only need Email Routing enabled on the zone — no custom addresses or destination verification required.
 
@@ -112,7 +130,7 @@ The newsletter is outbound-only (no-reply). You only need Email Routing enabled 
 
 ---
 
-## 5. Set Up Cloudflare Turnstile
+## 6. Set Up Cloudflare Turnstile
 
 Staging and local dev use Cloudflare's **test keys** — no dashboard widget needed. Test keys work on any domain (`localhost`, `*.workers.dev`, etc.) and always pass validation.
 
@@ -129,7 +147,7 @@ Use these as `PUBLIC_TURNSTILE_SITE_KEY` (Astro) and `TURNSTILE_SECRET_KEY` (Wor
 
 ---
 
-## 6. Configure Environment Variables
+## 7. Configure Environment Variables
 
 ### Worker Secrets (via `wrangler secret put --env staging`)
 
@@ -181,7 +199,7 @@ PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 
 ---
 
-## 7. Staging Pages Deployment
+## 8. Staging Pages Deployment
 
 Staging uses the **same Pages project** as production (`hmziqblog`). The `staging` branch is deployed as a **preview deployment** — it gets a dedicated URL at `staging.hmziqblog.pages.dev` without affecting the production site.
 
@@ -195,7 +213,7 @@ bun run deploy:web:staging
 
 ---
 
-## 8. Run Staging Migrations
+## 9. Run Staging Migrations
 
 ```bash
 bun run db:migrate:staging
@@ -203,7 +221,7 @@ bun run db:migrate:staging
 
 ---
 
-## 9. Deploy to Staging
+## 10. Deploy to Staging
 
 ```bash
 bun run deploy:staging
@@ -213,7 +231,7 @@ Or push to the `staging` branch — CI will deploy automatically.
 
 ---
 
-## 10. Verify Staging
+## 11. Verify Staging
 
 | Resource    | URL                                              |
 | ----------- | ------------------------------------------------ |
@@ -294,7 +312,7 @@ Newsletter delivery is handled asynchronously via **Cloudflare Queues**:
 - The `/send` endpoint enqueues messages in batches.
 - `apps/api/src/modules/newsletter/queue-consumer.ts` processes the queue and calls `sendMail()` for each subscriber.
 - Failed messages are retried automatically (default: 3 retries) and routed to the dead letter queue (`newsletter-dlq-staging`) after exceeding the limit.
-- Rate limiting is handled via D1 (`rate_limits` table) — no KV namespace is needed.
+- Rate limiting is handled via **Workers KV** (`RATE_LIMIT_KV` namespace) with TTL-based key expiry — no D1 table needed.
 
 ---
 
@@ -304,7 +322,7 @@ Newsletter delivery is handled asynchronously via **Cloudflare Queues**:
 - `apps/api/migrations/0001_initial.sql` — Database schema
 - `apps/api/src/modules/newsletter/` — API endpoints (subscribe, unsubscribe, send) + queue consumer
 - `apps/api/src/lib/mailer.ts` — `send_email` binding wrapper
-- `apps/api/src/lib/rate-limit.ts` — D1-based rate limiting
+- `apps/api/src/lib/rate-limit.ts` — KV-based rate limiting
 - `apps/web/src/components/NewsletterForm.astro` — Subscription form
 - `apps/web/src/components/NewsletterModal.astro` — Scroll modal
 - `scripts/send-newsletter.ts` — Newsletter trigger script (calls Worker endpoint)

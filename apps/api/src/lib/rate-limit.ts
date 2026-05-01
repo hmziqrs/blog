@@ -19,7 +19,12 @@ async function checkAndRecord(kv: KVNamespace, key: string, limit: number): Prom
   if (pruned.length >= limit) return false;
 
   pruned.push(now);
-  await kv.put(key, JSON.stringify(pruned), { expirationTtl: WINDOW_SECONDS });
+  try {
+    await kv.put(key, JSON.stringify(pruned), { expirationTtl: WINDOW_SECONDS });
+  } catch {
+    // KV enforces 1 write/second/key — treat a rejected write as rate-limited
+    return false;
+  }
   return true;
 }
 

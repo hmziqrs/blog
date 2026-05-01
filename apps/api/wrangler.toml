@@ -21,6 +21,7 @@ SITE_URL = "https://blog.hmziq.rs"
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
 id = "<!-- run: wrangler kv namespace create RATE_LIMIT_KV -->"
+preview_id = "<!-- run: wrangler kv namespace create RATE_LIMIT_KV --preview -->"
 
 [[d1_databases]]
 binding = "DB"

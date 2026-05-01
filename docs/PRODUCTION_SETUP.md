@@ -47,7 +47,25 @@ Copy the `database_id` into `apps/api/wrangler.toml` under `[[d1_databases]]`.
 
 ---
 
-## 2. Create Production Queues
+## 2. Create Production KV Namespace
+
+Rate limiting uses Cloudflare Workers KV with TTL-based expiry.
+
+```bash
+wrangler kv namespace create RATE_LIMIT_KV
+```
+
+Copy the returned `id` into `apps/api/wrangler.toml` under `[[kv_namespaces]]`.
+
+> Also create a preview namespace for local development:
+> ```bash
+> wrangler kv namespace create RATE_LIMIT_KV --preview
+> ```
+> Copy the returned `id` as `preview_id` in the same block. Without `preview_id`, `wrangler dev` writes to the production namespace.
+
+---
+
+## 3. Create Production Queues
 
 The main queue and its dead letter queue (DLQ) must both be created:
 
@@ -62,7 +80,7 @@ Messages that fail after max retries are automatically routed to the DLQ instead
 
 ---
 
-## 3. Create Production R2 Bucket
+## 4. Create Production R2 Bucket
 
 ```bash
 wrangler r2 bucket create blog-media
@@ -100,7 +118,7 @@ R2_PUBLIC_URL=<r2-dev-or-custom-url>
 
 ---
 
-## 4. Enable Cloudflare Email Routing
+## 5. Enable Cloudflare Email Routing
 
 The newsletter is outbound-only (no-reply). You only need Email Routing enabled on the zone — no custom addresses or destination verification required.
 
@@ -114,7 +132,7 @@ The newsletter is outbound-only (no-reply). You only need Email Routing enabled 
 
 ---
 
-## 5. Set Up Cloudflare Turnstile
+## 6. Set Up Cloudflare Turnstile
 
 1. Go to https://dash.cloudflare.com/
 2. Navigate to **Turnstile**
@@ -124,7 +142,7 @@ The newsletter is outbound-only (no-reply). You only need Email Routing enabled 
 
 ---
 
-## 6. Configure Environment Variables
+## 7. Configure Environment Variables
 
 ### Worker Secrets (via `wrangler secret put`)
 
@@ -178,7 +196,7 @@ Also update `site.config.ts` and any domain-specific URLs.
 
 ---
 
-## 7. Configure Custom Domain Routes
+## 8. Configure Custom Domain Routes
 
 Production uses custom domain routes. The routes are already configured in `wrangler.toml`:
 
@@ -194,7 +212,7 @@ If using a different domain, update the pattern accordingly.
 
 ---
 
-## 8. Create Production Pages Project
+## 9. Create Production Pages Project
 
 Dashboard → **Pages → Create project**:
 
@@ -211,7 +229,7 @@ bun run deploy:web:prod
 
 ---
 
-## 9. Run Production Migrations
+## 10. Run Production Migrations
 
 ```bash
 bun run db:migrate:prod
@@ -219,7 +237,7 @@ bun run db:migrate:prod
 
 ---
 
-## 10. Deploy to Production
+## 11. Deploy to Production
 
 ```bash
 bun run deploy:prod
@@ -229,7 +247,7 @@ Or push to the `master` branch — CI will deploy automatically.
 
 ---
 
-## 11. Verify Production
+## 12. Verify Production
 
 | Resource    | URL                                        |
 | ----------- | ------------------------------------------ |
@@ -280,7 +298,7 @@ Newsletter delivery is handled asynchronously via **Cloudflare Queues**:
 - The `/send` endpoint enqueues messages in batches.
 - `apps/api/src/modules/newsletter/queue-consumer.ts` processes the queue and calls `sendMail()` for each subscriber.
 - Failed messages are retried automatically (default: 3 retries) and routed to the dead letter queue (`newsletter-dlq`) after exceeding the limit.
-- Rate limiting is handled via D1 (`rate_limits` table) — no KV namespace is needed.
+- Rate limiting is handled via **Workers KV** (`RATE_LIMIT_KV` namespace) with TTL-based key expiry — no D1 table needed.
 
 ---
 
@@ -290,7 +308,7 @@ Newsletter delivery is handled asynchronously via **Cloudflare Queues**:
 - `apps/api/migrations/0001_initial.sql` — Database schema
 - `apps/api/src/modules/newsletter/` — API endpoints (subscribe, unsubscribe, send) + queue consumer
 - `apps/api/src/lib/mailer.ts` — `send_email` binding wrapper
-- `apps/api/src/lib/rate-limit.ts` — D1-based rate limiting
+- `apps/api/src/lib/rate-limit.ts` — KV-based rate limiting
 - `apps/web/src/components/NewsletterForm.astro` — Subscription form
 - `apps/web/src/components/NewsletterModal.astro` — Scroll modal
 - `scripts/send-newsletter.ts` — Newsletter trigger script (calls Worker endpoint)

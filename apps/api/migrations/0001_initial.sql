@@ -53,17 +53,6 @@ CREATE TABLE IF NOT EXISTS blacklist (
 
 CREATE INDEX IF NOT EXISTS idx_blacklist_email ON blacklist(email);
 
--- Rate limiting table
-CREATE TABLE IF NOT EXISTS rate_limits (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  ip TEXT NOT NULL,
-  timestamp INTEGER NOT NULL,
-  email TEXT
-);
-
-CREATE INDEX IF NOT EXISTS idx_rate_limits_ip_timestamp ON rate_limits(ip, timestamp);
-CREATE INDEX IF NOT EXISTS idx_rate_limits_email_timestamp ON rate_limits(email, timestamp);
-
 -- Media table
 CREATE TABLE IF NOT EXISTS media (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,7 +60,9 @@ CREATE TABLE IF NOT EXISTS media (
   r2_key TEXT NOT NULL,
   r2_url TEXT NOT NULL,
   content_hash TEXT NOT NULL,
-  uploaded_at TEXT NOT NULL DEFAULT (datetime('now'))
+  uploaded_at TEXT NOT NULL DEFAULT (datetime('now')),
+  width INTEGER,
+  height INTEGER
 );
 
 CREATE INDEX IF NOT EXISTS idx_media_local_path ON media(local_path);

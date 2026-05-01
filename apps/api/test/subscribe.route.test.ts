@@ -39,7 +39,6 @@ afterEach(async () => {
   await env.DB.prepare("DELETE FROM subscribers WHERE email LIKE ?")
     .bind("test-%@example.com")
     .run();
-  await env.DB.prepare("DELETE FROM rate_limits").run();
   // Clear KV rate-limit keys
   const kvKeys = [
     "rl:ip:1.2.3.4", "rl:ip:10.0.0.1", "rl:ip:10.0.0.2", "rl:ip:10.0.0.3",
