@@ -34,7 +34,7 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
   <div id={`${uid}-message`} class="text-sm hidden"></div>
 </form>
 
-<script define:vars={{ uid }}>
+<script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "" }}>
   const form = document.getElementById(`${uid}-form`);
   const submitBtn = document.getElementById(`${uid}-submit`);
   const message = document.getElementById(`${uid}-message`);
@@ -56,7 +56,7 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
     showMessage("Subscribing...", "info");
 
     try {
-      const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "";
+      const API_BASE = apiBase;
       const response = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

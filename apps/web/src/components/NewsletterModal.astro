@@ -63,7 +63,7 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
   </div>
 </div>
 
-<script define:vars={{ uid }}>
+<script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "" }}>
   const modal = document.getElementById(`${uid}-modal`);
   const closeBtn = document.getElementById(`${uid}-close`);
   const form = document.getElementById(`${uid}-form`);
@@ -141,7 +141,7 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
     showMessage("Subscribing...", "info");
 
     try {
-      const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "";
+      const API_BASE = apiBase;
       const response = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

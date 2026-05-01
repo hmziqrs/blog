@@ -10,6 +10,7 @@ export default defineConfig({
   base: siteConfig.basePath,
   integrations: [sitemap(), icon()],
   vite: {
+    envDir: "../../",
     plugins: [tailwindcss()],
     server: {
       proxy: {
