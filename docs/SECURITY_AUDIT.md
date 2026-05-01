@@ -107,3 +107,47 @@ Fix: add a one-line middleware: `app.use("*", async (c, next) => { await next();
 - `encodeURIComponent` used for `postSlug` and `unsubscribeToken` in email URLs.
 - `apps/web/` is static — no server runtime.
 - `TURNSTILE_SECRET_KEY` only used server-side in `siteverify`.
+
+## Test plan
+
+Each fix lands in the same PR as its test. Existing infra: `vitest`, `apps/api/test/apply-migrations.ts` for D1, `*.route.test.ts` for HTTP, `newsletter.test.ts` for unit.
+
+### New tests
+
+| ID | Test file | Case | Pass criteria |
+|---|---|---|---|
+| H1 | `unsubscribe.route.test.ts` | `GET /api/newsletter/unsubscribe?token=…` | Returns 405; row unchanged |
+| H1 | `unsubscribe.route.test.ts` | `POST` with valid token | Returns 200; row soft-deleted (see M6) |
+| H2a | `send.route.test.ts` | Two concurrent `POST /send` same slug | Exactly one `sendBatch` call; one 200 enqueued, one 200 "already sent"; `newsletter_sent` has 1 row |
+| H2b | `send.route.test.ts` | `POST /send` with slug not in content collection | Returns 400; queue not called |
+| H2c | `subscribe.route.test.ts` | Two concurrent `POST /subscribe` same email | One 201, one 201 (per M1); `subscribers` has 1 row; no 500 |
+| H3 | `send.route.test.ts` | Wrong secret of equal length to env value | Returns 401 |
+| H3 | unit (`newsletter.test.ts`) | `timingSafeEqual` helper | Equal strings → true; unequal-same-length → false; unequal-length → false |
+| M1 | `subscribe.route.test.ts` | `POST /subscribe` for already-active email | Returns 201 (not 409); no duplicate row inserted |
+| M5 | `app.test.ts` | App init with `TURNSTILE_SECRET_KEY=""` | `POST /subscribe` returns 503 with config error |
+| M5 | `app.test.ts` | App init with `TURNSTILE_SECRET_KEY="1x0000000000000000000000000000000AA"` | `POST /subscribe` returns 503 |
+| M6 | `unsubscribe.route.test.ts` | After unsubscribe | Row exists with `status='unsubscribed'`; `unsubscribed_at` set |
+| M6 | `send.route.test.ts` | `/send` with unsubscribed row present | Unsubscribed email not enqueued |
+| M6 | `subscribe.route.test.ts` | Re-subscribe after unsubscribe | Row updated to `status='active'`; behavior pinned (reuse vs rotate token — pick one) |
+| L4 | `subscribe.route.test.ts`, `unsubscribe.route.test.ts` | `Content-Type: application/json-pretend` | Returns 415 |
+| L5 | `subscribe.route.test.ts` | Missing `CF-Connecting-IP` with `ENVIRONMENT=production` | Returns 400 |
+| L9 | `app.test.ts` | Any `/api/*` response | Header `X-Content-Type-Options: nosniff` present |
+
+### Tests to update
+
+- `subscribe.route.test.ts` — assertion "already subscribed → 409" flips to "→ 201" (M1).
+- `unsubscribe.route.test.ts` — assertions checking row is `DELETE`d flip to `status='unsubscribed'` (M6).
+- `rate-limit.test.ts` — replaced wholesale when M2 swaps the JSON-array impl for DO / RL binding.
+
+### Out of scope for unit tests
+
+- **M2 KV race** — non-deterministic on current impl; covered by replacing the impl, not by a flaky test.
+- **M3 `workers_dev = false`** — config assertion; pin via a one-line check in `app.test.ts` that parses `wrangler.toml` if desired.
+- **H3 timing measurement** — flaky in V8 isolates; cover by unit-testing the wrapper, not the timing.
+
+### Definition of done per fix
+
+1. Code change merged.
+2. Test from the table above added (or existing test updated).
+3. `bun run test` green.
+4. Audit doc entry annotated with `// fixed in <commit>` or removed.
