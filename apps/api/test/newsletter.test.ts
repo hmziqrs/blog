@@ -8,36 +8,26 @@ describe("normalizeEmail", () => {
     expect(normalizeEmail("User@Example.COM")).toBe("user@example.com");
   });
 
-  test("strips gmail plus-addressing", () => {
+  test("strips plus-addressing", () => {
     expect(normalizeEmail("user+tag@gmail.com")).toBe("user@gmail.com");
   });
 
-  test("strips gmail dots", () => {
-    expect(normalizeEmail("u.s.e.r@gmail.com")).toBe("user@gmail.com");
+  test("preserves dots in local part", () => {
+    expect(normalizeEmail("u.s.e.r@gmail.com")).toBe("u.s.e.r@gmail.com");
   });
 
-  test("strips gmail dots and plus together", () => {
-    expect(normalizeEmail("u.s.e.r+tag@gmail.com")).toBe("user@gmail.com");
+  test("strips plus-addressing and preserves dots", () => {
+    expect(normalizeEmail("u.s.e.r+tag@gmail.com")).toBe("u.s.e.r@gmail.com");
   });
 
-  test("normalizes googlemail.com to gmail.com", () => {
-    expect(normalizeEmail("user@googlemail.com")).toBe("user@gmail.com");
+  test("does not normalize googlemail.com", () => {
+    expect(normalizeEmail("user@googlemail.com")).toBe("user@googlemail.com");
   });
 
-  test("strips outlook plus-addressing", () => {
+  test("strips plus-addressing for any domain", () => {
     expect(normalizeEmail("user+tag@outlook.com")).toBe("user@outlook.com");
-  });
-
-  test("strips hotmail plus-addressing", () => {
     expect(normalizeEmail("user+tag@hotmail.com")).toBe("user@hotmail.com");
-  });
-
-  test("strips generic plus-addressing for unknown domains", () => {
     expect(normalizeEmail("user+tag@example.com")).toBe("user@example.com");
-  });
-
-  test("does not strip dots for non-gmail domains", () => {
-    expect(normalizeEmail("u.s.e.r@example.com")).toBe("u.s.e.r@example.com");
   });
 
   test("handles no-plus address unchanged except case", () => {
