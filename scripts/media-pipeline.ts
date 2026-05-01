@@ -9,6 +9,7 @@ import { existsSync } from "node:fs";
 import fs from "node:fs";
 import path from "node:path";
 import { tmpdir } from "node:os";
+import { imageSize } from "image-size";
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 
@@ -218,6 +219,15 @@ async function upload() {
 
     const body = fs.readFileSync(filePath);
     const ext = path.extname(filePath);
+    let width: number | null = null;
+    let height: number | null = null;
+    try {
+      const dims = imageSize(filePath);
+      width = dims.width ?? null;
+      height = dims.height ?? null;
+    } catch {
+      // SVG or unsupported format
+    }
     await client.send(
       new PutObjectCommand({
         Bucket: R2_BUCKET_NAME,
@@ -228,14 +238,16 @@ async function upload() {
     );
 
     await queryD1(
-      `INSERT INTO media (local_path, r2_key, r2_url, content_hash)
-       VALUES (?, ?, ?, ?)
+      `INSERT INTO media (local_path, r2_key, r2_url, content_hash, width, height)
+       VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(local_path) DO UPDATE SET
          r2_key = excluded.r2_key,
          r2_url = excluded.r2_url,
          content_hash = excluded.content_hash,
+         width = excluded.width,
+         height = excluded.height,
          uploaded_at = datetime('now')`,
-      [localPath, r2Key, r2Url, hash],
+      [localPath, r2Key, r2Url, hash, width, height],
     );
 
     console.log(`  uploaded: ${localPath} → ${r2Url}`);
@@ -284,8 +296,8 @@ async function rewrite(outDir?: string) {
     process.exit(1);
   }
 
-  const rows = await queryD1<{ local_path: string; r2_url: string }>(
-    "SELECT local_path, r2_url FROM media",
+  const rows = await queryD1<{ local_path: string; r2_url: string; width: number | null; height: number | null }>(
+    "SELECT local_path, r2_url, width, height FROM media",
   );
 
   if (rows.length === 0) {
@@ -317,6 +329,15 @@ async function rewrite(outDir?: string) {
     const rewritten = rewriteImageRefs(src, byBasename);
     fs.writeFileSync(path.join(outPostsDir, file), rewritten);
   }
+
+  // Write manifest for build-time dimension lookups
+  const manifest: Record<string, { width: number; height: number }> = {};
+  for (const row of rows) {
+    if (row.width != null && row.height != null) {
+      manifest[row.r2_url] = { width: row.width, height: row.height };
+    }
+  }
+  fs.writeFileSync(path.join(targetDir, "media-manifest.json"), JSON.stringify(manifest, null, 2));
 
   console.log(outPostsDir);
 }

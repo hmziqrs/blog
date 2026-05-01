@@ -45,8 +45,10 @@
     "deploy:api:prod": "wrangler deploy --config apps/api/wrangler.toml",
     "deploy:web:staging": "PUBLIC_SITE_URL=https://staging.hmziqblog.pages.dev CONTENT_DIR=$(bun run media:rewrite) turbo -F web build:staging && wrangler pages deploy apps/web/dist --project-name=hmziqblog --branch=staging",
     "deploy:web:prod": "PUBLIC_SITE_URL=https://blog.hmziq.rs CONTENT_DIR=$(bun run media:rewrite) turbo -F web build:prod && wrangler pages deploy apps/web/dist --project-name=hmziqblog --branch=master",
-    "deploy:staging": "bun run db:migrate:staging && bun run deploy:api:staging && bun run deploy:web:staging",
-    "deploy:prod": "bun run db:migrate:prod && bun run deploy:api:prod && bun run deploy:web:prod"
+    "deploy:staging": "bun run media:upload && bun run db:migrate:staging && bun run deploy:api:staging && bun run deploy:web:staging",
+    "deploy:staging:nomedia": "bun run db:migrate:staging && bun run deploy:api:staging && bun run deploy:web:staging",
+    "deploy:prod": "bun run media:upload && bun run db:migrate:prod && bun run deploy:api:prod && bun run deploy:web:prod",
+    "deploy:prod:nomedia": "bun run db:migrate:prod && bun run deploy:api:prod && bun run deploy:web:prod"
   },
   "dependencies": {},
   "devDependencies": {
@@ -56,6 +58,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^22.10.2",
     "daisyui": "^5.5.19",
+    "image-size": "^2.0.2",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
     "turbo": "^2.6.3",

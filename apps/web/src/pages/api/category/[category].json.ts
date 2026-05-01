@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import type { GetStaticPaths, APIRoute } from "astro";
+import { normalizeCover } from "../../../utils/cover-image";
 
 export const getStaticPaths = (async () => {
   const posts = await getCollection("posts", ({ data }) => !data.draft);
@@ -22,15 +23,18 @@ export const GET: APIRoute = async ({ props }) => {
   return new Response(
     JSON.stringify({
       category,
-      posts: posts.map((post) => ({
-        id: post.id,
-        title: post.data.title,
-        description: post.data.description,
-        date: (post.data.date as Date).toISOString(),
-        category: post.data.category,
-        tags: post.data.tags,
-        cover: (post.data.cover as { src: string } | undefined)?.src ?? null,
-      })),
+      posts: posts.map((post) => {
+        const cover = normalizeCover(post.data.cover as any);
+        return {
+          id: post.id,
+          title: post.data.title,
+          description: post.data.description,
+          date: (post.data.date as Date).toISOString(),
+          category: post.data.category,
+          tags: post.data.tags,
+          cover: cover ? { src: cover.src, width: cover.width, height: cover.height } : null,
+        };
+      }),
     }),
     { headers: { "Content-Type": "application/json" } },
   );

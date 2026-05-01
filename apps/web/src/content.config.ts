@@ -19,7 +19,7 @@ const posts = defineCollection({
       category: z.string().trim().min(1),
       tags: z.array(z.string()),
       draft: z.boolean().default(false),
-      cover: image().optional(),
+      cover: z.union([image(), z.string().url()]).optional(),
       cover_alt: z.string().trim().min(1).optional(),
     }),
 });

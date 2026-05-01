@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { routes } from "../config/site";
+import { normalizeCover } from "../utils/cover-image";
 import CategoryBadge from "./CategoryBadge.astro";
 import TagBadge from "./TagBadge.astro";
 import ThemedImage from "./ThemedImage.astro";
@@ -10,7 +11,8 @@ interface Props {
 }
 
 const { post } = Astro.props as Props;
-const { title, description, date, tags, category, cover, cover_alt: coverAlt } = post.data;
+const { title, description, date, tags, category, cover_alt: coverAlt } = post.data;
+const cover = normalizeCover(post.data.cover);
 const postUrl = routes.post(post.id);
 
 const formattedDate = date.toLocaleDateString("en-US", {

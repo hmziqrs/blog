@@ -1,5 +1,5 @@
 ---
-import type { ImageMetadata } from "astro";
+import type { CoverImage } from "../utils/cover-image";
 import { ClientRouter } from "astro:transitions";
 import { routes, siteConfig, withBasePath } from "../config/site";
 import ConsentBanner from "../components/ConsentBanner.astro";
@@ -12,7 +12,7 @@ import Header from "../components/Header.astro";
 interface Props {
   title?: string;
   description?: string;
-  image?: string | ImageMetadata;
+  image?: CoverImage;
   noindex?: boolean;
   ogType?: "website" | "article";
   publishedTime?: string;
@@ -32,9 +32,9 @@ const {
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const imagePath = typeof image === "string" ? image : image?.src;
-const ogPath =
-  imagePath?.startsWith("/") ? withBasePath(siteConfig.basePath, imagePath) : imagePath;
+const ogPath = image
+  ? image.src.startsWith("/") ? withBasePath(siteConfig.basePath, image.src) : image.src
+  : undefined;
 const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
 ---
 

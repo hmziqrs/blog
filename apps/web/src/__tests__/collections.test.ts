@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { z } from "zod";
+import { normalizeCover } from "../utils/cover-image";
 
 const postSchema = z.object({
   title: z.string(),
@@ -87,5 +88,32 @@ describe("Post Schema", () => {
       tags: [],
     });
     expect(result.updated).toBeInstanceOf(Date);
+  });
+});
+
+describe("normalizeCover", () => {
+  test("returns undefined for undefined input", () => {
+    expect(normalizeCover(undefined)).toBeUndefined();
+  });
+
+  test("normalizes ImageMetadata-like input", () => {
+    const result = normalizeCover({ src: "/img.jpg", width: 100, height: 200 } as any);
+    expect(result).toEqual({ src: "/img.jpg", width: 100, height: 200 });
+  });
+
+  test("normalizes remote URL with manifest dimensions", () => {
+    const manifest = { "https://r2.dev/img.jpg": { width: 800, height: 600 } };
+    const result = normalizeCover("https://r2.dev/img.jpg", manifest);
+    expect(result).toEqual({ src: "https://r2.dev/img.jpg", width: 800, height: 600 });
+  });
+
+  test("falls back to default dimensions for unknown URL", () => {
+    const result = normalizeCover("https://r2.dev/unknown.jpg", {});
+    expect(result).toEqual({ src: "https://r2.dev/unknown.jpg", width: 1280, height: 720 });
+  });
+
+  test("falls back to default dimensions when manifest is null", () => {
+    const result = normalizeCover("https://r2.dev/img.jpg", null);
+    expect(result).toEqual({ src: "https://r2.dev/img.jpg", width: 1280, height: 720 });
   });
 });

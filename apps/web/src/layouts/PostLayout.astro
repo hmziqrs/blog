@@ -1,5 +1,7 @@
 ---
 import type { ImageMetadata } from "astro";
+import type { CoverImage } from "../utils/cover-image";
+import { normalizeCover } from "../utils/cover-image";
 import { pageTitle, routes, siteConfig, withBasePath } from "../config/site";
 import AdvertisementBanner from "../components/AdvertisementBanner.astro";
 import BaseLayout from "./BaseLayout.astro";
@@ -16,13 +18,14 @@ interface Props {
     updated?: Date;
     category: string;
     tags: string[];
-    cover?: ImageMetadata;
+    cover?: ImageMetadata | string;
     cover_alt?: string;
   };
   readingTime?: number;
 }
 
 const { frontmatter, readingTime } = Astro.props;
+const cover = normalizeCover(frontmatter.cover);
 
 const slug = Astro.params.slug;
 
@@ -39,8 +42,8 @@ const formattedUpdated = frontmatter.updated?.toLocaleDateString("en-US", {
 });
 
 const canonicalUrl = Astro.url.href;
-const coverPath = frontmatter.cover
-  ? withBasePath(siteConfig.basePath, frontmatter.cover.src)
+const coverPath = cover
+  ? cover.src.startsWith("/") ? withBasePath(siteConfig.basePath, cover.src) : cover.src
   : undefined;
 const imageUrl = new URL(coverPath ?? routes.ogDefault, Astro.site ?? Astro.url).href;
 const structuredData = {
@@ -75,13 +78,13 @@ const structuredData = {
 <BaseLayout
   title={pageTitle(frontmatter.title)}
   description={frontmatter.description}
-  image={frontmatter.cover}
+  image={cover}
   ogType="article"
   publishedTime={frontmatter.date.toISOString()}
   modifiedTime={frontmatter.updated?.toISOString()}
   structuredData={structuredData}
 >
-  <PageContainer class={frontmatter.cover ? "" : "pb-5 sm:pb-6"}>
+  <PageContainer class={cover ? "" : "pb-5 sm:pb-6"}>
     <AdvertisementBanner
       href={siteConfig.advertisement?.href || ""}
       imageUrl={siteConfig.advertisement?.imageUrl}
@@ -116,10 +119,10 @@ const structuredData = {
   </PageContainer>
 
   {
-    frontmatter.cover && (
+    cover && (
       <div class="bg-base-200/55 overflow-hidden lg:mx-auto lg:max-w-5xl">
         <ThemedImage
-          image={frontmatter.cover}
+          image={cover}
           alt={frontmatter.cover_alt ?? frontmatter.title}
           loading="eager"
           class="h-auto w-full object-cover"
@@ -128,7 +131,7 @@ const structuredData = {
     )
   }
 
-  <PageContainer class={frontmatter.cover ? "" : "pt-5 sm:pt-6"}>
+  <PageContainer class={cover ? "" : "pt-5 sm:pt-6"}>
     <div class="max-w-3xl">
       <article class="prose max-w-none text-[1.03rem] leading-8">
         <slot />

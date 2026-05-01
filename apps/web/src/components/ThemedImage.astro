@@ -1,17 +1,17 @@
 ---
-import type { ImageMetadata } from "astro";
+import type { CoverImage } from "../utils/cover-image";
 import { siteConfig, withBasePath } from "../config/site";
 
 interface Props {
   alt: string;
-  image: ImageMetadata;
+  image: CoverImage;
   loading?: "eager" | "lazy";
   class?: string;
 }
 
 const { alt, image, loading = "lazy", class: className } = Astro.props as Props;
 
-const src = withBasePath(siteConfig.basePath, image.src);
+const src = image.src.startsWith("/") ? withBasePath(siteConfig.basePath, image.src) : image.src;
 ---
 
 <img
