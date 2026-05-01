@@ -24,7 +24,7 @@ Copy the `database_id` into `apps/api/wrangler.toml` under `[[env.staging.d1_dat
 
 ## 2. Create Staging Queues
 
-The main queue and its dead letter queue (DLQ) must both be created explicitly:
+The main queue and its dead letter queue (DLQ) must both be created:
 
 ```bash
 wrangler queues create newsletter-send-staging
@@ -32,6 +32,8 @@ wrangler queues create newsletter-dlq-staging
 ```
 
 Messages that fail after max retries are automatically routed to the DLQ instead of being deleted.
+
+> The DLQ is auto-created if it doesn't exist when the consumer is deployed. Creating it explicitly ensures it's ready upfront.
 
 ---
 
@@ -44,8 +46,8 @@ wrangler r2 bucket create blog-media-staging
 Generate S3-compatible tokens:
 
 1. Go to https://dash.cloudflare.com
-2. **Storage & databases → R2 → Overview → Manage R2 API Tokens**
-3. Click **Create Account API token**
+2. **R2 → Manage R2 API Tokens**
+3. Click **Create API token**
 4. Set:
    - **Token name**: e.g. `blog-staging-media`
    - **Permissions**: Object Read & Write
@@ -57,9 +59,9 @@ Generate S3-compatible tokens:
 7. The S3 endpoint on the confirmation page contains your account ID: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` → that's `R2_ACCOUNT_ID`
 
 Enable public access:
-1. **R2 object storage** → select **blog-media-staging** → **Settings**
-2. Under **Public Development URL**, select **Enable**
-3. Type `allow` to confirm, select **Allow**
+1. **R2** → select **blog-media-staging** → **Settings**
+2. Under **R2.dev subdomain**, select **Allow access**
+3. Type `allow` to confirm
 4. Copy the **Public Bucket URL** shown — this is `R2_PUBLIC_URL`
 
 Variables needed:
@@ -75,25 +77,30 @@ R2_PUBLIC_URL=<r2-dev-or-custom-url>
 
 ## 4. Enable Cloudflare Email Routing
 
+The newsletter is outbound-only (no-reply). You only need Email Routing enabled on the zone — no custom addresses or destination verification required.
+
 1. In the Cloudflare dashboard, go to **Email Routing** (sidebar or `https://dash.cloudflare.com/?to=/:account/:zone/email/routing`)
 2. Review the DNS records that will be added to your zone, then select **Add records and enable**
-3. Go to **Routing rules**
-4. Under **Custom addresses**, select **Create address**
-5. Enter the custom address: `newsletter-staging@<your-domain>`
-6. In **Destination addresses**, enter your real inbox email
-7. Select **Save**
-8. Cloudflare sends a verification email to the destination — open it and select **Verify email address** > **Go to Email Routing**
-9. The destination now shows **Verified** — select **Continue**
-10. Select **Add records and finish** (Cloudflare auto-adds the required MX and TXT DNS records)
+3. Cloudflare auto-adds the required MX and TXT DNS records
+
+> The `EMAIL_FROM_ADDRESS` secret (set in step 6) determines the sender address. It must use a domain with Email Routing enabled.
 
 ---
 
 ## 5. Set Up Cloudflare Turnstile
 
-1. Go to https://dash.cloudflare.com/
-2. Navigate to **Turnstile**
-3. Create a new site (e.g. `blog-staging`)
-4. Copy the **site key** and **secret key**
+Staging and local dev use Cloudflare's **test keys** — no dashboard widget needed. Test keys work on any domain (`localhost`, `*.workers.dev`, etc.) and always pass validation.
+
+| Key           | Value                                |
+| ------------- | ------------------------------------ |
+| Site key      | `1x00000000000000000000AA`           |
+| Secret key    | `1x0000000000000000000000000000000AA`|
+
+Use these as `PUBLIC_TURNSTILE_SITE_KEY` (Astro) and `TURNSTILE_SECRET_KEY` (Worker secret).
+
+> "Any Hostname" (which allows custom domains without pre-configuration) is Enterprise-only. Test keys are the official approach for non-production environments.
+>
+> Reference: <https://developers.cloudflare.com/turnstile/troubleshooting/testing>
 
 ---
 
@@ -103,11 +110,11 @@ R2_PUBLIC_URL=<r2-dev-or-custom-url>
 
 ```bash
 wrangler secret put TURNSTILE_SECRET_KEY --env staging
-# → paste the staging Turnstile secret key
+# → paste the test secret key: 1x0000000000000000000000000000000AA
 wrangler secret put NEWSLETTER_SEND_SECRET --env staging
 # → generate a random secret (e.g. openssl rand -hex 32)
 wrangler secret put EMAIL_FROM_ADDRESS --env staging
-# → newsletter-staging@<your-domain>
+# → no-reply@<your-domain> (must use a domain with Email Routing enabled)
 ```
 
 ### Worker Vars (in `wrangler.toml` `env.staging.vars`)
@@ -125,7 +132,7 @@ Set in shell before running `bun run media:upload`, or as a GitHub Secret for CI
 ### Astro Build-Time Vars
 
 ```
-PUBLIC_TURNSTILE_SITE_KEY=<staging-turnstile-site-key>
+PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 ```
 
 Set in your local `.env` before running `bun run deploy:web:staging`, or in the Astro build environment.

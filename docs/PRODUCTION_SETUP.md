@@ -24,7 +24,7 @@ Copy the `database_id` into `apps/api/wrangler.toml` under `[[d1_databases]]`.
 
 ## 2. Create Production Queues
 
-The main queue and its dead letter queue (DLQ) must both be created explicitly:
+The main queue and its dead letter queue (DLQ) must both be created:
 
 ```bash
 wrangler queues create newsletter-send
@@ -32,6 +32,8 @@ wrangler queues create newsletter-dlq
 ```
 
 Messages that fail after max retries are automatically routed to the DLQ instead of being deleted.
+
+> The DLQ is auto-created if it doesn't exist when the consumer is deployed. Creating it explicitly ensures it's ready upfront.
 
 ---
 
@@ -44,8 +46,8 @@ wrangler r2 bucket create blog-media
 Generate S3-compatible tokens:
 
 1. Go to https://dash.cloudflare.com
-2. **Storage & databases → R2 → Overview → Manage R2 API Tokens**
-3. Click **Create Account API token**
+2. **R2 → Manage R2 API Tokens**
+3. Click **Create API token**
 4. Set:
    - **Token name**: e.g. `blog-prod-media`
    - **Permissions**: Object Read & Write
@@ -57,9 +59,9 @@ Generate S3-compatible tokens:
 7. The S3 endpoint on the confirmation page contains your account ID: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` → that's `R2_ACCOUNT_ID`
 
 Enable public access:
-1. **R2 object storage** → select **blog-media** → **Settings**
+1. **R2** → select **blog-media** → **Settings**
 2. Under **Custom Domains**, select **Add** to connect your domain (e.g. `media.yourdomain.com`)
-3. Alternatively, under **Public Development URL**, select **Enable**, type `allow` to confirm
+3. Alternatively, under **R2.dev subdomain**, select **Allow access**, type `allow` to confirm
 4. Copy the **Public Bucket URL** shown — this is `R2_PUBLIC_URL`
 
 Variables needed:
@@ -75,18 +77,15 @@ R2_PUBLIC_URL=<r2-dev-or-custom-url>
 
 ## 4. Enable Cloudflare Email Routing
 
+The newsletter is outbound-only (no-reply). You only need Email Routing enabled on the zone — no custom addresses or destination verification required.
+
 1. In the Cloudflare dashboard, go to **Email Routing** (sidebar or `https://dash.cloudflare.com/?to=/:account/:zone/email/routing`)
 2. Review the DNS records that will be added to your zone, then select **Add records and enable**
-3. Go to **Routing rules**
-4. Under **Custom addresses**, select **Create address**
-5. Enter the custom address: `newsletter@<your-domain>`
-6. In **Destination addresses**, enter your real inbox email
-7. Select **Save**
-8. Cloudflare sends a verification email to the destination — open it and select **Verify email address** > **Go to Email Routing**
-9. The destination now shows **Verified** — select **Continue**
-10. Select **Add records and finish** (Cloudflare auto-adds the required MX and TXT DNS records)
+3. Cloudflare auto-adds the required MX and TXT DNS records
 
-> If you already set up staging (`newsletter-staging@<your-domain>`), Email Routing is already enabled on the domain. Skip steps 1–2 and go straight to **Routing rules** to create the production custom address.
+> If you already enabled Email Routing for staging, skip this step — it's already active on the domain.
+
+> The `EMAIL_FROM_ADDRESS` secret (set in step 6) determines the sender address. It must use a domain with Email Routing enabled.
 
 ---
 
@@ -94,8 +93,9 @@ R2_PUBLIC_URL=<r2-dev-or-custom-url>
 
 1. Go to https://dash.cloudflare.com/
 2. Navigate to **Turnstile**
-3. Create a new site (e.g. `blog-prod`)
-4. Copy the **site key** and **secret key**
+3. Select **Add widget**
+4. Set widget name (e.g. `blog-prod`) and hostname (e.g. `blog.hmziq.rs`)
+5. Copy the **site key** and **secret key**
 
 ---
 
@@ -109,7 +109,7 @@ wrangler secret put TURNSTILE_SECRET_KEY
 wrangler secret put NEWSLETTER_SEND_SECRET
 # → generate a random secret (e.g. openssl rand -hex 32)
 wrangler secret put EMAIL_FROM_ADDRESS
-# → newsletter@<your-domain>
+# → no-reply@<your-domain> (must use a domain with Email Routing enabled)
 ```
 
 ### Worker Vars (in `wrangler.toml` `[vars]`)
@@ -138,15 +138,17 @@ Also update `site.config.ts` and any domain-specific URLs.
 
 ## 7. Configure Custom Domain Routes
 
-Production uses `workers_dev = false` — the API is only accessible via custom domain routes. The routes are already configured in `wrangler.toml`:
+Production uses custom domain routes. The routes are already configured in `wrangler.toml`:
 
 ```toml
-routes = [
-  { pattern = "blog.hmziq.rs/api/newsletter/*", zone_name = "hmziq.rs" }
-]
+[[routes]]
+pattern = "blog.hmziq.rs/api/newsletter/*"
+zone_name = "hmziq.rs"
 ```
 
-If using a different domain, update the pattern accordingly. No `*.workers.dev` subdomain is available in production.
+When routes are set, `workers_dev` is automatically inferred as `false` — no separate `*.workers.dev` subdomain is created.
+
+If using a different domain, update the pattern accordingly.
 
 ---
 
