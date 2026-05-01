@@ -8,10 +8,10 @@ workers_dev = false
 port = 8788
 ip = "localhost"
 
-# Prod routes — uncomment to go live
-# routes = [
-#   { pattern = "blog.hmziq.rs/api/newsletter/*", zone_name = "hmziq.rs" }
-# ]
+# Prod routes
+routes = [
+  { pattern = "blog.hmziq.rs/api/newsletter/*", zone_name = "hmziq.rs" }
+]
 
 [vars]
 ENVIRONMENT = "production"
@@ -43,7 +43,6 @@ queue = "newsletter-dlq"
 # ─── Staging ────────────────────────────────────────────
 [env.staging]
 name = "api-staging"
-workers_dev = false
 
 [env.staging.vars]
 ENVIRONMENT = "staging"
