@@ -16,6 +16,12 @@ app.use("/api/*", async (c, next) => {
   return next();
 });
 
+// M4/L9: Add security headers
+app.use("/api/*", async (c, next) => {
+  await next();
+  c.header("X-Content-Type-Options", "nosniff");
+});
+
 app.route("/api/newsletter", newsletter);
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 

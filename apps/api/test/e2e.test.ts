@@ -1,14 +1,40 @@
 import { env, createExecutionContext, createMessageBatch, getQueueResult } from "cloudflare:test";
-import { describe, expect, it, afterEach } from "vitest";
+import { describe, expect, it, afterEach, beforeEach } from "vitest";
 import app from "../src/app";
 import worker from "../src/index";
 import type { NewsletterMessage } from "../src/modules/newsletter/queue";
 
 const ctx = createExecutionContext();
 
+const FAKE_TURNSTILE_SECRET = "0x4AAAAAAAfakeSecretKeyForTesting";
+let originalFetch: typeof fetch;
+let originalEnvironment: string;
+let originalTurnstile: string;
+
+beforeEach(() => {
+  originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url =
+      typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+    if (url.includes("challenges.cloudflare.com/turnstile")) {
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return originalFetch(input, init);
+  }) as typeof fetch;
+
+  originalTurnstile = env.TURNSTILE_SECRET_KEY;
+  env.TURNSTILE_SECRET_KEY = FAKE_TURNSTILE_SECRET;
+  originalEnvironment = env.ENVIRONMENT;
+  env.ENVIRONMENT = "test";
+});
+
 describe("Complete end-to-end newsletter flow", () => {
   afterEach(async () => {
-    // Delete in dependency order (children before parents due to FK constraints)
+    globalThis.fetch = originalFetch;
+    env.TURNSTILE_SECRET_KEY = originalTurnstile;
+    env.ENVIRONMENT = originalEnvironment;
     await env.DB.prepare("DELETE FROM newsletter_deliveries WHERE post_slug = ?")
       .bind("e2e-flow-post")
       .run();
@@ -30,7 +56,6 @@ describe("Complete end-to-end newsletter flow", () => {
   });
 
   it("subscribe → send → queue → consumer → email → delivery record", async () => {
-    // ─── Phase 1: Subscribe a new user ────────────────────────────────
     const subscribeRes = await app.fetch(
       new Request("http://localhost/api/newsletter/subscribe", {
         method: "POST",
@@ -40,7 +65,7 @@ describe("Complete end-to-end newsletter flow", () => {
         },
         body: JSON.stringify({
           email: "e2e-new@example.com",
-          token: "dummy-token-any-value-works-with-test-key",
+          token: "dummy-token",
         }),
       }),
       env,
@@ -50,7 +75,6 @@ describe("Complete end-to-end newsletter flow", () => {
     const subscribeBody = (await subscribeRes.json()) as { message: string };
     expect(subscribeBody.message).toBe("Subscribed");
 
-    // Verify subscriber exists in D1
     const subscriber = await env.DB.prepare(
       "SELECT id, email, unsubscribe_token FROM subscribers WHERE email = ? AND status = 'active'",
     )
@@ -60,7 +84,6 @@ describe("Complete end-to-end newsletter flow", () => {
     const subscriberId = subscriber!.id;
     const unsubscribeToken = subscriber!.unsubscribe_token;
 
-    // ─── Phase 2: Send newsletter ─────────────────────────────────────
     const capturedMessages: NewsletterMessage[] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
     env.NEWSLETTER_QUEUE.sendBatch = async (messages: { body: NewsletterMessage }[]) => {
@@ -94,7 +117,6 @@ describe("Complete end-to-end newsletter flow", () => {
     const sendBody = (await sendRes.json()) as { queued: number };
     expect(sendBody.queued).toBe(1);
 
-    // Verify the exact message shape
     expect(capturedMessages.length).toBe(1);
     const msg = capturedMessages[0]!;
     expect(msg.postSlug).toBe("e2e-flow-post");
@@ -103,16 +125,17 @@ describe("Complete end-to-end newsletter flow", () => {
     expect(msg.subscriberEmail).toBe("e2e-new@example.com");
     expect(msg.unsubscribeToken).toBe(unsubscribeToken);
 
-    // ─── Phase 3: Process queue message ───────────────────────────────
     const sentEmails: { to: string; subject: string; html: string }[] = [];
     const originalSend = env.SEND_EMAIL.send;
     env.SEND_EMAIL.send = async (message) => {
       const to = message.to;
       const toStr = Array.isArray(to) ? (to[0] ?? "") : (to ?? "");
+      const htmlRaw = (message as { html?: string | Array<{ content: string }> }).html;
+      const htmlStr = Array.isArray(htmlRaw) ? (htmlRaw[0]?.content ?? "") : (htmlRaw ?? "");
       sentEmails.push({
         to: toStr,
         subject: (message as { subject?: string }).subject ?? "",
-        html: (message as { html?: Array<{ content: string }> }).html?.[0]?.content ?? "",
+        html: htmlStr,
       });
       return { messageId: "test-id" } as import("@cloudflare/workers-types").EmailSendResult;
     };
@@ -134,14 +157,12 @@ describe("Complete end-to-end newsletter flow", () => {
       expect(result.explicitAcks).toStrictEqual(["e2e-msg"]);
       expect(result.retryMessages).toStrictEqual([]);
 
-      // ─── Phase 4: Verify email was sent ─────────────────────────────
       expect(sentEmails.length).toBe(1);
       expect(sentEmails[0]!.to).toBe("e2e-new@example.com");
       expect(sentEmails[0]!.subject).toBe("New Post: E2E Flow Post");
       expect(sentEmails[0]!.html).toContain("e2e-flow-post");
       expect(sentEmails[0]!.html).toContain(unsubscribeToken);
 
-      // ─── Phase 5: Verify delivery recorded in D1 ────────────────────
       const delivery = await env.DB.prepare(
         "SELECT status, subscriber_id FROM newsletter_deliveries WHERE post_slug = ? AND subscriber_id = ?",
       )
@@ -156,15 +177,13 @@ describe("Complete end-to-end newsletter flow", () => {
     }
   });
 
-  it("unsubscribe removes subscriber and they no longer receive emails", async () => {
-    // Seed subscriber
+  it("unsubscribe soft-deletes subscriber and they no longer receive emails", async () => {
     await env.DB.prepare(
       "INSERT INTO subscribers (id, email, status, unsubscribe_token) VALUES (?, ?, 'active', ?)",
     )
       .bind("e2e-unsub", "e2e-unsub@example.com", "unsub-token-123")
       .run();
 
-    // Unsubscribe
     const unsubRes = await app.fetch(
       new Request("http://localhost/api/newsletter/unsubscribe", {
         method: "POST",
@@ -179,13 +198,13 @@ describe("Complete end-to-end newsletter flow", () => {
     );
     expect(unsubRes.status).toBe(200);
 
-    // Verify deleted
-    const row = await env.DB.prepare("SELECT id FROM subscribers WHERE id = ?")
+    // M6: soft-delete — row still exists with status='unsubscribed'
+    const row = await env.DB.prepare("SELECT id, status FROM subscribers WHERE id = ?")
       .bind("e2e-unsub")
-      .first();
-    expect(row).toBeNull();
+      .first<{ id: string; status: string }>();
+    expect(row).not.toBeNull();
+    expect(row?.status).toBe("unsubscribed");
 
-    // Send newsletter — should enqueue 0 for this user
     const capturedMessages: NewsletterMessage[] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
     env.NEWSLETTER_QUEUE.sendBatch = async (messages: { body: NewsletterMessage }[]) => {
@@ -211,7 +230,6 @@ describe("Complete end-to-end newsletter flow", () => {
       );
       expect(sendRes.status).toBe(200);
 
-      // This user should not be in the captured messages
       const forUnsubUser = capturedMessages.filter((m) => m.subscriberId === "e2e-unsub");
       expect(forUnsubUser.length).toBe(0);
     } finally {
@@ -225,7 +243,6 @@ describe("Complete end-to-end newsletter flow", () => {
   it("rate-limited IP cannot subscribe, but other IPs can", async () => {
     const blockedIp = "99.99.99.99";
 
-    // Exhaust rate limit for this IP
     for (let i = 1; i <= 2; i++) {
       const res = await app.fetch(
         new Request("http://localhost/api/newsletter/subscribe", {
@@ -242,7 +259,6 @@ describe("Complete end-to-end newsletter flow", () => {
       expect(res.status).toBe(201);
     }
 
-    // Third attempt blocked
     const blockedRes = await app.fetch(
       new Request("http://localhost/api/newsletter/subscribe", {
         method: "POST",
@@ -257,7 +273,6 @@ describe("Complete end-to-end newsletter flow", () => {
     );
     expect(blockedRes.status).toBe(429);
 
-    // Different IP still works
     const allowedRes = await app.fetch(
       new Request("http://localhost/api/newsletter/subscribe", {
         method: "POST",

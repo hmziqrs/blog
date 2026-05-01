@@ -51,8 +51,7 @@ describe("normalizeEmail", () => {
 const subscribeSchema = z.object({
   email: z.email("Invalid email address"),
   token: z.string().min(1, "CAPTCHA token required"),
-  honeypot: z.string().max(0, "Bot detected").optional(),
-  submitTime: z.number().optional(),
+  honeypot: z.string().optional(),
 });
 
 describe("subscribe schema", () => {
@@ -70,21 +69,15 @@ describe("subscribe schema", () => {
     expect(() => subscribeSchema.parse({ email: "notanemail", token: "abc" })).toThrow();
   });
 
-  test("rejects non-empty honeypot", () => {
+  test("accepts non-empty honeypot (handled by route, not schema)", () => {
     expect(() =>
       subscribeSchema.parse({ email: "user@example.com", token: "abc", honeypot: "filled" }),
-    ).toThrow();
+    ).not.toThrow();
   });
 
   test("accepts empty honeypot", () => {
     expect(() =>
       subscribeSchema.parse({ email: "user@example.com", token: "abc", honeypot: "" }),
-    ).not.toThrow();
-  });
-
-  test("accepts optional submitTime", () => {
-    expect(() =>
-      subscribeSchema.parse({ email: "user@example.com", token: "abc", submitTime: 1234567890 }),
     ).not.toThrow();
   });
 });

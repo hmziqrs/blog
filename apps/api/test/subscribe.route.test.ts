@@ -1,5 +1,5 @@
 import { env, createExecutionContext } from "cloudflare:test";
-import { describe, expect, it, afterEach } from "vitest";
+import { describe, expect, it, afterEach, beforeEach } from "vitest";
 import app from "../src/app";
 
 const ctx = createExecutionContext();
@@ -8,17 +8,43 @@ function req(path: string, init?: RequestInit) {
   return new Request(`http://localhost${path}`, init);
 }
 
-describe("POST /api/newsletter/subscribe", () => {
-  afterEach(async () => {
-    // Clean up: delete any test subscribers and KV rate limits
-    await env.DB.prepare("DELETE FROM subscribers WHERE email LIKE ?")
-      .bind("test-%@example.com")
-      .run();
-    const list = await env.RATE_LIMIT_KV.list();
-    await Promise.all(list.keys.map((k: { name: string }) => env.RATE_LIMIT_KV.delete(k.name)));
-  });
+const FAKE_TURNSTILE_SECRET = "0x4AAAAAAAfakeSecretKeyForTesting";
 
-  // ─── Validation ────────────────────────────────────────────────────
+let originalFetch: typeof fetch;
+let originalEnvironment: string;
+
+beforeEach(() => {
+  originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url =
+      typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+    if (url.includes("challenges.cloudflare.com/turnstile")) {
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return originalFetch(input, init);
+  }) as typeof fetch;
+
+  // Set a non-test Turnstile secret so M5 passes
+  env.TURNSTILE_SECRET_KEY = FAKE_TURNSTILE_SECRET;
+  // Set non-production so L5 (missing CF-Connecting-IP) doesn't block tests
+  originalEnvironment = env.ENVIRONMENT;
+  env.ENVIRONMENT = "test";
+});
+
+afterEach(async () => {
+  globalThis.fetch = originalFetch;
+  env.ENVIRONMENT = originalEnvironment;
+  await env.DB.prepare("DELETE FROM subscribers WHERE email LIKE ?")
+    .bind("test-%@example.com")
+    .run();
+  const list = await env.RATE_LIMIT_KV.list();
+  await Promise.all(list.keys.map((k: { name: string }) => env.RATE_LIMIT_KV.delete(k.name)));
+});
+
+describe("POST /api/newsletter/subscribe", () => {
+  // ─── Content-Type validation ─────────────────────────────────────────
 
   it("rejects wrong Content-Type", async () => {
     const res = await app.fetch(
@@ -46,6 +72,84 @@ describe("POST /api/newsletter/subscribe", () => {
     );
     expect(res.status).toBe(415);
   });
+
+  // L4: strict Content-Type parsing via split(";")[0].trim()
+  it("rejects spoofed Content-Type like application/json-pretend", async () => {
+    const res = await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json-pretend" },
+        body: JSON.stringify({ email: "user@example.com", token: "abc123" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(415);
+  });
+
+  // ─── M5: Turnstile test key guard ────────────────────────────────────
+
+  it("returns 503 when Turnstile secret is empty", async () => {
+    env.TURNSTILE_SECRET_KEY = "";
+    const res = await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "user@example.com", token: "abc123" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(503);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("Service misconfigured");
+  });
+
+  it("returns 503 when Turnstile secret is a test key (1x)", async () => {
+    env.TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA";
+    const res = await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "user@example.com", token: "abc123" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(503);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("Service misconfigured");
+  });
+
+  it("returns 503 when Turnstile secret is a test key (2x)", async () => {
+    env.TURNSTILE_SECRET_KEY = "2x0000000000000000000000000000000AA";
+    const res = await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "user@example.com", token: "abc123" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(503);
+  });
+
+  it("returns 503 when Turnstile secret is a test key (3x)", async () => {
+    env.TURNSTILE_SECRET_KEY = "3x0000000000000000000000000000000AA";
+    const res = await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "user@example.com", token: "abc123" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(503);
+  });
+
+  // ─── Field validation ───────────────────────────────────────────────
 
   it("rejects invalid email", async () => {
     const res = await app.fetch(
@@ -99,21 +203,25 @@ describe("POST /api/newsletter/subscribe", () => {
     expect(res.status).toBe(400);
   });
 
-  // ─── Honeypot ──────────────────────────────────────────────────────
+  // ─── L3: Honeypot returns fake 201 instead of 400 ──────────────────
 
-  it("rejects non-empty honeypot via Zod validation (bot trap)", async () => {
+  it("returns fake success for non-empty honeypot (bot trap)", async () => {
     const res = await app.fetch(
       req("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: "user@example.com", token: "abc123", honeypot: "bot-value" }),
+        body: JSON.stringify({
+          email: "user@example.com",
+          token: "abc123",
+          honeypot: "bot-value",
+        }),
       }),
       env,
       ctx,
     );
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as { error: string };
-    expect(body.error).toBe("Bot detected");
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { message: string };
+    expect(body.message).toBe("Subscribed");
 
     // Verify no DB entry was created
     const count = await env.DB.prepare("SELECT COUNT(*) as c FROM subscribers WHERE email = ?")
@@ -122,43 +230,7 @@ describe("POST /api/newsletter/subscribe", () => {
     expect(count?.c).toBe(0);
   });
 
-  // ─── Timing check ──────────────────────────────────────────────────
-
-  it("rejects when submitTime is too fast (bot detection)", async () => {
-    const res = await app.fetch(
-      req("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          email: "user@example.com",
-          token: "abc123",
-          submitTime: Date.now(),
-        }),
-      }),
-      env,
-      ctx,
-    );
-    expect(res.status).toBe(400);
-  });
-
-  it("allows when submitTime is old enough", async () => {
-    const res = await app.fetch(
-      req("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          email: "test-old@example.com",
-          token: "abc123",
-          submitTime: Date.now() - 5000,
-        }),
-      }),
-      env,
-      ctx,
-    );
-    expect(res.status).toBe(201);
-  });
-
-  // ─── Happy path ────────────────────────────────────────────────────
+  // ─── Happy path ──────────────────────────────────────────────────────
 
   it("subscribes successfully with valid data", async () => {
     const res = await app.fetch(
@@ -200,7 +272,10 @@ describe("POST /api/newsletter/subscribe", () => {
       req("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: "Test.User+Newsletter@gmail.com", token: "abc123" }),
+        body: JSON.stringify({
+          email: "Test.User+Newsletter@gmail.com",
+          token: "abc123",
+        }),
       }),
       env,
       ctx,
@@ -214,10 +289,9 @@ describe("POST /api/newsletter/subscribe", () => {
     expect(row?.email).toBe("testuser@gmail.com");
   });
 
-  // ─── Already subscribed ────────────────────────────────────────────
+  // ─── M1: Already subscribed returns 201 (no enumeration) ─────────────
 
-  it("rejects already subscribed email", async () => {
-    // First subscription
+  it("returns 201 for already subscribed email (no enumeration)", async () => {
     await app.fetch(
       req("/api/newsletter/subscribe", {
         method: "POST",
@@ -228,7 +302,6 @@ describe("POST /api/newsletter/subscribe", () => {
       ctx,
     );
 
-    // Duplicate attempt
     const res = await app.fetch(
       req("/api/newsletter/subscribe", {
         method: "POST",
@@ -238,12 +311,62 @@ describe("POST /api/newsletter/subscribe", () => {
       env,
       ctx,
     );
-    expect(res.status).toBe(409);
-    const body = (await res.json()) as { error: string };
-    expect(body.error).toBe("Already subscribed");
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { message: string };
+    expect(body.message).toBe("Subscribed");
+
+    // No duplicate row
+    const count = await env.DB.prepare("SELECT COUNT(*) as c FROM subscribers WHERE email = ?")
+      .bind("test-dup@example.com")
+      .first<{ c: number }>();
+    expect(count?.c).toBe(1);
   });
 
-  // ─── Rate limiting ─────────────────────────────────────────────────
+  // ─── Re-subscribe after unsubscribe ──────────────────────────────────
+
+  it("re-activates unsubscribed subscriber", async () => {
+    // Subscribe
+    await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "test-resub@example.com", token: "abc123" }),
+      }),
+      env,
+      ctx,
+    );
+
+    // Simulate unsubscribe (soft delete)
+    await env.DB.prepare(
+      "UPDATE subscribers SET status = 'unsubscribed', unsubscribed_at = datetime('now') WHERE email = ?",
+    )
+      .bind("test-resub@example.com")
+      .run();
+
+    // Re-subscribe
+    const res = await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "test-resub@example.com", token: "abc123" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { message: string };
+    expect(body.message).toBe("Subscribed");
+
+    const row = await env.DB.prepare(
+      "SELECT status, unsubscribed_at FROM subscribers WHERE email = ?",
+    )
+      .bind("test-resub@example.com")
+      .first<{ status: string; unsubscribed_at: string | null }>();
+    expect(row?.status).toBe("active");
+    expect(row?.unsubscribed_at).toBeNull();
+  });
+
+  // ─── Rate limiting ───────────────────────────────────────────────────
 
   it("rate-limits after 2 requests from same IP", async () => {
     const headers = {
@@ -251,7 +374,6 @@ describe("POST /api/newsletter/subscribe", () => {
       "CF-Connecting-IP": "1.2.3.4",
     };
 
-    // Two allowed
     for (let i = 1; i <= 2; i++) {
       const res = await app.fetch(
         new Request("http://localhost/api/newsletter/subscribe", {
@@ -265,7 +387,6 @@ describe("POST /api/newsletter/subscribe", () => {
       expect(res.status).toBe(201);
     }
 
-    // Third blocked
     const res = await app.fetch(
       new Request("http://localhost/api/newsletter/subscribe", {
         method: "POST",
@@ -294,7 +415,7 @@ describe("POST /api/newsletter/subscribe", () => {
     );
     expect(res1.status).toBe(201);
 
-    // Second attempt with same email: already subscribed (409) but rate-limit entry recorded
+    // Second attempt with same email: already subscribed, returns 201 (M1), rate-limit entry recorded
     const res2 = await app.fetch(
       new Request("http://localhost/api/newsletter/subscribe", {
         method: "POST",
@@ -307,9 +428,9 @@ describe("POST /api/newsletter/subscribe", () => {
       env,
       ctx,
     );
-    expect(res2.status).toBe(409);
+    expect(res2.status).toBe(201);
 
-    // Third attempt with same email: rate-limited (429)
+    // Third attempt with same email: rate-limited
     const res3 = await app.fetch(
       new Request("http://localhost/api/newsletter/subscribe", {
         method: "POST",
@@ -323,5 +444,56 @@ describe("POST /api/newsletter/subscribe", () => {
       ctx,
     );
     expect(res3.status).toBe(429);
+  });
+
+  // ─── L5: Missing CF-Connecting-IP in production ──────────────────────
+
+  it("rejects missing CF-Connecting-IP in production", async () => {
+    env.ENVIRONMENT = "production";
+    const res = await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "user@example.com", token: "abc123" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("Missing required headers");
+  });
+
+  it("allows missing CF-Connecting-IP in non-production", async () => {
+    // beforeEach already sets ENVIRONMENT to "test", so this should pass
+    const res = await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "test-noip@example.com", token: "abc123" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { message: string };
+    expect(body.message).toBe("Subscribed");
+  });
+
+  // ─── L1: Error logging sanitized ────────────────────────────────────
+
+  it("returns 500 for malformed JSON body", async () => {
+    const res = await app.fetch(
+      req("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{not valid json}",
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(500);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("Internal server error");
   });
 });

@@ -22,40 +22,29 @@ async function processUnsubscribe(
     return { error: "Invalid unsubscribe token", status: 404 };
   }
 
-  await db.prepare("DELETE FROM subscribers WHERE id = ?").bind(subscriber.id).run();
+  await db
+    .prepare(
+      "UPDATE subscribers SET status='unsubscribed', unsubscribed_at=datetime('now') WHERE id = ?",
+    )
+    .bind(subscriber.id)
+    .run();
 
   return { message: "Successfully unsubscribed", status: 200 };
 }
 
-app.get("/", async (c) => {
-  const ip = c.req.header("CF-Connecting-IP") ?? "unknown";
-
-  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, ip);
-  if (!allowed) {
-    return c.json({ error: "Too many requests" }, 429);
-  }
-
-  const token = c.req.query("token");
-  if (!token) {
-    return c.json({ error: "Token required" }, 400);
-  }
-
-  const result = await processUnsubscribe(c.env.DB, token);
-  return c.json(
-    "error" in result ? { error: result.error } : { message: result.message },
-    result.status,
-  );
-});
-
 app.post("/", async (c) => {
   const contentType = c.req.header("Content-Type") ?? "";
-  if (!contentType.includes("application/json")) {
+  if (contentType.split(";")[0].trim() !== "application/json") {
     return c.json({ error: "Content-Type must be application/json" }, 415);
   }
 
-  const ip = c.req.header("CF-Connecting-IP") ?? "unknown";
+  const ip = c.req.header("CF-Connecting-IP");
+  if (!ip && c.env.ENVIRONMENT === "production") {
+    return c.json({ error: "Missing required headers" }, 400);
+  }
+  const clientIp = ip ?? "unknown";
 
-  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, ip);
+  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp);
   if (!allowed) {
     return c.json({ error: "Too many requests" }, 429);
   }

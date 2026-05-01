@@ -205,10 +205,12 @@ describe("handleQueueBatch", () => {
     env.SEND_EMAIL.send = async (message) => {
       const to = message.to;
       const toStr = Array.isArray(to) ? (to[0] ?? "") : (to ?? "");
+      const htmlRaw = (message as { html?: string | Array<{ content: string }> }).html;
+      const htmlStr = Array.isArray(htmlRaw) ? (htmlRaw[0]?.content ?? "") : (htmlRaw ?? "");
       sentEmails.push({
         to: toStr,
         subject: (message as { subject?: string }).subject ?? "",
-        html: (message as { html?: Array<{ content: string }> }).html?.[0]?.content ?? "",
+        html: htmlStr,
       });
       return { messageId: "test-id" } as import("@cloudflare/workers-types").EmailSendResult;
     };

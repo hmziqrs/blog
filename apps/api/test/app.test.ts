@@ -50,6 +50,12 @@ describe("App-level", () => {
     }
   });
 
+  // L9: X-Content-Type-Options header
+  it("sets X-Content-Type-Options: nosniff on API responses", async () => {
+    const res = await app.fetch(req("/api/nonexistent"), env, ctx);
+    expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
+  });
+
   it("does not apply CORS when ALLOWED_ORIGIN is empty", async () => {
     const originalOrigin = env.ALLOWED_ORIGIN;
     env.ALLOWED_ORIGIN = "";

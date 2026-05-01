@@ -189,6 +189,53 @@ describe("POST /api/newsletter/send", () => {
     expect(res.status).toBe(415);
   });
 
+  // H2b: Slug format validation
+  it("rejects invalid slug format", async () => {
+    const res = await app.fetch(
+      req("/api/newsletter/send", {
+        method: "POST",
+        headers: { ...AUTH_HEADER, "content-type": "application/json" },
+        body: JSON.stringify({ slug: "My Post", title: "My Post", excerpt: "An excerpt" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("Invalid slug format");
+  });
+
+  // L4: Spoofed Content-Type
+  it("rejects spoofed Content-Type like application/json-pretend", async () => {
+    const res = await app.fetch(
+      req("/api/newsletter/send", {
+        method: "POST",
+        headers: { ...AUTH_HEADER, "content-type": "application/json-pretend" },
+        body: JSON.stringify({ slug: "my-post", title: "My Post", excerpt: "An excerpt" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(415);
+  });
+
+  // H3: Timing-safe secret comparison
+  it("rejects wrong secret of equal length (timing-safe)", async () => {
+    const res = await app.fetch(
+      req("/api/newsletter/send", {
+        method: "POST",
+        headers: {
+          "x-send-secret": "wrong-dev-secrax", // 16 chars, same length as "local-dev-secret"
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ slug: "my-post", title: "My Post", excerpt: "An excerpt" }),
+      }),
+      env,
+      ctx,
+    );
+    expect(res.status).toBe(401);
+  });
+
   // ─── Idempotency ───────────────────────────────────────────────────
 
   it("returns 'Already sent' when post was already sent", async () => {
