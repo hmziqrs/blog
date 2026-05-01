@@ -41,18 +41,26 @@ Messages that fail after max retries are automatically routed to the DLQ instead
 wrangler r2 bucket create blog-media-staging
 ```
 
-Generate S3-compatible tokens in the Cloudflare dashboard (**R2 → Manage R2 API tokens → Create API token**):
+Generate S3-compatible tokens:
 
-- Permissions: **Object Read & Write**
-- Bucket: select **blog-media-staging** only
-- Save the generated credentials:
-  - `R2_ACCESS_KEY_ID` — shown after creation
-  - `R2_SECRET_ACCESS_KEY` — shown once, save immediately
+1. Go to https://dash.cloudflare.com
+2. **Storage & databases → R2 → Overview → Manage R2 API Tokens**
+3. Click **Create Account API token**
+4. Set:
+   - **Token name**: e.g. `blog-staging-media`
+   - **Permissions**: Object Read & Write
+   - **Specify bucket(s)**: select **blog-media-staging** only
+5. Click **Create API token**
+6. Copy both values immediately (secret key is shown once):
+   - **Access Key ID** → `R2_ACCESS_KEY_ID`
+   - **Secret Access Key** → `R2_SECRET_ACCESS_KEY`
+7. The S3 endpoint on the confirmation page contains your account ID: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` → that's `R2_ACCOUNT_ID`
 
-Find your account ID in any dashboard URL: `https://dash.cloudflare.com/<ACCOUNT_ID>/...`
-
-Enable public access in **R2 → blog-media-staging → Settings → Public access**:
-- Use the `*.r2.dev` subdomain (e.g. `https://pub-abc123.r2.dev`) — this is `R2_PUBLIC_URL`
+Enable public access:
+1. **R2 object storage** → select **blog-media-staging** → **Settings**
+2. Under **Public Development URL**, select **Enable**
+3. Type `allow` to confirm, select **Allow**
+4. Copy the **Public Bucket URL** shown — this is `R2_PUBLIC_URL`
 
 Variables needed:
 ```

@@ -41,18 +41,26 @@ Messages that fail after max retries are automatically routed to the DLQ instead
 wrangler r2 bucket create blog-media
 ```
 
-Generate S3-compatible tokens in the Cloudflare dashboard (**R2 → Manage R2 API tokens → Create API token**):
+Generate S3-compatible tokens:
 
-- Permissions: **Object Read & Write**
-- Bucket: select **blog-media** only
-- Save the generated credentials:
-  - `R2_ACCESS_KEY_ID` — shown after creation
-  - `R2_SECRET_ACCESS_KEY` — shown once, save immediately
+1. Go to https://dash.cloudflare.com
+2. **Storage & databases → R2 → Overview → Manage R2 API Tokens**
+3. Click **Create Account API token**
+4. Set:
+   - **Token name**: e.g. `blog-prod-media`
+   - **Permissions**: Object Read & Write
+   - **Specify bucket(s)**: select **blog-media** only
+5. Click **Create API token**
+6. Copy both values immediately (secret key is shown once):
+   - **Access Key ID** → `R2_ACCESS_KEY_ID`
+   - **Secret Access Key** → `R2_SECRET_ACCESS_KEY`
+7. The S3 endpoint on the confirmation page contains your account ID: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` → that's `R2_ACCOUNT_ID`
 
-Find your account ID in any dashboard URL: `https://dash.cloudflare.com/<ACCOUNT_ID>/...`
-
-Enable public access in **R2 → blog-media → Settings → Public access**:
-- Use a custom domain (e.g. `https://media.yourdomain.com`) or the `*.r2.dev` subdomain — this is `R2_PUBLIC_URL`
+Enable public access:
+1. **R2 object storage** → select **blog-media** → **Settings**
+2. Under **Custom Domains**, select **Add** to connect your domain (e.g. `media.yourdomain.com`)
+3. Alternatively, under **Public Development URL**, select **Enable**, type `allow` to confirm
+4. Copy the **Public Bucket URL** shown — this is `R2_PUBLIC_URL`
 
 Variables needed:
 ```
