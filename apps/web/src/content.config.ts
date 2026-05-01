@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const monorepoRoot = path.resolve(fileURLToPath(import.meta.url), "../../../../");
 
-const contentDir = process.env.CONTENT_DIR ?? path.join(monorepoRoot, "content/posts");
+const contentDir = process.env.CONTENT_DIR || path.join(monorepoRoot, "content/posts");
 
 const posts = defineCollection({
   loader: glob({ pattern: "**/*.md", base: contentDir }),
