@@ -2,68 +2,65 @@
 const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
 ---
 
-<div id={`${uid}-modal`} class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-  <div class="bg-base-100 rounded-2xl shadow-xl max-w-md w-full relative border border-base-content/10">
+<div
+  id={`${uid}-modal`}
+  class="fixed inset-0 z-50 hidden items-center justify-center backdrop-blur-[2px] p-4 opacity-0 transition-opacity duration-300"
+>
+  <div class="relative w-full max-w-md overflow-hidden rounded-xl border border-base-content/10 bg-base-200/90 p-6 backdrop-blur-3xl">
     <button
       id={`${uid}-close`}
-      class="absolute top-4 right-4 text-base-content/40 hover:text-base-content/70 text-2xl leading-none transition-colors"
+      class="absolute top-4 right-4 text-base-content/40 hover:text-base-content/70 text-xl leading-none transition-colors"
       aria-label="Close"
     >
       &times;
     </button>
 
-    <div class="p-6">
-      <h2 class="text-2xl font-bold mb-2">Subscribe to the Newsletter</h2>
-      <p class="text-base-content/70 mb-6">
-        Get notified when new posts are published. No spam, unsubscribe anytime.
-      </p>
+    <h2 class="text-xl font-semibold">Subscribe to the Newsletter</h2>
+    <p class="mt-1.5 text-sm text-base-content/60 leading-relaxed">
+      Get notified when new posts are published. No spam, unsubscribe anytime.
+    </p>
 
-      <form id={`${uid}-form`} class="flex flex-col gap-3">
-        <div>
-          <label for={`${uid}-email`} class="block text-sm font-medium mb-1">
-            Email address
-          </label>
-          <input
-            type="email"
-            id={`${uid}-email`}
-            name="email"
-            required
-            placeholder="you@example.com"
-            class="w-full px-4 py-2.5 border border-base-content/15 rounded-xl bg-base-200/60 focus:ring-2 focus:ring-primary/50 focus:border-primary/40 text-base-content placeholder:text-base-content/40 transition-all"
-          />
-        </div>
-
-        <div
-          id={`${uid}-turnstile`}
-          class="cf-turnstile"
-          data-sitekey={siteKey}
-        ></div>
-
-        <button
-          type="submit"
-          id={`${uid}-submit`}
-          class="w-full bg-primary text-primary-content font-semibold py-2.5 px-4 rounded-xl hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Subscribe
-        </button>
-
-        <div id={`${uid}-message`} class="text-sm hidden"></div>
-      </form>
-
-      <div class="mt-4 flex items-center gap-2">
-        <input type="checkbox" id={`${uid}-dismiss`} class="checkbox checkbox-sm checkbox-primary" />
-        <label for={`${uid}-dismiss`} class="text-base-content/60 cursor-pointer text-sm">Don't ask me again for 7 days</label>
+    <form id={`${uid}-form`} class="mt-5 flex flex-col gap-3">
+      <div>
+        <label for={`${uid}-email`} class="block text-sm font-medium mb-1.5">
+          Email address
+        </label>
+        <input
+          type="email"
+          id={`${uid}-email`}
+          name="email"
+          required
+          placeholder="you@example.com"
+          class="w-full px-4 py-2.5 border border-base-content/15 rounded-xl bg-base-100/60 focus:ring-2 focus:ring-primary/50 focus:border-primary/40 text-base-content placeholder:text-base-content/40 transition-all"
+        />
       </div>
 
-      <p class="text-xs text-base-content/50 mt-4">
-        By subscribing, you agree to our
-        <a href="/privacy" class="text-primary hover:underline">Privacy Policy</a>.
-      </p>
+      <div id={`${uid}-turnstile`} data-sitekey={siteKey}></div>
+
+      <button
+        type="submit"
+        id={`${uid}-submit`}
+        class="btn btn-primary w-full"
+      >
+        Subscribe
+      </button>
+
+      <div id={`${uid}-message`} class="text-sm hidden"></div>
+    </form>
+
+    <div class="mt-4 flex items-center gap-2">
+      <input type="checkbox" id={`${uid}-dismiss`} class="checkbox checkbox-sm checkbox-primary" />
+      <label for={`${uid}-dismiss`} class="text-base-content/60 cursor-pointer text-sm">Don't ask me again for 7 days</label>
     </div>
+
+    <p class="mt-4 text-xs text-base-content/40">
+      By subscribing, you agree to our
+      <a href="/privacy" class="text-primary hover:underline">Privacy Policy</a>.
+    </p>
   </div>
 </div>
 
-<script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "" }}>
+<script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "", siteKey }}>
   const modal = document.getElementById(`${uid}-modal`);
   const closeBtn = document.getElementById(`${uid}-close`);
   const form = document.getElementById(`${uid}-form`);
@@ -71,15 +68,48 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
   const message = document.getElementById(`${uid}-message`);
   const dismissCheckbox = document.getElementById(`${uid}-dismiss`);
 
-  // Never show if already subscribed
   const isSubscribed = localStorage.getItem("newsletterSubscribed") === "true";
-
-  // Check if user has dismissed before and if 7 days have passed
   const dismissUntil = localStorage.getItem("newsletterDismissUntil");
   const isDismissed = dismissUntil && Date.now() < parseInt(dismissUntil);
 
+  let turnstileWidgetId = null;
+
+  async function ensureTurnstile() {
+    if (turnstileWidgetId !== null) {
+      window.turnstile.reset(turnstileWidgetId);
+      return;
+    }
+
+    if (!window.turnstile) {
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      document.head.appendChild(script);
+      await new Promise((resolve) => {
+        script.addEventListener("load", resolve);
+      });
+    }
+
+    const container = document.getElementById(`${uid}-turnstile`);
+    if (container) {
+      turnstileWidgetId = window.turnstile.render(`#${uid}-turnstile`, {
+        sitekey: siteKey,
+      });
+    }
+  }
+
+  function showModal() {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        modal.classList.remove("opacity-0");
+      });
+    });
+    ensureTurnstile();
+  }
+
   if (!isSubscribed && !isDismissed) {
-    // Show modal after 50% scroll
     const scrollThreshold = 0.5;
     let hasShown = false;
 
@@ -88,49 +118,51 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
 
       const scrollPercentage = window.scrollY / (document.body.scrollHeight - window.innerHeight);
       if (scrollPercentage >= scrollThreshold) {
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
+        showModal();
         hasShown = true;
       }
     });
   }
 
   function closeModal() {
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
+    modal.classList.add("opacity-0");
+    setTimeout(() => {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }, 300);
 
-    // If checkbox is checked, dismiss for 7 days
     if (dismissCheckbox.checked) {
       const sevenDays = 7 * 24 * 60 * 60 * 1000;
       localStorage.setItem("newsletterDismissUntil", String(Date.now() + sevenDays));
     }
+
+    if (window.turnstile && turnstileWidgetId !== null) {
+      window.turnstile.reset(turnstileWidgetId);
+    }
   }
 
-  // Close modal
   closeBtn.addEventListener("click", closeModal);
 
-  // Close on backdrop click
   modal.addEventListener("click", (e) => {
     if (e.target === modal) {
       closeModal();
     }
   });
 
-  // Close on Escape key
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !modal.classList.contains("hidden")) {
       closeModal();
     }
   });
 
-  // Form submission
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const email = document.getElementById(`${uid}-email`)?.value;
-    const turnstileResponse = document.querySelector(
+    const turnstileInput = document.querySelector(
       `#${uid}-turnstile input[name='cf-turnstile-response']`,
-    )?.value;
+    );
+    const turnstileResponse = turnstileInput?.value;
 
     if (!turnstileResponse) {
       showMessage("Please complete the CAPTCHA", "error");
@@ -156,17 +188,13 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
       if (response.ok) {
         showMessage("Successfully subscribed! Check your email.", "success");
         form.reset();
-        // Mark as permanently subscribed so modal never shows again
         localStorage.setItem("newsletterSubscribed", "true");
-        // Close modal after success
-        setTimeout(() => {
-          modal.classList.add("hidden");
-          modal.classList.remove("flex");
-        }, 2000);
-        // Reset Turnstile
         if (window.turnstile) {
           window.turnstile.reset(`#${uid}-turnstile`);
         }
+        setTimeout(() => {
+          closeModal();
+        }, 2000);
       } else {
         showMessage(data.error || "Subscription failed", "error");
       }
