@@ -50,6 +50,12 @@ const apiBase = import.meta.env.PUBLIC_API_BASE ?? "";
       $loading.classList.add("hidden");
       if (res.ok) {
         $success.classList.remove("hidden");
+      } else if (res.status === 429) {
+        $error.classList.remove("hidden");
+        const retryAfter = data.retryAfter || 3600;
+        const m = Math.floor(retryAfter / 60);
+        const s = retryAfter % 60;
+        $msg.textContent = `Too many attempts. Please try again in ${m > 0 ? `${m}m ${s}s` : `${s}s`}.`;
       } else {
         $error.classList.remove("hidden");
         $msg.textContent = data.error || "Something went wrong.";

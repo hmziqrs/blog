@@ -35,14 +35,76 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
 </form>
 
 <script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "" }}>
+  import { isEmail } from "validator";
+
   const form = document.getElementById(`${uid}-form`);
   const submitBtn = document.getElementById(`${uid}-submit`);
   const message = document.getElementById(`${uid}-message`);
+  const emailInput = document.getElementById(`${uid}-email`);
+  const COOLDOWN_KEY = `${uid}-rate-limit-until`;
+
+  function normalizeEmail(raw) {
+    const atIndex = raw.lastIndexOf("@");
+    if (atIndex === -1) return raw.toLowerCase().trim();
+    const local = raw.slice(0, atIndex).toLowerCase().trim();
+    const domain = raw.slice(atIndex + 1).toLowerCase().trim();
+    const normalizedLocal = local.split("+")[0] ?? local;
+    return `${normalizedLocal}@${domain}`;
+  }
+
+  function formatCooldown(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  }
+
+  function startCooldown(remainingSec) {
+    const until = Date.now() + remainingSec * 1000;
+    localStorage.setItem(COOLDOWN_KEY, String(until));
+    disableForm(remainingSec);
+  }
+
+  function disableForm(remainingSec) {
+    submitBtn.disabled = true;
+    emailInput && (emailInput.disabled = true);
+    showMessage(`Too many attempts. Try again in ${formatCooldown(remainingSec)}.`, "error");
+
+    const interval = setInterval(() => {
+      const left = Math.ceil((Number(localStorage.getItem(COOLDOWN_KEY)) - Date.now()) / 1000);
+      if (left <= 0) {
+        clearInterval(interval);
+        localStorage.removeItem(COOLDOWN_KEY);
+        submitBtn.disabled = false;
+        emailInput && (emailInput.disabled = false);
+        showMessage("", "info");
+        message.classList.add("hidden");
+        return;
+      }
+      showMessage(`Too many attempts. Try again in ${formatCooldown(left)}.`, "error");
+    }, 1000);
+  }
+
+  // Restore cooldown on page load
+  const savedUntil = Number(localStorage.getItem(COOLDOWN_KEY));
+  if (savedUntil && savedUntil > Date.now()) {
+    disableForm(Math.ceil((savedUntil - Date.now()) / 1000));
+  }
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById(`${uid}-email`)?.value;
+    const rawEmail = emailInput?.value?.trim() ?? "";
+    if (!rawEmail || !isEmail(rawEmail)) {
+      showMessage("Please enter a valid email address.", "error");
+      return;
+    }
+
+    // Show the normalized form so the user knows what will be stored
+    const normalized = normalizeEmail(rawEmail);
+    if (normalized !== rawEmail) {
+      showMessage(`Will subscribe as ${normalized}`, "info");
+    }
+
     const turnstileResponse = document.querySelector(
       `#${uid}-turnstile input[name='cf-turnstile-response']`,
     )?.value;
@@ -61,7 +123,7 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          email: rawEmail,
           token: turnstileResponse,
         }),
       });
@@ -71,17 +133,24 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
       if (response.ok) {
         showMessage("Successfully subscribed! Check your email.", "success");
         form.reset();
+        submitBtn.disabled = false;
         localStorage.setItem("newsletterSubscribed", "true");
         if (window.turnstile) {
           window.turnstile.reset(`#${uid}-turnstile`);
         }
+      } else if (response.status === 429) {
+        startCooldown(data.retryAfter || 3600);
+        return;
       } else {
         showMessage(data.error || "Subscription failed", "error");
+        submitBtn.disabled = false;
       }
     } catch (error) {
       showMessage("An error occurred. Please try again.", "error");
     } finally {
-      submitBtn.disabled = false;
+      if (!submitBtn.disabled) {
+        submitBtn.disabled = false;
+      }
     }
   });
 

@@ -1,7 +1,12 @@
 const WINDOW_MS = 60 * 60 * 1000;
 const WINDOW_SECONDS = 60 * 60;
 
-async function checkAndRecord(kv: KVNamespace, key: string, limit: number): Promise<boolean> {
+export interface RateLimitResult {
+  allowed: boolean;
+  retryAfterSec?: number;
+}
+
+async function checkAndRecord(kv: KVNamespace, key: string, limit: number): Promise<RateLimitResult> {
   const now = Date.now();
   const raw = await kv.get(key);
 
@@ -16,32 +21,36 @@ async function checkAndRecord(kv: KVNamespace, key: string, limit: number): Prom
   }
 
   const pruned = timestamps.filter((t) => now - t < WINDOW_MS);
-  if (pruned.length >= limit) return false;
+  if (pruned.length >= limit) {
+    const oldest = Math.min(...pruned);
+    const retryAfterSec = Math.ceil((oldest + WINDOW_MS - now) / 1000);
+    return { allowed: false, retryAfterSec: Math.max(1, retryAfterSec) };
+  }
 
   pruned.push(now);
   try {
     await kv.put(key, JSON.stringify(pruned), { expirationTtl: WINDOW_SECONDS });
   } catch {
     // KV enforces 1 write/second/key — treat a rejected write as rate-limited
-    return false;
+    return { allowed: false, retryAfterSec: 1 };
   }
-  return true;
+  return { allowed: true };
 }
 
 export async function checkSubscribeRateLimit(
   kv: KVNamespace,
   ip: string,
   email: string,
-): Promise<boolean> {
-  const ipOk = await checkAndRecord(kv, `rl:ip:${ip}`, 2);
-  if (!ipOk) return false;
+): Promise<RateLimitResult> {
+  const ipResult = await checkAndRecord(kv, `rl:ip:${ip}`, 2);
+  if (!ipResult.allowed) return ipResult;
 
-  const emailOk = await checkAndRecord(kv, `rl:email:${email}`, 2);
-  if (!emailOk) return false;
+  const emailResult = await checkAndRecord(kv, `rl:email:${email}`, 2);
+  if (!emailResult.allowed) return emailResult;
 
-  return true;
+  return { allowed: true };
 }
 
-export async function checkUnsubscribeRateLimit(kv: KVNamespace, ip: string): Promise<boolean> {
+export async function checkUnsubscribeRateLimit(kv: KVNamespace, ip: string): Promise<RateLimitResult> {
   return checkAndRecord(kv, `rl:ip:${ip}`, 3);
 }

@@ -46,9 +46,13 @@ app.get("/", async (c) => {
   }
   const clientIp = ip ?? "unknown";
 
-  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp);
-  if (!allowed) {
-    return c.json({ error: "Too many requests" }, 429);
+  const rateLimit = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp);
+  if (!rateLimit.allowed) {
+    return c.json(
+      { error: "Too many requests", retryAfter: rateLimit.retryAfterSec },
+      429,
+      { "Retry-After": String(rateLimit.retryAfterSec) },
+    );
   }
 
   const result = await processUnsubscribe(c.env.DB, token);
@@ -70,9 +74,13 @@ app.post("/", async (c) => {
   }
   const clientIp = ip ?? "unknown";
 
-  const allowed = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp);
-  if (!allowed) {
-    return c.json({ error: "Too many requests" }, 429);
+  const rateLimit = await checkUnsubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp);
+  if (!rateLimit.allowed) {
+    return c.json(
+      { error: "Too many requests", retryAfter: rateLimit.retryAfterSec },
+      429,
+      { "Retry-After": String(rateLimit.retryAfterSec) },
+    );
   }
 
   try {
