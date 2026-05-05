@@ -1,5 +1,4 @@
 ---
-import { Icon } from "astro-icon/components";
 
 const hasMeasurementId = Boolean(import.meta.env.PUBLIC_FIREBASE_MEASUREMENT_ID);
 if (!hasMeasurementId) return;
@@ -13,9 +12,14 @@ if (!hasMeasurementId) return;
 >
   <div class="mx-auto max-w-lg px-4">
     <div class="flex items-start gap-3 rounded-xl border border-base-content/10 bg-base-200/60 p-4 backdrop-blur-xl">
-      <span class="mt-0.5 shrink-0 text-primary" aria-hidden="true">
-        <Icon name="tabler:cookie" class="size-5" />
-      </span>
+      <svg class="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/>
+        <path d="M8.5 8.5v.01"/>
+        <path d="M16 15.5v.01"/>
+        <path d="M12 12v.01"/>
+        <path d="M11 17v.01"/>
+        <path d="M7 14v.01"/>
+      </svg>
       <div class="min-w-0 flex-1">
         <p id="consent-title" class="text-sm leading-relaxed text-base-content/75">
           This site uses analytics to understand how content performs. No personal data is sold or shared.
