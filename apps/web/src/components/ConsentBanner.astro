@@ -1,23 +1,30 @@
 ---
-// Only rendered when Firebase measurement ID is configured
+import { Icon } from "astro-icon/components";
+
 const hasMeasurementId = Boolean(import.meta.env.PUBLIC_FIREBASE_MEASUREMENT_ID);
 if (!hasMeasurementId) return;
 ---
 
 <div
   id="consent-banner"
-  class="fixed bottom-0 left-0 right-0 z-50 hidden bg-base-200 border-t border-base-content/10 px-4 py-3"
+  class="fixed inset-x-0 bottom-4 z-50 hidden translate-y-4 opacity-0 transition-all duration-300 ease-out sm:bottom-6"
   role="dialog"
   aria-labelledby="consent-title"
 >
-  <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-    <p id="consent-title" class="text-sm text-base-content/80">
-      This site uses analytics to understand how content performs.
-      No personal data is sold or shared.
-    </p>
-    <div class="flex gap-2 shrink-0">
-      <button id="consent-decline" class="btn btn-ghost btn-xs">Decline</button>
-      <button id="consent-accept" class="btn btn-primary btn-xs">Accept</button>
+  <div class="mx-auto max-w-lg px-4">
+    <div class="flex items-start gap-3 rounded-xl border border-base-content/10 bg-base-200/60 p-4 backdrop-blur-xl">
+      <span class="mt-0.5 shrink-0 text-primary" aria-hidden="true">
+        <Icon name="tabler:cookie" class="size-5" />
+      </span>
+      <div class="min-w-0 flex-1">
+        <p id="consent-title" class="text-sm leading-relaxed text-base-content/75">
+          This site uses analytics to understand how content performs. No personal data is sold or shared.
+        </p>
+        <div class="mt-3 flex gap-2">
+          <button id="consent-decline" class="btn btn-ghost btn-xs">Decline</button>
+          <button id="consent-accept" class="btn btn-primary btn-xs">Accept</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -30,21 +37,32 @@ if (!hasMeasurementId) return;
 
     const stored = localStorage.getItem(CONSENT_KEY);
 
-    if (stored === null) {
+    if (stored !== null) {
+      if (stored === "true") window.__initAnalytics?.();
+      return;
+    }
+
+    requestAnimationFrame(() => {
       banner.classList.remove("hidden");
-    } else if (stored === "true") {
-      window.__initAnalytics?.();
+      requestAnimationFrame(() => {
+        banner.classList.remove("translate-y-4", "opacity-0");
+      });
+    });
+
+    function hide() {
+      banner.classList.add("translate-y-4", "opacity-0");
+      setTimeout(() => banner.classList.add("hidden"), 300);
     }
 
     document.getElementById("consent-accept")?.addEventListener("click", function () {
       localStorage.setItem(CONSENT_KEY, "true");
-      banner.classList.add("hidden");
+      hide();
       window.__initAnalytics?.();
     });
 
     document.getElementById("consent-decline")?.addEventListener("click", function () {
       localStorage.setItem(CONSENT_KEY, "false");
-      banner.classList.add("hidden");
+      hide();
     });
   })();
 </script>
