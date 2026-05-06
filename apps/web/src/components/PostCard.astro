@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { routes } from "../config/site";
+import { routes, siteConfig } from "../config/site";
 import { normalizeCover } from "../utils/cover-image";
 import CategoryBadge from "./CategoryBadge.astro";
 import TagBadge from "./TagBadge.astro";
@@ -47,6 +47,8 @@ const formattedDate = date.toLocaleDateString("en-US", {
             <time class="shrink-0">{formattedDate}</time>
             <span aria-hidden="true">/</span>
             <CategoryBadge category={category} class="pointer-events-auto shrink-0" />
+            <span aria-hidden="true">/</span>
+            <span class="text-base-content/36">{siteConfig.author.name}</span>
           </div>
           <h2 class="mt-3 max-w-2xl text-[1.36rem] leading-tight font-semibold tracking-tight text-base-content sm:text-[1.58rem]">
             <a href={postUrl} class="pointer-events-auto group-hover:text-primary transition-colors">
@@ -70,6 +72,8 @@ const formattedDate = date.toLocaleDateString("en-US", {
           <time class="shrink-0">{formattedDate}</time>
           <span aria-hidden="true">/</span>
           <CategoryBadge category={category} class="pointer-events-auto shrink-0" />
+          <span aria-hidden="true">/</span>
+          <span class="text-base-content/28">{siteConfig.author.name}</span>
         </div>
         <h2 class="mt-3 text-[1.32rem] leading-tight font-semibold tracking-tight sm:text-[1.5rem]">
           <a href={postUrl} class="pointer-events-auto group-hover:text-primary transition-colors">

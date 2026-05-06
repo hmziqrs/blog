@@ -20,9 +20,15 @@ export interface ContactMethod {
   href: string;
 }
 
+export interface SiteAuthorSocial {
+  platform: string;
+  url: string;
+}
+
 export interface SiteAuthor {
   name: string;
   url?: string;
+  socials?: SiteAuthorSocial[];
 }
 
 export interface AboutPageConfig {

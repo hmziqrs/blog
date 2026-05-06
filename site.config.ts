@@ -9,6 +9,12 @@ export const siteConfig = defineSiteConfig({
   author: {
     name: "hmziqrs",
     url: "https://hmziq.rs/about/",
+    socials: [
+      { platform: "x", url: "https://x.com/hmziqrs" },
+      { platform: "github", url: "https://github.com/hmziqrs" },
+      { platform: "linkedin", url: "https://www.linkedin.com/in/hmziqrs" },
+      { platform: "telegram", url: "https://t.me/hmziqrs" },
+    ],
   },
   primaryNav: [
     { page: "about", label: "About" },

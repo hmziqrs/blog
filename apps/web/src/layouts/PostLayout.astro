@@ -9,6 +9,7 @@ import CategoryBadge from "../components/CategoryBadge.astro";
 import PageContainer from "../components/PageContainer.astro";
 import TagBadge from "../components/TagBadge.astro";
 import ThemedImage from "../components/ThemedImage.astro";
+import { Icon } from "astro-icon/components";
 
 interface Props {
   frontmatter: {
@@ -28,6 +29,14 @@ const { frontmatter, readingTime } = Astro.props;
 const cover = normalizeCover(frontmatter.cover);
 
 const slug = Astro.params.slug;
+
+const socialIconMap: Record<string, string> = {
+  x: "tabler:brand-x",
+  github: "tabler:brand-github",
+  linkedin: "tabler:brand-linkedin",
+  telegram: "tabler:brand-telegram",
+  email: "tabler:mail",
+};
 
 const formattedDate = frontmatter.date.toLocaleDateString("en-US", {
   year: "numeric",
@@ -136,6 +145,43 @@ const structuredData = {
       <article class="prose max-w-none text-[1.03rem] leading-8">
         <slot />
       </article>
+
+      <hr class="my-10 border-base-content/10" />
+
+      <div class="flex flex-wrap items-center gap-5">
+        <div class="flex items-center gap-3.5">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary ring-1 ring-primary/30">
+            {siteConfig.author.name.charAt(0).toUpperCase()}
+          </div>
+          <div class="min-w-0">
+            <p class="page-kicker">Written by</p>
+            {siteConfig.author.url ? (
+              <a href={siteConfig.author.url} class="text-sm font-semibold text-base-content hover:text-primary transition-colors duration-200">{siteConfig.author.name}</a>
+            ) : (
+              <span class="text-sm font-semibold text-base-content">{siteConfig.author.name}</span>
+            )}
+          </div>
+        </div>
+
+        {siteConfig.author.socials && siteConfig.author.socials.length > 0 && (
+          <>
+            <div class="hidden h-4 w-px bg-base-content/10 sm:block" />
+            <div class="flex items-center gap-3">
+              {siteConfig.author.socials.map((social) => (
+                <a
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-base-content/40 hover:text-primary transition-colors duration-200"
+                  aria-label={social.platform}
+                >
+                  <Icon name={socialIconMap[social.platform.toLowerCase()] ?? "tabler:link"} class="h-[1.1rem] w-[1.1rem]" />
+                </a>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
 
       {slug && (
         <div
