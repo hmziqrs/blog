@@ -1,5 +1,6 @@
 ---
 import type { CoverImage } from "../utils/cover-image";
+import { extractTwitterHandle } from "../utils/meta";
 import { ClientRouter } from "astro:transitions";
 import { routes, siteConfig, withBasePath } from "../config/site";
 import ConsentBanner from "../components/ConsentBanner.astro";
@@ -37,11 +38,7 @@ const ogPath = image
   ? image.src.startsWith("/") ? withBasePath(siteConfig.basePath, image.src) : image.src
   : undefined;
 const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
-const twitterHandle = siteConfig.author.socials
-  ?.find((s) => s.platform.toLowerCase() === "x")
-  ?.url.split("/")
-  .pop()
-  ?.replace("@", "");
+const twitterHandle = extractTwitterHandle(siteConfig.author.socials);
 ---
 
 <!doctype html>
