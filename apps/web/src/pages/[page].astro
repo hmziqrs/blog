@@ -91,26 +91,21 @@ const contactMethods = contactPage?.methods ?? [];
               ))}
             </div>
 
-            <div class="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-2">
+            <div class="mt-12 space-y-2.5 max-w-md">
               {
                 contactMethods.map((method) => (
                   <a
                     href={method.href}
-                    class="group flex min-w-0 flex-col items-center justify-center gap-2 rounded-[1.1rem] border border-base-content/10 bg-base-200/60 px-3 py-3.5 text-center transition-[border-color,background-color,color,transform] duration-200 hover:-translate-y-px hover:border-primary/35 hover:bg-base-200/80 hover:text-primary sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-[0.95rem] sm:text-left"
                     target={method.href.startsWith("http") ? "_blank" : undefined}
                     rel={method.href.startsWith("http") ? "noreferrer" : undefined}
+                    class="group flex items-center gap-3 rounded-xl border border-base-content/8 bg-base-100 px-5 py-3.5 hover:border-base-content/16 hover:bg-base-200/30 transition-all duration-200"
                   >
-                    <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-base-content/12 bg-base-100 text-base-content/90 transition-[border-color,color,background-color,transform] duration-200 group-hover:border-primary/35 group-hover:bg-primary/8 group-hover:text-primary sm:order-2 sm:h-10 sm:w-10">
-                      <ContactPlatformIcon platform={method.label} class="h-5 w-5 sm:h-[1.05rem] sm:w-[1.05rem]" />
-                    </span>
-                    <div class="min-w-0 sm:order-1 sm:flex-1">
-                      <p class="hidden font-mono text-[0.68rem] font-semibold tracking-[0.16em] text-base-content/48 uppercase sm:block">
-                        {method.label}
-                      </p>
-                      <p class="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium tracking-[-0.02em] text-base-content sm:text-base">
-                        {method.value}
-                      </p>
+                    <ContactPlatformIcon platform={method.label} class="h-5 w-5 shrink-0 text-base-content/50 group-hover:text-primary transition-colors" />
+                    <div class="min-w-0">
+                      <div class="text-[0.64rem] font-mono font-semibold uppercase tracking-[0.18em] text-base-content/35">{method.label}</div>
+                      <div class="text-sm text-base-content/78 group-hover:text-base-content truncate">{method.value}</div>
                     </div>
+                    <span class="ml-auto text-base-content/16 group-hover:text-primary group-hover:translate-x-1 transition-all text-xs">&rarr;</span>
                   </a>
                 ))
               }

@@ -43,8 +43,9 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href={routes.favicon} />
-    <link rel="apple-touch-icon" href={routes.favicon} />
+    <link rel="icon" type="image/svg+xml" href="/author-light.svg" data-theme-favicon />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large"} />
@@ -84,6 +85,11 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
       function applyTheme(theme) {
         document.documentElement.dataset.theme = theme;
         document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
+
+        const favicon = document.querySelector("link[rel='icon'][data-theme-favicon]");
+        if (favicon) {
+          favicon.href = theme === "dark" ? "/author-dark.svg" : "/author-light.svg";
+        }
 
         document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
           const label = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";

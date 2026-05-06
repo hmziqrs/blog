@@ -153,7 +153,7 @@ export function createRoutes(basePath = "/"): RoutesConfig {
     advertise: withBasePath(basePath, "/advertise"),
     rss: withBasePath(basePath, "/rss.xml"),
     robots: withBasePath(basePath, "/robots.txt"),
-    favicon: withBasePath(basePath, "/favicon.svg"),
+    favicon: withBasePath(basePath, "/author-light.svg"),
     ogDefault: withBasePath(basePath, "/og-default.svg"),
     sitemapIndex: withBasePath(basePath, "/sitemap-index.xml"),
     post: (slug) => withBasePath(basePath, `/posts/${slug}`),
