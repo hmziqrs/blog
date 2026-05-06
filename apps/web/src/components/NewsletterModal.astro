@@ -1,16 +1,13 @@
 ---
+import Modal from "./Modal.astro";
+
 const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
 ---
-<>
-<div
-  id={`${uid}-modal-backdrop`}
-  class="fixed inset-0 z-40 hidden opacity-0 bg-base-100/5 backdrop-blur-[1.5px] transition-opacity duration-300"
->
-</div>
-<div id={`${uid}-modal`} class="fixed inset-0 z-50 hidden items-center justify-center opacity-0 transition-opacity duration-300">
-    <div class="relative w-full max-w-md overflow-hidden rounded-xl border border-base-content/10 bg-base-200/60 p-6 backdrop-blur-xl">
+
+<Modal uid={uid}>
+  <div class="relative w-full max-w-md overflow-hidden rounded-xl border border-base-content/10 bg-base-200/60 p-6 backdrop-blur-xl">
     <button
-      id={`${uid}-close`}
+      data-modal-close
       class="absolute top-4 right-4 text-base-content/40 hover:text-base-content/70 text-xl leading-none transition-colors"
       aria-label="Close"
     >
@@ -60,13 +57,10 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
       <a href="/privacy" class="text-primary hover:underline">Privacy Policy</a>.
     </p>
   </div>
-</div>
-</>
+</Modal>
 
 <script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "", siteKey }}>
-  const backdrop = document.getElementById(`${uid}-modal-backdrop`);
-  const modal = document.getElementById(`${uid}-modal`);
-  const closeBtn = document.getElementById(`${uid}-close`);
+  const modal = document.getElementById(uid);
   const form = document.getElementById(`${uid}-form`);
   const submitBtn = document.getElementById(`${uid}-submit`);
   const message = document.getElementById(`${uid}-message`);
@@ -102,18 +96,18 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
     }
   }
 
-  function showModal() {
-    backdrop.classList.remove("hidden");
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        backdrop.classList.remove("opacity-0");
-        modal.classList.remove("opacity-0");
-      });
-    });
-    ensureTurnstile();
-  }
+  document.addEventListener(`${uid}:show`, ensureTurnstile);
+
+  modal?.addEventListener(`${uid}:beforeclose`, () => {
+    if (dismissCheckbox.checked) {
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      localStorage.setItem("newsletterDismissUntil", String(Date.now() + sevenDays));
+    }
+
+    if (window.turnstile && turnstileWidgetId !== null) {
+      window.turnstile.reset(turnstileWidgetId);
+    }
+  });
 
   if (!isSubscribed && !isDismissed) {
     const scrollThreshold = 0.5;
@@ -124,46 +118,11 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
 
       const scrollPercentage = window.scrollY / (document.body.scrollHeight - window.innerHeight);
       if (scrollPercentage >= scrollThreshold) {
-        showModal();
+        document.dispatchEvent(new CustomEvent(`${uid}:show`));
         hasShown = true;
       }
     });
   }
-
-  function closeModal() {
-    backdrop.classList.add("opacity-0");
-    modal.classList.add("opacity-0");
-    setTimeout(() => {
-      backdrop.classList.add("hidden");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }, 300);
-
-    if (dismissCheckbox.checked) {
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
-      localStorage.setItem("newsletterDismissUntil", String(Date.now() + sevenDays));
-    }
-
-    if (window.turnstile && turnstileWidgetId !== null) {
-      window.turnstile.reset(turnstileWidgetId);
-    }
-  }
-
-  closeBtn.addEventListener("click", closeModal);
-
-  backdrop.addEventListener("click", closeModal);
-
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      closeModal();
-    }
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-      closeModal();
-    }
-  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -203,7 +162,7 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
           window.turnstile.reset(`#${uid}-turnstile`);
         }
         setTimeout(() => {
-          closeModal();
+          document.dispatchEvent(new CustomEvent(`${uid}:close`));
         }, 2000);
       } else {
         showMessage(data.error || "Subscription failed", "error");
