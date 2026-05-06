@@ -1,12 +1,14 @@
 ---
 const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
 ---
-
+<>
 <div
-  id={`${uid}-modal`}
-  class="fixed inset-0 z-50 hidden items-center justify-center backdrop-blur-[2px] p-4 opacity-0 transition-opacity duration-300"
+  id={`${uid}-modal-backdrop`}
+  class="fixed inset-0 z-50  bg-base-100/5 backdrop-blur-xs duration-300"
 >
-  <div class="relative w-full max-w-md overflow-hidden rounded-xl border border-base-content/10 bg-base-200/90 p-6 backdrop-blur-3xl">
+</div>
+<div id={`${uid}-modal`} class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="relative w-full max-w-md overflow-hidden rounded-xl border border-base-content/10 bg-base-200/60 p-6 backdrop-blur-lg">
     <button
       id={`${uid}-close`}
       class="absolute top-4 right-4 text-base-content/40 hover:text-base-content/70 text-xl leading-none transition-colors"
@@ -59,6 +61,7 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
     </p>
   </div>
 </div>
+</>
 
 <script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "", siteKey }}>
   const modal = document.getElementById(`${uid}-modal`);

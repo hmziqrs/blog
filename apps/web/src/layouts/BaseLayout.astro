@@ -202,7 +202,7 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
     </main>
 
     <dialog id="light-mode-warning" class="modal">
-      <div class="modal-box max-w-md">
+      <div class="modal-box max-w-md !bg-base-200/90 backdrop-blur-3xl border border-base-content/10 shadow-none">
         <h3 class="text-lg font-semibold">Switch to light mode?</h3>
         <p class="text-base-content/70 mt-2 text-sm leading-relaxed">
           Light mode can cause eye strain in dark environments. The change is instant and may feel jarring.
@@ -216,7 +216,7 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
           <button type="button" id="light-mode-confirm" class="btn btn-primary btn-sm">Switch to light</button>
         </div>
       </div>
-      <form method="dialog" class="modal-backdrop"><button>close</button></form>
+      <form method="dialog" class="modal-backdrop !bg-transparent backdrop-blur-[2px]"><button>close</button></form>
     </dialog>
 
     <Footer />
