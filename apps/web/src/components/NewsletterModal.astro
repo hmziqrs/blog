@@ -4,11 +4,11 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
 <>
 <div
   id={`${uid}-modal-backdrop`}
-  class="fixed inset-0 z-50  bg-base-100/5 backdrop-blur-xs duration-300"
+  class="fixed inset-0 z-40 hidden opacity-0 bg-base-100/5 backdrop-blur-[1.5px] transition-opacity duration-300"
 >
 </div>
-<div id={`${uid}-modal`} class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="relative w-full max-w-md overflow-hidden rounded-xl border border-base-content/10 bg-base-200/60 p-6 backdrop-blur-lg">
+<div id={`${uid}-modal`} class="fixed inset-0 z-50 hidden items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="relative w-full max-w-md overflow-hidden rounded-xl border border-base-content/10 bg-base-200/60 p-6 backdrop-blur-xl">
     <button
       id={`${uid}-close`}
       class="absolute top-4 right-4 text-base-content/40 hover:text-base-content/70 text-xl leading-none transition-colors"
@@ -64,6 +64,7 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
 </>
 
 <script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "", siteKey }}>
+  const backdrop = document.getElementById(`${uid}-modal-backdrop`);
   const modal = document.getElementById(`${uid}-modal`);
   const closeBtn = document.getElementById(`${uid}-close`);
   const form = document.getElementById(`${uid}-form`);
@@ -102,10 +103,12 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
   }
 
   function showModal() {
+    backdrop.classList.remove("hidden");
     modal.classList.remove("hidden");
     modal.classList.add("flex");
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        backdrop.classList.remove("opacity-0");
         modal.classList.remove("opacity-0");
       });
     });
@@ -128,8 +131,10 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
   }
 
   function closeModal() {
+    backdrop.classList.add("opacity-0");
     modal.classList.add("opacity-0");
     setTimeout(() => {
+      backdrop.classList.add("hidden");
       modal.classList.add("hidden");
       modal.classList.remove("flex");
     }, 300);
@@ -145,6 +150,8 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
   }
 
   closeBtn.addEventListener("click", closeModal);
+
+  backdrop.addEventListener("click", closeModal);
 
   modal.addEventListener("click", (e) => {
     if (e.target === modal) {
