@@ -150,9 +150,11 @@ const structuredData = {
 
       <div class="flex flex-wrap items-center gap-5">
         <div class="flex items-center gap-3.5">
-          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary ring-1 ring-primary/30">
-            {siteConfig.author.name.charAt(0).toUpperCase()}
-          </div>
+          <img
+            src="/author-light.svg"
+            alt=""
+            class="h-12 w-12 shrink-0 object-cover theme-invert-dark ring-1 ring-base-content/10"
+          />
           <div class="min-w-0">
             <p class="page-kicker">Written by</p>
             {siteConfig.author.url ? (

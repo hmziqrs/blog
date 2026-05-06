@@ -62,6 +62,14 @@ html[data-theme="light"] .theme-invert-light {
   @apply invert;
 }
 
+.theme-invert-dark {
+  @apply transition-[filter] duration-200 invert;
+}
+
+html[data-theme="light"] .theme-invert-dark {
+  @apply invert-0;
+}
+
 body {
   min-height: 100vh;
   letter-spacing: -0.01em;
