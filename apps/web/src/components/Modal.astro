@@ -54,7 +54,9 @@ const { uid = "modal" } = Astro.props;
   document.addEventListener(`${uid}:show`, show);
   document.addEventListener(`${uid}:close`, close);
 
-  modal?.querySelector("[data-modal-close]")?.addEventListener("click", close);
+  modal?.querySelectorAll("[data-modal-close]").forEach((el) =>
+    el.addEventListener("click", close),
+  );
 
   backdrop.addEventListener("click", close);
 
