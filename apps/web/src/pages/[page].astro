@@ -100,9 +100,9 @@ const contactMethods = contactPage?.methods ?? [];
                     rel={method.href.startsWith("http") ? "noreferrer" : undefined}
                     class="group flex items-center gap-3 rounded-xl border border-base-content/8 bg-base-100 px-5 py-3.5 hover:border-base-content/16 hover:bg-base-200/30 transition-all duration-200"
                   >
-                    <ContactPlatformIcon platform={method.label} class="h-5 w-5 shrink-0 text-base-content/50 group-hover:text-primary transition-colors" />
+                    <ContactPlatformIcon platform={method.label} class="h-5 w-5 shrink-0 text-muted group-hover:text-primary transition-colors" />
                     <div class="min-w-0">
-                      <div class="text-[0.64rem] font-mono font-semibold uppercase tracking-[0.18em] text-base-content/35">{method.label}</div>
+                      <div class="text-[0.64rem] font-mono font-semibold uppercase tracking-[0.18em] text-dim">{method.label}</div>
                       <div class="text-sm text-base-content/78 group-hover:text-base-content truncate">{method.value}</div>
                     </div>
                     <span class="ml-auto text-base-content/16 group-hover:text-primary group-hover:translate-x-1 transition-all text-xs">&rarr;</span>
@@ -117,10 +117,10 @@ const contactMethods = contactPage?.methods ?? [];
           <PageHeader title={config.title} description={config.description} class="mb-8" />
           <article class="prose legal-doc max-w-3xl">
             <div class="not-prose mb-8 flex flex-wrap items-center gap-3">
-              <span class="rounded-full border border-base-300 bg-base-200 px-3 py-1 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/62">
+              <span class="rounded-full border border-base-300 bg-base-200 px-3 py-1 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-soft">
                 {legalPage.badgeLabel}
               </span>
-              <span class="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/48">
+              <span class="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-muted">
                 Effective {legalPage.effectiveDate}
               </span>
             </div>

@@ -106,10 +106,10 @@ const structuredData = {
       <header class="mb-8">
         <CategoryBadge category={frontmatter.category} class="mb-4" />
         <h1 class="mb-4 text-4xl font-semibold tracking-tight sm:text-5xl">{frontmatter.title}</h1>
-        <p class="text-base-content/68 mb-5 max-w-2xl text-lg leading-8">
+        <p class="text-soft mb-5 max-w-2xl text-lg leading-8">
           {frontmatter.description}
         </p>
-        <div class="text-base-content/46 flex flex-wrap items-center gap-3 font-mono text-xs tracking-[0.08em] uppercase">
+        <div class="text-muted flex flex-wrap items-center gap-3 font-mono text-xs tracking-[0.08em] uppercase">
           <time datetime={frontmatter.date.toISOString()}>{formattedDate}</time>
           {readingTime && <span>·</span>}
           {readingTime && <span>{readingTime} min read</span>}
@@ -176,7 +176,7 @@ const structuredData = {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-base-content/40 hover:text-primary transition-colors duration-200"
+                  class="text-dim hover:text-primary transition-colors duration-200"
                   aria-label={social.platform}
                 >
                   <Icon name={socialIconMap[social.platform.toLowerCase()] ?? "tabler:link"} class="h-[1.1rem] w-[1.1rem]" />

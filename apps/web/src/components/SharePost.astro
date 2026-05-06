@@ -57,7 +57,7 @@ const shareItems = [
           href={item.href}
           target="_blank"
           rel="noopener noreferrer"
-          class="text-base-content/40 hover:text-primary transition-colors duration-200 p-1.5"
+          class="text-dim hover:text-primary transition-colors duration-200 p-1.5"
           aria-label={`Share on ${item.platform}`}
         >
           <Icon name={item.icon} class="h-[1.15rem] w-[1.15rem]" />
@@ -67,13 +67,13 @@ const shareItems = [
     <button
       data-copy-link
       data-url={url}
-      class="text-base-content/40 hover:text-primary transition-colors duration-200 p-1.5 cursor-pointer"
+      class="text-dim hover:text-primary transition-colors duration-200 p-1.5 cursor-pointer"
       aria-label="Copy link"
       type="button"
     >
       <Icon name="tabler:copy" class="h-[1.15rem] w-[1.15rem]" />
     </button>
-    <span data-copy-feedback class="hidden text-xs font-mono text-base-content/56 ml-1">Copied!</span>
+    <span data-copy-feedback class="hidden text-xs font-mono text-faint ml-1">Copied!</span>
   </div>
 </div>
 

@@ -15,13 +15,13 @@ const sponsorHref = hasSponsor ? siteConfig.advertisement?.href : "/contact";
         {siteConfig.footerNav.map((link) => (
           <a
             href={link.href}
-            class="text-base-content/52 hover:text-primary font-mono text-[0.72rem] tracking-[0.14em] uppercase transition-colors duration-200"
+            class="text-muted hover:text-primary font-mono text-[0.72rem] tracking-[0.14em] uppercase transition-colors duration-200"
           >
             {link.label}
           </a>
         ))}
       </nav>
-      <p class="text-base-content/48">
+      <p class="text-faint">
         © {year}{" "}
         <a
           href={siteConfig.copyrightSiteURL}
@@ -51,7 +51,7 @@ const sponsorHref = hasSponsor ? siteConfig.advertisement?.href : "/contact";
         </a>
         .
       </p>
-      <p class="text-base-content/48">
+      <p class="text-faint">
         Powered by{" "}
         <a
           href={sponsorHref}
