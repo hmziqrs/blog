@@ -1,0 +1,102 @@
+---
+import { Icon } from "astro-icon/components";
+import { siteConfig } from "../config/site";
+
+interface Props {
+  title: string;
+  url: string;
+}
+
+const { title, url } = Astro.props;
+const encodedTitle = encodeURIComponent(title);
+const encodedUrl = encodeURIComponent(url);
+
+const xSocial = siteConfig.author.socials?.find((s) => s.platform.toLowerCase() === "x");
+const xVia = xSocial ? xSocial.url.split("/").pop()?.replace("@", "") : undefined;
+
+const shareItems = [
+  {
+    platform: "X",
+    icon: "tabler:brand-x",
+    href: `https://x.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}${xVia ? `&via=${xVia}` : ""}`,
+  },
+  {
+    platform: "LinkedIn",
+    icon: "tabler:brand-linkedin",
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+  },
+  {
+    platform: "Hacker News",
+    icon: "tabler:brand-ycombinator",
+    href: `https://news.ycombinator.com/submitlink?u=${encodedUrl}&t=${encodedTitle}`,
+  },
+  {
+    platform: "Reddit",
+    icon: "tabler:brand-reddit",
+    href: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`,
+  },
+  {
+    platform: "Facebook",
+    icon: "tabler:brand-facebook",
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+  },
+  {
+    platform: "Telegram",
+    icon: "tabler:brand-telegram",
+    href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
+  },
+];
+---
+
+<div data-share-post class="mt-10 mb-8">
+  <p class="page-kicker mb-3.5">Share this post</p>
+  <div class="flex flex-wrap items-center gap-1">
+    {
+      shareItems.map((item) => (
+        <a
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-base-content/40 hover:text-primary transition-colors duration-200 p-1.5"
+          aria-label={`Share on ${item.platform}`}
+        >
+          <Icon name={item.icon} class="h-[1.15rem] w-[1.15rem]" />
+        </a>
+      ))
+    }
+    <button
+      data-copy-link
+      data-url={url}
+      class="text-base-content/40 hover:text-primary transition-colors duration-200 p-1.5 cursor-pointer"
+      aria-label="Copy link"
+      type="button"
+    >
+      <Icon name="tabler:copy" class="h-[1.15rem] w-[1.15rem]" />
+    </button>
+    <span data-copy-feedback class="hidden text-xs font-mono text-base-content/56 ml-1">Copied!</span>
+  </div>
+</div>
+
+<script>
+  const container = document.querySelector("[data-share-post]");
+  if (!container) throw new Error("SharePost container not found");
+
+  const btn = container.querySelector("[data-copy-link]");
+  const feedback = container.querySelector("[data-copy-feedback]");
+  if (!btn || !feedback) throw new Error("SharePost copy elements not found");
+
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  btn.addEventListener("click", async () => {
+    const copyUrl = btn.getAttribute("data-url");
+    if (!copyUrl) return;
+    try {
+      await navigator.clipboard.writeText(copyUrl);
+      clearTimeout(timeout);
+      feedback.classList.remove("hidden");
+      timeout = setTimeout(() => feedback.classList.add("hidden"), 2000);
+    } catch {
+      // clipboard may not be available
+    }
+  });
+</script>

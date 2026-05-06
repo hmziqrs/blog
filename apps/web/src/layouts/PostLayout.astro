@@ -7,6 +7,7 @@ import AdvertisementBanner from "../components/AdvertisementBanner.astro";
 import BaseLayout from "./BaseLayout.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
 import PageContainer from "../components/PageContainer.astro";
+import SharePost from "../components/SharePost.astro";
 import TagBadge from "../components/TagBadge.astro";
 import ThemedImage from "../components/ThemedImage.astro";
 import { Icon } from "astro-icon/components";
@@ -145,7 +146,8 @@ const structuredData = {
       <article class="prose max-w-none text-[1.03rem] leading-8">
         <slot />
       </article>
-
+      <hr class="my-10 border-base-content/10" />
+      <SharePost title={frontmatter.title} url={canonicalUrl} />
       <hr class="my-10 border-base-content/10" />
 
       <div class="flex flex-wrap items-center gap-5">
