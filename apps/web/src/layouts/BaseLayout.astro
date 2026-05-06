@@ -3,6 +3,7 @@ import type { CoverImage } from "../utils/cover-image";
 import { ClientRouter } from "astro:transitions";
 import { routes, siteConfig, withBasePath } from "../config/site";
 import ConsentBanner from "../components/ConsentBanner.astro";
+import LightModeWarningModal from "../components/LightModeWarningModal.astro";
 import NewsletterModal from "../components/NewsletterModal.astro";
 import StructuredData from "../components/StructuredData.astro";
 import "../styles/global.css";
@@ -119,11 +120,7 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
       }
 
       function showLightModeWarning() {
-        const dialog = document.getElementById("light-mode-warning");
-        if (!dialog) return;
-        const checkbox = document.getElementById("dismiss-light-warning");
-        if (checkbox instanceof HTMLInputElement) checkbox.checked = false;
-        dialog.showModal();
+        document.dispatchEvent(new CustomEvent("light-mode-warning:show"));
       }
 
       applyTheme(getTheme());
@@ -158,28 +155,6 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
         window.location.assign(href);
       });
 
-      document.addEventListener("click", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-
-        if (target.id === "light-mode-confirm" || target.closest("#light-mode-confirm")) {
-          const checkbox = document.getElementById("dismiss-light-warning");
-          if (checkbox instanceof HTMLInputElement && checkbox.checked) {
-            try { window.localStorage.setItem(lightWarningKey, "true"); } catch {}
-          }
-          setTheme("light");
-          const dialog = document.getElementById("light-mode-warning");
-          if (dialog) dialog.close();
-          return;
-        }
-
-        if (target.id === "light-mode-stay" || target.closest("#light-mode-stay")) {
-          const dialog = document.getElementById("light-mode-warning");
-          if (dialog) dialog.close();
-          return;
-        }
-      });
-
       document.addEventListener("astro:after-swap", syncThemeToggle);
       document.addEventListener("astro:page-load", syncThemeToggle);
       document.addEventListener("DOMContentLoaded", syncThemeToggle);
@@ -201,23 +176,7 @@ const ogImage = new URL(ogPath ?? routes.ogDefault, Astro.site);
       <slot />
     </main>
 
-    <dialog id="light-mode-warning" class="modal">
-      <div class="modal-box max-w-md !bg-base-200/90 backdrop-blur-3xl border border-base-content/10 shadow-none">
-        <h3 class="text-lg font-semibold">Switch to light mode?</h3>
-        <p class="text-base-content/70 mt-2 text-sm leading-relaxed">
-          Light mode can cause eye strain in dark environments. The change is instant and may feel jarring.
-        </p>
-        <div class="mt-4 flex items-center gap-2">
-          <input type="checkbox" id="dismiss-light-warning" class="checkbox checkbox-sm checkbox-primary" />
-          <label for="dismiss-light-warning" class="text-base-content/60 cursor-pointer text-sm">Don't show this again</label>
-        </div>
-        <div class="modal-action">
-          <button type="button" id="light-mode-stay" class="btn btn-ghost btn-sm">Stay in dark</button>
-          <button type="button" id="light-mode-confirm" class="btn btn-primary btn-sm">Switch to light</button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop !bg-transparent backdrop-blur-[2px]"><button>close</button></form>
-    </dialog>
+    <LightModeWarningModal />
 
     <Footer />
 

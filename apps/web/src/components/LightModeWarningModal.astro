@@ -1,0 +1,45 @@
+---
+import Modal from "./Modal.astro";
+---
+
+<Modal uid="light-mode-warning">
+  <div class="relative w-full max-w-md overflow-hidden rounded-xl border border-base-content/10 bg-base-200/60 p-6 backdrop-blur-xl">
+    <button
+      data-modal-close
+      class="absolute top-4 right-4 text-base-content/40 hover:text-base-content/70 text-xl leading-none transition-colors"
+      aria-label="Close"
+    >
+      &times;
+    </button>
+
+    <h2 class="text-xl font-semibold">Switch to light mode?</h2>
+    <p class="mt-1.5 text-sm text-base-content/60 leading-relaxed">
+      Light mode can cause eye strain in dark environments. The change is instant and may feel jarring.
+    </p>
+
+    <div class="mt-4 flex items-center gap-2">
+      <input type="checkbox" id="dismiss-light-warning" class="checkbox checkbox-sm checkbox-primary" />
+      <label for="dismiss-light-warning" class="text-base-content/60 cursor-pointer text-sm">Don't show this again</label>
+    </div>
+
+    <div class="mt-5 flex justify-end gap-2">
+      <button type="button" data-modal-close class="btn btn-ghost btn-sm">Stay in dark</button>
+      <button type="button" id="light-mode-confirm" class="btn btn-primary btn-sm">Switch to light</button>
+    </div>
+  </div>
+</Modal>
+
+<script define:vars={{}}>
+  const lightWarningKey = "theme-light-warning-dismissed";
+
+  document.getElementById("light-mode-confirm")?.addEventListener("click", () => {
+    const checkbox = document.getElementById("dismiss-light-warning");
+    if (checkbox instanceof HTMLInputElement && checkbox.checked) {
+      try { window.localStorage.setItem(lightWarningKey, "true"); } catch {}
+    }
+
+    setTheme("light");
+
+    document.dispatchEvent(new CustomEvent("light-mode-warning:close"));
+  });
+</script>
