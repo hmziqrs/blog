@@ -193,6 +193,6 @@ const twitterHandle = extractTwitterHandle(siteConfig.author.socials);
 
     <NewsletterModal siteKey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} />
     <ConsentBanner />
-    <ColorTweaks />
+    {import.meta.env.DEV && <ColorTweaks />}
   </body>
 </html>
