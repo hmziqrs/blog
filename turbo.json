@@ -67,7 +67,8 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["CONTENT_DIR"]
     },
     "check": {
       "dependsOn": ["^build"]

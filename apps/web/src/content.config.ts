@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 
 const monorepoRoot = path.resolve(fileURLToPath(import.meta.url), "../../../../");
 
-const contentRoot = process.env.CONTENT_DIR || path.join(monorepoRoot, "content");
+const defaultContentDir = import.meta.env.DEV ? "content-staging" : "content";
+const contentRoot = process.env.CONTENT_DIR || path.join(monorepoRoot, defaultContentDir);
 const postsDir = path.join(contentRoot, "posts");
 
 const posts = defineCollection({

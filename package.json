@@ -21,6 +21,7 @@
     "build:wc": "turbo -F @blog/web-components build",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
+    "dev:web:prod": "CONTENT_DIR=content turbo -F web dev",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt --write",
