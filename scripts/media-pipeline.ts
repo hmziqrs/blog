@@ -296,9 +296,12 @@ async function rewrite(outDir?: string) {
     process.exit(1);
   }
 
-  const rows = await queryD1<{ local_path: string; r2_url: string; width: number | null; height: number | null }>(
-    "SELECT local_path, r2_url, width, height FROM media",
-  );
+  const rows = await queryD1<{
+    local_path: string;
+    r2_url: string;
+    width: number | null;
+    height: number | null;
+  }>("SELECT local_path, r2_url, width, height FROM media");
 
   if (rows.length === 0) {
     console.error("No media entries in D1. Run `bun run media:upload` first.");

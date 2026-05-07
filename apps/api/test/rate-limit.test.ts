@@ -1,5 +1,5 @@
 import { env } from "cloudflare:test";
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, beforeEach } from "vitest";
 import { checkSubscribeRateLimit, checkUnsubscribeRateLimit } from "../src/lib/rate-limit";
 
 describe("checkSubscribeRateLimit", () => {
@@ -33,39 +33,63 @@ describe("checkSubscribeRateLimit", () => {
   });
 
   it("allows first request from an IP", async () => {
-    const result = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.1", "user1@example.com");
+    const result = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.1.1.1",
+      "user1@example.com",
+    );
     expect(result.allowed).toBe(true);
   });
 
   it("allows second request from same IP (different email)", async () => {
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.2", "user-a@example.com");
-    const result = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.2", "user-b@example.com");
+    const result = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.1.1.2",
+      "user-b@example.com",
+    );
     expect(result.allowed).toBe(true);
   });
 
   it("blocks third request from same IP", async () => {
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.3", "user-x@example.com");
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.3", "user-y@example.com");
-    const result = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.1.1.3", "user-z@example.com");
+    const result = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.1.1.3",
+      "user-z@example.com",
+    );
     expect(result.allowed).toBe(false);
     expect(result.retryAfterSec).toBeGreaterThan(0);
   });
 
   it("allows first request for an email", async () => {
-    const result = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.1", "unique@example.com");
+    const result = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.2.2.1",
+      "unique@example.com",
+    );
     expect(result.allowed).toBe(true);
   });
 
   it("allows second request for same email from different IP", async () => {
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.2", "same-email@example.com");
-    const result = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.3", "same-email@example.com");
+    const result = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.2.2.3",
+      "same-email@example.com",
+    );
     expect(result.allowed).toBe(true);
   });
 
   it("blocks third request for same email", async () => {
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.4", "blocked-email@example.com");
     await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.5", "blocked-email@example.com");
-    const result = await checkSubscribeRateLimit(env.RATE_LIMIT_KV, "10.2.2.6", "blocked-email@example.com");
+    const result = await checkSubscribeRateLimit(
+      env.RATE_LIMIT_KV,
+      "10.2.2.6",
+      "blocked-email@example.com",
+    );
     expect(result.allowed).toBe(false);
     expect(result.retryAfterSec).toBeGreaterThan(0);
   });

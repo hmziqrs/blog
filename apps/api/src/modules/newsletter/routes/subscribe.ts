@@ -63,11 +63,9 @@ app.post("/", async (c) => {
     const email = normalizeEmail(validated.email);
     const rateLimit = await checkSubscribeRateLimit(c.env.RATE_LIMIT_KV, clientIp, email);
     if (!rateLimit.allowed) {
-      return c.json(
-        { error: "Too many requests", retryAfter: rateLimit.retryAfterSec },
-        429,
-        { "Retry-After": String(rateLimit.retryAfterSec) },
-      );
+      return c.json({ error: "Too many requests", retryAfter: rateLimit.retryAfterSec }, 429, {
+        "Retry-After": String(rateLimit.retryAfterSec),
+      });
     }
 
     // M1: Always return 201 to avoid email enumeration

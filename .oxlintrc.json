@@ -5,5 +5,8 @@
     "suspicious": "warn",
     "pedantic": "off"
   },
-  "ignorePatterns": ["**/dist/**", "**/public/web-components/**", "**/node_modules/**"]
+  "ignorePatterns": ["**/dist/**", "**/public/web-components/**", "**/node_modules/**"],
+  "rules": {
+    "no-underscore-dangle": ["warn", { "allow": ["__dirname", "__initAnalytics"] }]
+  }
 }

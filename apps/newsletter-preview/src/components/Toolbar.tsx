@@ -1,24 +1,24 @@
-import type { EmailClient } from '../clients/types'
+import type { EmailClient } from "../clients/types";
 
 interface ToolbarProps {
-  client: EmailClient
-  onClientChange: (client: EmailClient) => void
-  deviceType: 'mobile' | 'desktop'
-  onDeviceChange: (device: 'mobile' | 'desktop') => void
-  darkMode: boolean
-  onDarkModeChange: (enabled: boolean) => void
-  showFullEmail: boolean
-  onShowFullEmailChange: (show: boolean) => void
-  selectedSlug: string
-  onSlugChange: (slug: string) => void
-  slugs: string[]
+  client: EmailClient;
+  onClientChange: (client: EmailClient) => void;
+  deviceType: "mobile" | "desktop";
+  onDeviceChange: (device: "mobile" | "desktop") => void;
+  darkMode: boolean;
+  onDarkModeChange: (enabled: boolean) => void;
+  showFullEmail: boolean;
+  onShowFullEmailChange: (show: boolean) => void;
+  selectedSlug: string;
+  onSlugChange: (slug: string) => void;
+  slugs: string[];
 }
 
 const clientOptions: { value: EmailClient; label: string }[] = [
-  { value: 'raw', label: 'Browser (Raw)' },
-  { value: 'gmail', label: 'Gmail Web' },
-  { value: 'outlook', label: 'Outlook' },
-]
+  { value: "raw", label: "Browser (Raw)" },
+  { value: "gmail", label: "Gmail Web" },
+  { value: "outlook", label: "Outlook" },
+];
 
 export function Toolbar({
   client,
@@ -64,8 +64,8 @@ export function Toolbar({
                 onClick={() => onClientChange(option.value)}
                 className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                   client === option.value
-                    ? 'bg-accent text-white'
-                    : 'text-text-secondary hover:text-text-primary'
+                    ? "bg-accent text-white"
+                    : "text-text-secondary hover:text-text-primary"
                 }`}
               >
                 {option.label}
@@ -81,21 +81,21 @@ export function Toolbar({
           <label className="text-sm text-text-secondary font-medium">Device:</label>
           <div className="flex bg-bg-tertiary rounded-lg p-1 border border-border">
             <button
-              onClick={() => onDeviceChange('desktop')}
+              onClick={() => onDeviceChange("desktop")}
               className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                deviceType === 'desktop'
-                  ? 'bg-accent text-white'
-                  : 'text-text-secondary hover:text-text-primary'
+                deviceType === "desktop"
+                  ? "bg-accent text-white"
+                  : "text-text-secondary hover:text-text-primary"
               }`}
             >
               Desktop
             </button>
             <button
-              onClick={() => onDeviceChange('mobile')}
+              onClick={() => onDeviceChange("mobile")}
               className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                deviceType === 'mobile'
-                  ? 'bg-accent text-white'
-                  : 'text-text-secondary hover:text-text-primary'
+                deviceType === "mobile"
+                  ? "bg-accent text-white"
+                  : "text-text-secondary hover:text-text-primary"
               }`}
             >
               Mobile
@@ -110,8 +110,8 @@ export function Toolbar({
           onClick={() => onDarkModeChange(!darkMode)}
           className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border transition-colors ${
             darkMode
-              ? 'bg-accent/20 border-accent text-accent'
-              : 'bg-bg-tertiary border-border text-text-secondary hover:text-text-primary'
+              ? "bg-accent/20 border-accent text-accent"
+              : "bg-bg-tertiary border-border text-text-secondary hover:text-text-primary"
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -131,7 +131,7 @@ export function Toolbar({
               />
             )}
           </svg>
-          {darkMode ? 'Light' : 'Dark'}
+          {darkMode ? "Light" : "Dark"}
         </button>
 
         <div className="w-px h-6 bg-border" />
@@ -141,8 +141,8 @@ export function Toolbar({
           onClick={() => onShowFullEmailChange(!showFullEmail)}
           className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border transition-colors ${
             showFullEmail
-              ? 'bg-success/20 border-success text-success'
-              : 'bg-bg-tertiary border-border text-text-secondary hover:text-text-primary'
+              ? "bg-success/20 border-success text-success"
+              : "bg-bg-tertiary border-border text-text-secondary hover:text-text-primary"
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -153,9 +153,9 @@ export function Toolbar({
               d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
             />
           </svg>
-          {showFullEmail ? 'Full Email' : 'Body Only'}
+          {showFullEmail ? "Full Email" : "Body Only"}
         </button>
       </div>
     </div>
-  )
+  );
 }

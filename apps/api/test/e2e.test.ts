@@ -136,7 +136,7 @@ describe("Complete end-to-end newsletter flow", () => {
     const sentEmails: { to: string; from: string; subject: string; html: string }[] = [];
     const originalSend = env.SEND_EMAIL.send;
     env.SEND_EMAIL.send = async (message) => {
-      const to = Array.isArray(message.to) ? message.to[0] ?? "" : message.to ?? "";
+      const to = Array.isArray(message.to) ? (message.to[0] ?? "") : (message.to ?? "");
       sentEmails.push({
         to,
         from: message.from ?? "",

@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import { newslettersPlugin } from './plugins/newsletters'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { newslettersPlugin } from "./plugins/newsletters";
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), newslettersPlugin()],
@@ -10,6 +10,6 @@ export default defineConfig({
     open: true,
   },
   build: {
-    outDir: 'dist',
+    outDir: "dist",
   },
-})
+});

@@ -1,20 +1,20 @@
-import type { CompatibilityReport } from '../utils/compatibility'
+import type { CompatibilityReport } from "../utils/compatibility";
 
 interface CompatibilityPanelProps {
-  report: CompatibilityReport | null
-  clientName: string
+  report: CompatibilityReport | null;
+  clientName: string;
 }
 
 export function CompatibilityPanel({ report, clientName }: CompatibilityPanelProps) {
-  if (!report) return null
+  if (!report) return null;
 
   const gradeColors: Record<string, string> = {
-    A: 'text-success',
-    B: 'text-success/80',
-    C: 'text-warning',
-    D: 'text-danger/80',
-    F: 'text-danger',
-  }
+    A: "text-success",
+    B: "text-success/80",
+    C: "text-warning",
+    D: "text-danger/80",
+    F: "text-danger",
+  };
 
   return (
     <div className="bg-bg-secondary border border-border rounded-lg p-4 space-y-4">
@@ -75,5 +75,5 @@ export function CompatibilityPanel({ report, clientName }: CompatibilityPanelPro
         </div>
       )}
     </div>
-  )
+  );
 }

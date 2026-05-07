@@ -66,7 +66,7 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
 
   function disableForm(remainingSec) {
     submitBtn.disabled = true;
-    emailInput && (emailInput.disabled = true);
+    if (emailInput) emailInput.disabled = true;
     showMessage(`Too many attempts. Try again in ${formatCooldown(remainingSec)}.`, "error");
 
     const interval = setInterval(() => {
@@ -75,7 +75,7 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
         clearInterval(interval);
         localStorage.removeItem(COOLDOWN_KEY);
         submitBtn.disabled = false;
-        emailInput && (emailInput.disabled = false);
+        if (emailInput) emailInput.disabled = false;
         showMessage("", "info");
         message.classList.add("hidden");
         return;

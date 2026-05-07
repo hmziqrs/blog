@@ -40,7 +40,11 @@ describe("POST /api/newsletter/send", () => {
       req("/api/newsletter/send", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug: "my-post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
+        body: JSON.stringify({
+          slug: "my-post",
+          subject: "My Post",
+          htmlBody: "<p>An excerpt</p>",
+        }),
       }),
       env,
       ctx,
@@ -56,7 +60,11 @@ describe("POST /api/newsletter/send", () => {
           "content-type": "application/json",
           "x-send-secret": "wrong-secret",
         },
-        body: JSON.stringify({ slug: "my-post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
+        body: JSON.stringify({
+          slug: "my-post",
+          subject: "My Post",
+          htmlBody: "<p>An excerpt</p>",
+        }),
       }),
       env,
       ctx,
@@ -196,7 +204,11 @@ describe("POST /api/newsletter/send", () => {
       req("/api/newsletter/send", {
         method: "POST",
         headers: { ...AUTH_HEADER, "content-type": "application/json" },
-        body: JSON.stringify({ slug: "My Post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
+        body: JSON.stringify({
+          slug: "My Post",
+          subject: "My Post",
+          htmlBody: "<p>An excerpt</p>",
+        }),
       }),
       env,
       ctx,
@@ -212,7 +224,11 @@ describe("POST /api/newsletter/send", () => {
       req("/api/newsletter/send", {
         method: "POST",
         headers: { ...AUTH_HEADER, "content-type": "application/json-pretend" },
-        body: JSON.stringify({ slug: "my-post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
+        body: JSON.stringify({
+          slug: "my-post",
+          subject: "My Post",
+          htmlBody: "<p>An excerpt</p>",
+        }),
       }),
       env,
       ctx,
@@ -229,7 +245,11 @@ describe("POST /api/newsletter/send", () => {
           "x-send-secret": "wrong-dev-secrax", // 16 chars, same length as "local-dev-secret"
           "content-type": "application/json",
         },
-        body: JSON.stringify({ slug: "my-post", subject: "My Post", htmlBody: "<p>An excerpt</p>" }),
+        body: JSON.stringify({
+          slug: "my-post",
+          subject: "My Post",
+          htmlBody: "<p>An excerpt</p>",
+        }),
       }),
       env,
       ctx,

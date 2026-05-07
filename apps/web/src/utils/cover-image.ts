@@ -13,7 +13,9 @@ const srcDir = path.resolve(fileURLToPath(import.meta.url), "..");
 const contentDir = process.env.CONTENT_DIR || path.resolve(srcDir, "../../../../content/posts");
 const manifestPath = path.resolve(contentDir, "..", "media-manifest.json");
 
-export const mediaManifest: Record<string, { width: number; height: number }> = fs.existsSync(manifestPath)
+export const mediaManifest: Record<string, { width: number; height: number }> = fs.existsSync(
+  manifestPath,
+)
   ? JSON.parse(fs.readFileSync(manifestPath, "utf-8"))
   : {};
 

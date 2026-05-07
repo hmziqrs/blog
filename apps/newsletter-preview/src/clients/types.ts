@@ -2,7 +2,7 @@
  * Supported email client identifiers.
  * 'raw' means no CSS simulation is applied.
  */
-export type EmailClient = 'gmail' | 'outlook' | 'raw'
+export type EmailClient = "gmail" | "outlook" | "raw";
 
 /**
  * Describes a single CSS restriction for an email client.
@@ -12,15 +12,15 @@ export type EmailClient = 'gmail' | 'outlook' | 'raw'
  */
 export interface CssRestriction {
   /** CSS property name in kebab-case (e.g. 'position', 'border-radius') */
-  property: string
+  property: string;
   /** Human-readable explanation for the console warning */
-  reason: string
+  reason: string;
   /**
    * If set, only strip the property when the value starts with one of these strings.
    * Example: ['grid', 'inline-grid'] strips display:grid but keeps display:flex.
    * If undefined, ALL values of this property are restricted.
    */
-  unsupportedValues?: string[]
+  unsupportedValues?: string[];
 }
 
 /**
@@ -29,38 +29,38 @@ export interface CssRestriction {
  */
 export interface ClientConfig {
   /** Unique identifier matching the EmailClient union type */
-  id: EmailClient
+  id: EmailClient;
   /** Display name for console warnings and UI labels */
-  name: string
+  name: string;
   /** Version string clarifying which version this restriction list applies to */
-  version: string
+  version: string;
   /** List of CSS properties that this client strips or does not support */
-  cssRestrictions: CssRestriction[]
+  cssRestrictions: CssRestriction[];
   /**
    * If true, <link rel="stylesheet"> tags are removed from the HTML.
    * Gmail and Outlook both strip external stylesheets.
    */
-  stripExternalStylesheets?: boolean
+  stripExternalStylesheets?: boolean;
   /**
    * If true, @import rules are removed from <style> blocks.
    * Gmail and Outlook both strip @import.
    */
-  stripAtImport?: boolean
+  stripAtImport?: boolean;
   /**
    * If true, @font-face blocks are removed from <style> blocks.
    * Gmail and Outlook both strip web font declarations.
    */
-  stripFontFace?: boolean
+  stripFontFace?: boolean;
   /**
    * If true, @media query blocks are removed from <style> blocks.
    * Outlook Word engine strips media queries entirely.
    * Gmail web DOES support @media queries (viewport = full browser window width),
    * so stripMediaQueries should be false for Gmail.
    */
-  stripMediaQueries?: boolean
+  stripMediaQueries?: boolean;
   /**
    * If set, <style> blocks exceeding this character count are removed entirely.
    * Gmail drops style blocks over 8,192 characters.
    */
-  styleBlockCharLimit?: number
+  styleBlockCharLimit?: number;
 }

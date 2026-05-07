@@ -19,19 +19,19 @@ Create a token at **My Profile → API Tokens → Create Token** → start with 
 
 ### Account-level permissions (select "Account" dropdown)
 
-| Permission | Access |
-|---|---|
-| Workers Scripts | Edit |
-| D1 | Edit |
-| Cloudflare Pages | Edit |
-| Queues | Edit |
-| Workers R2 Storage | Edit |
+| Permission         | Access |
+| ------------------ | ------ |
+| Workers Scripts    | Edit   |
+| D1                 | Edit   |
+| Cloudflare Pages   | Edit   |
+| Queues             | Edit   |
+| Workers R2 Storage | Edit   |
 
 ### Zone-level permission (select "Zone" dropdown)
 
-| Permission | Access | Resource |
-|---|---|---|
-| Workers Routes | Edit | `hmziq.rs` |
+| Permission     | Access | Resource   |
+| -------------- | ------ | ---------- |
+| Workers Routes | Edit   | `hmziq.rs` |
 
 > "Workers Routes" is a **Zone-level** permission — it won't appear under Account. Switch the dropdown from "Account" to "Zone" to find it.
 
@@ -58,9 +58,11 @@ wrangler kv namespace create RATE_LIMIT_KV
 Copy the returned `id` into `apps/api/wrangler.toml` under `[[kv_namespaces]]`.
 
 > Also create a preview namespace for local development:
+>
 > ```bash
 > wrangler kv namespace create RATE_LIMIT_KV --preview
 > ```
+>
 > Copy the returned `id` as `preview_id` in the same block. Without `preview_id`, `wrangler dev` writes to the production namespace.
 
 ---
@@ -102,12 +104,14 @@ Generate S3-compatible tokens:
 7. The S3 endpoint on the confirmation page contains your account ID: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` → that's `R2_ACCOUNT_ID`
 
 Enable public access:
+
 1. **R2** → select **blog-media** → **Settings**
 2. Under **Custom Domains**, select **Add** to connect your domain (e.g. `media.yourdomain.com`)
 3. Alternatively, under **R2.dev subdomain**, select **Allow access**, type `allow` to confirm
 4. Copy the **Public Bucket URL** shown — this is `R2_PUBLIC_URL`
 
 Variables needed:
+
 ```
 R2_ACCOUNT_ID=<from-dashboard-url>
 R2_ACCESS_KEY_ID=<from-token>
@@ -161,11 +165,11 @@ wrangler secret put EMAIL_FROM_ADDRESS --config apps/api/wrangler.toml
 
 Already configured — no action needed.
 
-| Variable | Value |
-|---|---|
-| `ENVIRONMENT` | `production` |
+| Variable         | Value                   |
+| ---------------- | ----------------------- |
+| `ENVIRONMENT`    | `production`            |
 | `ALLOWED_ORIGIN` | `https://blog.hmziq.rs` |
-| `SITE_URL` | `https://blog.hmziq.rs` |
+| `SITE_URL`       | `https://blog.hmziq.rs` |
 
 ### Local `.env` (for manual deploys from your machine)
 
@@ -249,12 +253,12 @@ Or push to the `master` branch — CI will deploy automatically.
 
 ## 12. Verify Production
 
-| Resource    | URL                                        |
-| ----------- | ------------------------------------------ |
-| Web         | `https://blog.hmziq.rs`                    |
-| API         | `https://blog.hmziq.rs/api/newsletter/*`   |
-| Subscribe   | `POST /api/newsletter/subscribe`           |
-| Unsubscribe | `POST /api/newsletter/unsubscribe`         |
+| Resource    | URL                                      |
+| ----------- | ---------------------------------------- |
+| Web         | `https://blog.hmziq.rs`                  |
+| API         | `https://blog.hmziq.rs/api/newsletter/*` |
+| Subscribe   | `POST /api/newsletter/subscribe`         |
+| Unsubscribe | `POST /api/newsletter/unsubscribe`       |
 
 > The API is served via the same domain as the web app through Cloudflare routes. There is no separate `*.workers.dev` URL in production.
 
@@ -266,27 +270,27 @@ Add these to your repository secrets for CI production deploys.
 
 ### Shared (used by both staging and prod)
 
-| Secret | Value |
-|---|---|
-| `CLOUDFLARE_API_TOKEN` | Your Cloudflare API token |
+| Secret                  | Value                              |
+| ----------------------- | ---------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | Your Cloudflare API token          |
 | `CLOUDFLARE_ACCOUNT_ID` | `f05ef21f6ee2c5e0d688d6358bcd47f6` |
-| `R2_ACCOUNT_ID` | Same as Cloudflare account ID |
+| `R2_ACCOUNT_ID`         | Same as Cloudflare account ID      |
 
 ### Production-only (no prefix)
 
-| Secret | Value |
-|---|---|
-| `R2_ACCESS_KEY_ID` | R2 token scoped to `blog-media` |
-| `R2_SECRET_ACCESS_KEY` | R2 token scoped to `blog-media` |
-| `R2_BUCKET_NAME` | `blog-media` |
-| `R2_PUBLIC_URL` | Your production R2 public URL |
+| Secret                      | Value                              |
+| --------------------------- | ---------------------------------- |
+| `R2_ACCESS_KEY_ID`          | R2 token scoped to `blog-media`    |
+| `R2_SECRET_ACCESS_KEY`      | R2 token scoped to `blog-media`    |
+| `R2_BUCKET_NAME`            | `blog-media`                       |
+| `R2_PUBLIC_URL`             | Your production R2 public URL      |
 | `PUBLIC_TURNSTILE_SITE_KEY` | Your production Turnstile site key |
 
 ### Newsletter workflow (production only)
 
-| Secret | Value |
-|---|---|
-| `SITE_URL` | `https://blog.hmziq.rs` |
+| Secret                   | Value                           |
+| ------------------------ | ------------------------------- |
+| `SITE_URL`               | `https://blog.hmziq.rs`         |
 | `NEWSLETTER_SEND_SECRET` | Same value as the Worker secret |
 
 ---

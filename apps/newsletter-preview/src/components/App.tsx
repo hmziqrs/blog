@@ -1,35 +1,35 @@
-import { useState, useMemo, useEffect } from 'react'
-import { newsletters as rawNewsletters } from 'virtual:newsletters'
-import { parseNewsletterIssue } from '../lib/newsletter'
-import type { EmailClient } from '../clients/types'
-import { gmailConfig } from '../clients/gmail'
-import { outlookConfig } from '../clients/outlook'
-import { filterHtml } from '../utils/css-filter'
-import { analyzeCompatibility } from '../utils/compatibility'
-import { analyzeEmail } from '../utils/html-analysis'
-import { Toolbar } from './Toolbar'
-import { PreviewFrame } from './PreviewFrame'
-import { CompatibilityPanel } from './CompatibilityPanel'
+import { useState, useMemo, useEffect } from "react";
+import { newsletters as rawNewsletters } from "virtual:newsletters";
+import { parseNewsletterIssue } from "../lib/newsletter";
+import type { EmailClient } from "../clients/types";
+import { gmailConfig } from "../clients/gmail";
+import { outlookConfig } from "../clients/outlook";
+import { filterHtml } from "../utils/css-filter";
+import { analyzeCompatibility } from "../utils/compatibility";
+import { analyzeEmail } from "../utils/html-analysis";
+import { Toolbar } from "./Toolbar";
+import { PreviewFrame } from "./PreviewFrame";
+import { CompatibilityPanel } from "./CompatibilityPanel";
 
 function getClientConfig(client: EmailClient) {
   switch (client) {
-    case 'gmail':
-      return gmailConfig
-    case 'outlook':
-      return outlookConfig
+    case "gmail":
+      return gmailConfig;
+    case "outlook":
+      return outlookConfig;
     default:
-      return null
+      return null;
   }
 }
 
 function getClientName(client: EmailClient): string {
   switch (client) {
-    case 'gmail':
-      return 'Gmail Web'
-    case 'outlook':
-      return 'Outlook 2019-2021'
+    case "gmail":
+      return "Gmail Web";
+    case "outlook":
+      return "Outlook 2019-2021";
     default:
-      return 'Browser'
+      return "Browser";
   }
 }
 
@@ -37,55 +37,55 @@ export function App() {
   const parsedNewsletters = useMemo(() => {
     return rawNewsletters
       .map((n) => parseNewsletterIssue(n.slug, n.content))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-  }, [])
+      .toSorted((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, []);
 
   const [selectedSlug, setSelectedSlug] = useState(() => {
-    const last = parsedNewsletters[parsedNewsletters.length - 1]
-    return last?.slug ?? ''
-  })
-  const [client, setClient] = useState<EmailClient>('raw')
-  const [deviceType, setDeviceType] = useState<'mobile' | 'desktop'>('desktop')
-  const [darkMode, setDarkMode] = useState(false)
-  const [showFullEmail, setShowFullEmail] = useState(true)
-  const [warnings, setWarnings] = useState<string[]>([])
+    const last = parsedNewsletters[parsedNewsletters.length - 1];
+    return last?.slug ?? "";
+  });
+  const [client, setClient] = useState<EmailClient>("raw");
+  const [deviceType, setDeviceType] = useState<"mobile" | "desktop">("desktop");
+  const [darkMode, setDarkMode] = useState(false);
+  const [showFullEmail, setShowFullEmail] = useState(true);
+  const [warnings, setWarnings] = useState<string[]>([]);
 
-  const selectedNewsletter = parsedNewsletters.find((n) => n.slug === selectedSlug)
+  const selectedNewsletter = parsedNewsletters.find((n) => n.slug === selectedSlug);
 
   const previewHtml = useMemo(() => {
-    if (!selectedNewsletter) return ''
-    const html = showFullEmail ? selectedNewsletter.htmlBody : selectedNewsletter.rawBody
-    const config = getClientConfig(client)
-    if (!config) return html
-    const result = filterHtml(html, config)
-    setWarnings(result.warnings)
-    return result.html
-  }, [selectedNewsletter, client, showFullEmail])
+    if (!selectedNewsletter) return "";
+    const html = showFullEmail ? selectedNewsletter.htmlBody : selectedNewsletter.rawBody;
+    const config = getClientConfig(client);
+    if (!config) return html;
+    const result = filterHtml(html, config);
+    setWarnings(result.warnings);
+    return result.html;
+  }, [selectedNewsletter, client, showFullEmail]);
 
   const compatibilityReport = useMemo(() => {
-    if (!selectedNewsletter) return null
-    const config = getClientConfig(client)
-    if (!config) return null
+    if (!selectedNewsletter) return null;
+    const config = getClientConfig(client);
+    if (!config) return null;
     return analyzeCompatibility(
       showFullEmail ? selectedNewsletter.htmlBody : selectedNewsletter.rawBody,
       config,
-    )
-  }, [selectedNewsletter, client, showFullEmail])
+    );
+  }, [selectedNewsletter, client, showFullEmail]);
 
   const metadata = useMemo(() => {
-    if (!selectedNewsletter) return null
-    return analyzeEmail(selectedNewsletter.htmlBody)
-  }, [selectedNewsletter])
+    if (!selectedNewsletter) return null;
+    return analyzeEmail(selectedNewsletter.htmlBody);
+  }, [selectedNewsletter]);
 
-  const previewWidth = deviceType === 'mobile' ? 375 : 600
+  const previewWidth = deviceType === "mobile" ? 375 : 600;
 
   useEffect(() => {
     if (warnings.length > 0) {
-      console.group(`Email CSS Warnings (${client})`)
-      warnings.forEach((w) => console.warn(w))
-      console.groupEnd()
+      console.group(`Email CSS Warnings (${client})`);
+      warnings.forEach((w) => console.warn(w));
+      console.groupEnd();
     }
-  }, [warnings, client])
+  }, [warnings, client]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -94,7 +94,12 @@ export function App() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -113,15 +118,15 @@ export function App() {
             <div className="flex items-center gap-4 text-xs text-text-secondary">
               {metadata.subject && (
                 <div>
-                  <span className="text-text-muted">Subject:</span>{' '}
+                  <span className="text-text-muted">Subject:</span>{" "}
                   <span className="text-text-primary font-medium">{metadata.subject}</span>
                 </div>
               )}
               <div>
-                <span className="text-text-muted">Size:</span>{' '}
+                <span className="text-text-muted">Size:</span>{" "}
                 <span
                   className={`font-medium ${
-                    metadata.fileSize.isWarning ? 'text-danger' : 'text-text-primary'
+                    metadata.fileSize.isWarning ? "text-danger" : "text-text-primary"
                   }`}
                 >
                   {metadata.fileSize.formatted}
@@ -156,7 +161,7 @@ export function App() {
         <div className="flex-1 bg-bg-primary p-6 overflow-auto">
           <div className="flex justify-center min-h-full">
             {selectedNewsletter ? (
-              deviceType === 'mobile' ? (
+              deviceType === "mobile" ? (
                 <div className="phone-frame relative">
                   <div className="phone-notch" />
                   <PreviewFrame
@@ -206,7 +211,10 @@ export function App() {
                   </svg>
                   <p className="text-lg font-medium">No newsletters found</p>
                   <p className="text-sm mt-1">
-                    Add markdown files to <code className="bg-bg-tertiary px-1.5 py-0.5 rounded">content/newsletters/</code>
+                    Add markdown files to{" "}
+                    <code className="bg-bg-tertiary px-1.5 py-0.5 rounded">
+                      content/newsletters/
+                    </code>
                   </p>
                 </div>
               </div>
@@ -227,8 +235,8 @@ export function App() {
                     onClick={() => setSelectedSlug(newsletter.slug)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                       selectedSlug === newsletter.slug
-                        ? 'bg-accent/20 text-accent border border-accent/30'
-                        : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
+                        ? "bg-accent/20 text-accent border border-accent/30"
+                        : "text-text-secondary hover:bg-bg-tertiary hover:text-text-primary"
                     }`}
                   >
                     <div className="font-medium truncate">{newsletter.title}</div>
@@ -242,10 +250,7 @@ export function App() {
 
             {/* Compatibility panel */}
             {compatibilityReport && (
-              <CompatibilityPanel
-                report={compatibilityReport}
-                clientName={getClientName(client)}
-              />
+              <CompatibilityPanel report={compatibilityReport} clientName={getClientName(client)} />
             )}
 
             {/* Preview text */}
@@ -272,5 +277,5 @@ export function App() {
         </div>
       </div>
     </div>
-  )
+  );
 }

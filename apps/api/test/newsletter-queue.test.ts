@@ -204,7 +204,7 @@ describe("handleQueueBatch", () => {
     const sentEmails: { to: string; from: string; subject: string; html: string }[] = [];
     const originalSend = env.SEND_EMAIL.send;
     env.SEND_EMAIL.send = async (message) => {
-      const to = Array.isArray(message.to) ? message.to[0] ?? "" : message.to ?? "";
+      const to = Array.isArray(message.to) ? (message.to[0] ?? "") : (message.to ?? "");
       sentEmails.push({
         to,
         from: message.from ?? "",
@@ -327,7 +327,9 @@ describe("handleQueueBatch", () => {
       expect(result.retryMessages).toStrictEqual([]);
 
       // Should be in blacklist with reason
-      const blacklisted = await env.DB.prepare("SELECT email, reason FROM blacklist WHERE email = ?")
+      const blacklisted = await env.DB.prepare(
+        "SELECT email, reason FROM blacklist WHERE email = ?",
+      )
         .bind("blacklist@example.com")
         .first<{ email: string; reason: string }>();
       expect(blacklisted).not.toBeNull();

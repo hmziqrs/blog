@@ -79,7 +79,9 @@ async function main() {
   }
 
   const next = unsent[0];
-  console.log(`Found unsent issue: "${next.subject}" (${next.slug}) from ${next.date.toISOString().slice(0, 10)}`);
+  console.log(
+    `Found unsent issue: "${next.subject}" (${next.slug}) from ${next.date.toISOString().slice(0, 10)}`,
+  );
   await sendIssue(next.slug);
 }
 

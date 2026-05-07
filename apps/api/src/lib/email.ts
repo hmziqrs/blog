@@ -15,7 +15,10 @@ export function normalizeEmail(raw: string): string {
   if (atIndex === -1) return raw.toLowerCase().trim();
 
   const local = raw.slice(0, atIndex).toLowerCase().trim();
-  const domain = raw.slice(atIndex + 1).toLowerCase().trim();
+  const domain = raw
+    .slice(atIndex + 1)
+    .toLowerCase()
+    .trim();
 
   const normalizedLocal = local.split("+")[0] ?? local;
 

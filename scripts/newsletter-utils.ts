@@ -40,7 +40,9 @@ export function parseNewsletterIssue(slug: string, dir = NEWSLETTERS_DIR): Newsl
   let htmlBody = marked.parse(body) as string;
 
   if (posts.length > 0) {
-    const links = posts.map((p) => `<li><a href="${escapeAttr(`/posts/${p}`)}">${escapeHTML(p)}</a></li>`).join("");
+    const links = posts
+      .map((p) => `<li><a href="${escapeAttr(`/posts/${p}`)}">${escapeHTML(p)}</a></li>`)
+      .join("");
     htmlBody += `\n<h3>Featured Posts</h3>\n<ul>${links}</ul>`;
   }
 
@@ -110,16 +112,20 @@ export function listNewsletterIssues(dir = NEWSLETTERS_DIR): NewsletterIssue[] {
 }
 
 export async function getSentSlugs(): Promise<string[]> {
-  const rows = await queryD1<{ issue_slug: string }>(
-    "SELECT issue_slug FROM newsletter_sent",
-  );
+  const rows = await queryD1<{ issue_slug: string }>("SELECT issue_slug FROM newsletter_sent");
   return rows.map((r) => r.issue_slug);
 }
 
 function escapeHTML(raw: string): string {
-  return raw.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch] ?? ch);
+  return raw.replace(
+    /[&<>"']/g,
+    (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch] ?? ch,
+  );
 }
 
 function escapeAttr(raw: string): string {
-  return raw.replace(/[&"<>'"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch] ?? ch);
+  return raw.replace(
+    /[&"<>'"]/g,
+    (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch] ?? ch,
+  );
 }

@@ -6,7 +6,11 @@ export interface RateLimitResult {
   retryAfterSec?: number;
 }
 
-async function checkAndRecord(kv: KVNamespace, key: string, limit: number): Promise<RateLimitResult> {
+async function checkAndRecord(
+  kv: KVNamespace,
+  key: string,
+  limit: number,
+): Promise<RateLimitResult> {
   const now = Date.now();
   const raw = await kv.get(key);
 
@@ -51,6 +55,9 @@ export async function checkSubscribeRateLimit(
   return { allowed: true };
 }
 
-export async function checkUnsubscribeRateLimit(kv: KVNamespace, ip: string): Promise<RateLimitResult> {
+export async function checkUnsubscribeRateLimit(
+  kv: KVNamespace,
+  ip: string,
+): Promise<RateLimitResult> {
   return checkAndRecord(kv, `rl:ip:${ip}`, 3);
 }

@@ -5,9 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 workers_dev = false
 
 # Prod routes
-routes = [
-  { pattern = "blog.hmziq.rs/api/newsletter/*", zone_name = "hmziq.rs" }
-]
+routes = [{ pattern = "blog.hmziq.rs/api/newsletter/*", zone_name = "hmziq.rs" }]
 
 [dev]
 port = 8788

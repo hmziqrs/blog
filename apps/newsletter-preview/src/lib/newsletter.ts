@@ -1,24 +1,24 @@
-import { marked } from 'marked'
+import { marked } from "marked";
 
 export interface NewsletterIssue {
-  slug: string
-  title: string
-  subject: string
-  date: string
-  htmlBody: string
-  rawBody: string
+  slug: string;
+  title: string;
+  subject: string;
+  date: string;
+  htmlBody: string;
+  rawBody: string;
 }
 
 const HTML_ESCAPES: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-}
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
 
 function escapeHTML(raw: string): string {
-  return raw.replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch] ?? ch)
+  return raw.replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch] ?? ch);
 }
 
 function generateEmailHTML(subject: string, htmlBody: string): string {
@@ -38,30 +38,30 @@ function generateEmailHTML(subject: string, htmlBody: string): string {
     <a href="#" style="color: #999;">Unsubscribe</a>
   </p>
 </body>
-</html>`
+</html>`;
 }
 
 export function parseNewsletterIssue(slug: string, content: string): NewsletterIssue {
-  const fmMatch = content.match(/^---\n([\s\S]*?)\n---/)
+  const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
-  let title = 'Newsletter'
-  let subject = 'Newsletter'
-  let date = ''
+  let title = "Newsletter";
+  let subject = "Newsletter";
+  let date = "";
 
   if (fmMatch?.[1]) {
-    const fm = fmMatch[1]
-    const titleMatch = fm.match(/title:\s*["'](.+?)["']/)
-    const subjectMatch = fm.match(/subject:\s*["'](.+?)["']/)
-    const dateMatch = fm.match(/date:\s*["']?(.+?)["']?(?:\n|$)/)
+    const fm = fmMatch[1];
+    const titleMatch = fm.match(/title:\s*["'](.+?)["']/);
+    const subjectMatch = fm.match(/subject:\s*["'](.+?)["']/);
+    const dateMatch = fm.match(/date:\s*["']?(.+?)["']?(?:\n|$)/);
 
-    if (titleMatch?.[1]) title = titleMatch[1]
-    if (subjectMatch?.[1]) subject = subjectMatch[1]
-    if (dateMatch?.[1]) date = dateMatch[1].trim()
+    if (titleMatch?.[1]) title = titleMatch[1];
+    if (subjectMatch?.[1]) subject = subjectMatch[1];
+    if (dateMatch?.[1]) date = dateMatch[1].trim();
   }
 
-  const body = fmMatch ? content.slice(fmMatch[0].length).trim() : content.trim()
-  const rawBody = body
-  const htmlBody = marked.parse(body) as string
+  const body = fmMatch ? content.slice(fmMatch[0].length).trim() : content.trim();
+  const rawBody = body;
+  const htmlBody = marked.parse(body) as string;
 
   return {
     slug,
@@ -70,5 +70,5 @@ export function parseNewsletterIssue(slug: string, content: string): NewsletterI
     date,
     htmlBody: generateEmailHTML(subject, htmlBody),
     rawBody,
-  }
+  };
 }

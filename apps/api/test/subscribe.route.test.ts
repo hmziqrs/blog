@@ -41,16 +41,23 @@ afterEach(async () => {
     .run();
   // Clear KV rate-limit keys
   const kvKeys = [
-    "rl:ip:1.2.3.4", "rl:ip:10.0.0.1", "rl:ip:10.0.0.2", "rl:ip:10.0.0.3",
+    "rl:ip:1.2.3.4",
+    "rl:ip:10.0.0.1",
+    "rl:ip:10.0.0.2",
+    "rl:ip:10.0.0.3",
     "rl:ip:unknown",
   ];
   await Promise.all(kvKeys.map((k) => env.RATE_LIMIT_KV.delete(k)));
   // Clear email keys used by rate-limit and subscribe tests
   const emailKeys = [
-    "rl:email:test-rl-1@example.com", "rl:email:test-rl-2@example.com",
-    "rl:email:test-rl-3@example.com", "rl:email:test-rate@example.com",
-    "rl:email:testuser@gmail.com", "rl:email:test-dup@example.com",
-    "rl:email:test-resub@example.com", "rl:email:test-concurrent@example.com",
+    "rl:email:test-rl-1@example.com",
+    "rl:email:test-rl-2@example.com",
+    "rl:email:test-rl-3@example.com",
+    "rl:email:test-rate@example.com",
+    "rl:email:testuser@gmail.com",
+    "rl:email:test-dup@example.com",
+    "rl:email:test-resub@example.com",
+    "rl:email:test-concurrent@example.com",
   ];
   await Promise.all(emailKeys.map((k) => env.RATE_LIMIT_KV.delete(k)));
 });

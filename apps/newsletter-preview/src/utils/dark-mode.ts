@@ -1,16 +1,16 @@
-import type { EmailClient } from '../clients/types'
+import type { EmailClient } from "../clients/types";
 
-export type DarkModeStrategy = 'none' | 'full-inversion' | 'partial-inversion' | 'color-scheme'
+export type DarkModeStrategy = "none" | "full-inversion" | "partial-inversion" | "color-scheme";
 
 export interface DarkModeConfig {
-  strategy: DarkModeStrategy
-  css: string
-  colorScheme: boolean
+  strategy: DarkModeStrategy;
+  css: string;
+  colorScheme: boolean;
 }
 
 const NONE_CSS = `
   html { background-color: #1a1a1a !important; }
-`
+`;
 
 const FULL_INVERSION_CSS = `
   html { background-color: #1a1a1a !important; }
@@ -18,7 +18,7 @@ const FULL_INVERSION_CSS = `
   img, video, picture, picture source {
     filter: invert(0.9) hue-rotate(180deg) !important;
   }
-`
+`;
 
 const PARTIAL_INVERSION_CSS = `
   html { background-color: #1e1e1e !important; }
@@ -26,31 +26,31 @@ const PARTIAL_INVERSION_CSS = `
   img, video, picture, picture source {
     filter: invert(0.85) hue-rotate(180deg) !important;
   }
-`
+`;
 
 const configs: Record<EmailClient, DarkModeConfig> = {
   gmail: {
-    strategy: 'none',
+    strategy: "none",
     css: NONE_CSS,
     colorScheme: false,
   },
   outlook: {
-    strategy: 'partial-inversion',
+    strategy: "partial-inversion",
     css: PARTIAL_INVERSION_CSS,
     colorScheme: false,
   },
   raw: {
-    strategy: 'full-inversion',
+    strategy: "full-inversion",
     css: FULL_INVERSION_CSS,
     colorScheme: false,
   },
-}
+};
 
 export function getDarkModeConfig(client: EmailClient): DarkModeConfig {
-  return configs[client]
+  return configs[client];
 }
 
 export function getDarkModeCss(client: EmailClient, enabled: boolean): string {
-  if (!enabled) return ''
-  return configs[client].css
+  if (!enabled) return "";
+  return configs[client].css;
 }

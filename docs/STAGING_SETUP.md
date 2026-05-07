@@ -19,19 +19,19 @@ Create a token at **My Profile → API Tokens → Create Token** → start with 
 
 ### Account-level permissions (select "Account" dropdown)
 
-| Permission | Access |
-|---|---|
-| Workers Scripts | Edit |
-| D1 | Edit |
-| Cloudflare Pages | Edit |
-| Queues | Edit |
-| Workers R2 Storage | Edit |
+| Permission         | Access |
+| ------------------ | ------ |
+| Workers Scripts    | Edit   |
+| D1                 | Edit   |
+| Cloudflare Pages   | Edit   |
+| Queues             | Edit   |
+| Workers R2 Storage | Edit   |
 
 ### Zone-level permission (select "Zone" dropdown)
 
-| Permission | Access | Resource |
-|---|---|---|
-| Workers Routes | Edit | `hmziq.rs` |
+| Permission     | Access | Resource   |
+| -------------- | ------ | ---------- |
+| Workers Routes | Edit   | `hmziq.rs` |
 
 > "Workers Routes" is a **Zone-level** permission — it won't appear under Account. Switch the dropdown from "Account" to "Zone" to find it.
 
@@ -58,9 +58,11 @@ wrangler kv namespace create RATE_LIMIT_KV --env staging
 Copy the returned `id` into `apps/api/wrangler.toml` under `[[env.staging.kv_namespaces]]`.
 
 > Also create a preview namespace for local development:
+>
 > ```bash
 > wrangler kv namespace create RATE_LIMIT_KV --preview
 > ```
+>
 > Copy the returned `id` as `preview_id` in the top-level `[[kv_namespaces]]` block.
 
 ---
@@ -102,12 +104,14 @@ Generate S3-compatible tokens:
 7. The S3 endpoint on the confirmation page contains your account ID: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` → that's `R2_ACCOUNT_ID`
 
 Enable public access:
+
 1. **R2** → select **blog-media-staging** → **Settings**
 2. Under **R2.dev subdomain**, select **Allow access**
 3. Type `allow` to confirm
 4. Copy the **Public Bucket URL** shown — this is `R2_PUBLIC_URL`
 
 Variables needed:
+
 ```
 R2_ACCOUNT_ID=<from-dashboard-url>
 R2_ACCESS_KEY_ID=<from-token>
@@ -134,10 +138,10 @@ The newsletter is outbound-only (no-reply). You only need Email Routing enabled 
 
 Staging and local dev use Cloudflare's **test keys** — no dashboard widget needed. Test keys work on any domain (`localhost`, `*.workers.dev`, etc.) and always pass validation.
 
-| Key           | Value                                |
-| ------------- | ------------------------------------ |
-| Site key      | `1x00000000000000000000AA`           |
-| Secret key    | `1x0000000000000000000000000000000AA`|
+| Key        | Value                                 |
+| ---------- | ------------------------------------- |
+| Site key   | `1x00000000000000000000AA`            |
+| Secret key | `1x0000000000000000000000000000000AA` |
 
 Use these as `PUBLIC_TURNSTILE_SITE_KEY` (Astro) and `TURNSTILE_SECRET_KEY` (Worker secret).
 
@@ -166,11 +170,11 @@ wrangler secret put EMAIL_FROM_ADDRESS --env staging --config apps/api/wrangler.
 
 Already configured — no action needed.
 
-| Variable | Value |
-|---|---|
-| `ENVIRONMENT` | `staging` |
+| Variable         | Value                                 |
+| ---------------- | ------------------------------------- |
+| `ENVIRONMENT`    | `staging`                             |
 | `ALLOWED_ORIGIN` | `https://staging.hmziqblog.pages.dev` |
-| `SITE_URL` | `https://staging.hmziqblog.pages.dev` |
+| `SITE_URL`       | `https://staging.hmziqblog.pages.dev` |
 
 ### Local `.env` (for manual deploys from your machine)
 
@@ -233,12 +237,12 @@ Or push to the `staging` branch — CI will deploy automatically.
 
 ## 11. Verify Staging
 
-| Resource    | URL                                              |
-| ----------- | ------------------------------------------------ |
-| Web         | `https://staging.hmziqblog.pages.dev`            |
-| API         | `https://api-staging.hmziq.workers.dev`          |
-| Subscribe   | `POST /api/newsletter/subscribe`                 |
-| Unsubscribe | `POST /api/newsletter/unsubscribe`               |
+| Resource    | URL                                     |
+| ----------- | --------------------------------------- |
+| Web         | `https://staging.hmziqblog.pages.dev`   |
+| API         | `https://api-staging.hmziq.workers.dev` |
+| Subscribe   | `POST /api/newsletter/subscribe`        |
+| Unsubscribe | `POST /api/newsletter/unsubscribe`      |
 
 > Staging uses the default `workers_dev` (enabled), so the API is accessible via `*.workers.dev` subdomain. This is intentionally different from production, which uses custom domain routes.
 
@@ -287,21 +291,21 @@ Add these to your repository secrets for CI staging deploys. Staging-specific se
 
 ### Shared (used by both staging and prod)
 
-| Secret | Value |
-|---|---|
-| `CLOUDFLARE_API_TOKEN` | Your Cloudflare API token |
+| Secret                  | Value                              |
+| ----------------------- | ---------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | Your Cloudflare API token          |
 | `CLOUDFLARE_ACCOUNT_ID` | `f05ef21f6ee2c5e0d688d6358bcd47f6` |
-| `R2_ACCOUNT_ID` | Same as Cloudflare account ID |
+| `R2_ACCOUNT_ID`         | Same as Cloudflare account ID      |
 
 ### Staging-only (prefixed with `STAGE_`)
 
-| Secret | Value |
-|---|---|
-| `STAGE_R2_ACCESS_KEY_ID` | R2 token scoped to `blog-media-staging` |
-| `STAGE_R2_SECRET_ACCESS_KEY` | R2 token scoped to `blog-media-staging` |
-| `STAGE_R2_BUCKET_NAME` | `blog-media-staging` |
-| `STAGE_R2_PUBLIC_URL` | Your staging R2 public URL |
-| `STAGE_PUBLIC_TURNSTILE_SITE_KEY` | `1x00000000000000000000AA` (test key) |
+| Secret                            | Value                                   |
+| --------------------------------- | --------------------------------------- |
+| `STAGE_R2_ACCESS_KEY_ID`          | R2 token scoped to `blog-media-staging` |
+| `STAGE_R2_SECRET_ACCESS_KEY`      | R2 token scoped to `blog-media-staging` |
+| `STAGE_R2_BUCKET_NAME`            | `blog-media-staging`                    |
+| `STAGE_R2_PUBLIC_URL`             | Your staging R2 public URL              |
+| `STAGE_PUBLIC_TURNSTILE_SITE_KEY` | `1x00000000000000000000AA` (test key)   |
 
 ---
 

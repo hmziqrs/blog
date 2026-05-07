@@ -85,7 +85,11 @@ async function status() {
 }
 
 async function main() {
-  if (!process.env.CLOUDFLARE_ACCOUNT_ID || !process.env.CLOUDFLARE_API_TOKEN || !process.env.D1_DATABASE_ID) {
+  if (
+    !process.env.CLOUDFLARE_ACCOUNT_ID ||
+    !process.env.CLOUDFLARE_API_TOKEN ||
+    !process.env.D1_DATABASE_ID
+  ) {
     console.error("Set CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, D1_DATABASE_ID");
     process.exit(1);
   }
