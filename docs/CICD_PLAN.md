@@ -1,161 +1,101 @@
 # CI/CD Plan
 
-Single `master` branch. File-based deploy gates. No extra branches, no tags.
+Single `master` branch. File-based deploy gates. Push anytime: staging always deploys, prod is gated on specific file changes.
 
-> Status: design doc, not yet implemented. Current `ci.yml` still uses a `master` + `staging` branch model — this plan replaces it.
+> Status: design doc. Replaces the master+staging branch model in the current `ci.yml`.
 
-## Philosophy
+## How it works
 
-Push code anytime. Independent file-based triggers control what deploys.
+Every push to master deploys staging (full stack: web + api + migrations). Prod deploys only when specific files change in that push:
 
-```
-push to master
-├── Always: QA → deploy staging (1:1 prod replica)
-├── If new changelog/web/v*.md added: deploy web prod
-├── If content/** changed: deploy web prod (new post)
-├── If apps/api/** changed: deploy API prod (no changelog needed)
-├── If new changelog/mobile/v*.md added: cut mobile release
-└── Manual workflow_dispatch: send newsletter
-```
+- `content/**` changed → web prod
+- New `changelog/v*.md` added → web prod + api prod (release)
 
-Each prod deploy is an explicit file change. No implicit magic.
+API code, migrations, and shared packages do **not** deploy to prod on path changes alone. They land on staging on every push and ship to prod only when a `changelog/v*.md` is added. The changelog is the guard: it forces every API/code release through staging first.
 
----
+PRs run QA only. No deploys from PRs. `workflow_dispatch` is the manual override.
 
-## Content separation
+## Content
 
-### `content/` — production
-Source of truth for published posts, newsletters, media. Files here are public.
-
-### `content-staging/` — staging only
-Drafts, WIP, experiments. **1:1 replica structure** of `content/` — staging URL renders this directory exactly as prod renders `content/`. Public via git is acceptable.
+Two independent content trees with the same structure:
 
 ```
-content-staging/
-├── posts/
-├── newsletters/
-└── media/
+content/           # production content
+content-staging/   # staging content
 ```
 
-Build mapping (env vars set per deploy job):
+Each environment renders its own tree. `content-staging/` is **not** a drafts area, WIP, or experiments folder. It exists so you can change staging content (test layouts, swap copy, seed sample data) without touching prod. Both trees stand on their own.
 
-| Environment | `CONTENT_DIR`           | Source            |
-|-------------|-------------------------|-------------------|
-| Production  | `content/posts`         | Published posts   |
-| Staging     | `content-staging/posts` | Drafts + WIP      |
+The build picks one via `CONTENT_DIR`:
 
-Newsletters and media follow the same pattern via their own env vars (`NEWSLETTER_DIR`, `MEDIA_DIR`). The Astro content loader (`apps/web/src/content.config.ts`) already reads `CONTENT_DIR`.
+| Env     | `CONTENT_DIR`     |
+|---------|-------------------|
+| prod    | `content`         |
+| staging | `content-staging` |
 
-### Promotion rule
-**Move, don't copy.** When a draft promotes to prod, the same commit MUST delete the staging file and create the prod file. Copy-only leaves divergent versions of the same slug across environments.
+`CONTENT_DIR` is the content root. `posts/`, `newsletters/`, `media/` resolve relative to it. One env var covers everything; `NEWSLETTER_DIR` and `MEDIA_DIR` are not used.
 
----
+The Astro loader (`apps/web/src/content.config.ts`) currently reads `CONTENT_DIR` as the posts directory; it needs a small adjustment to treat it as the content root.
 
-## Changelogs
-
-Two changelogs — one per **client**, not per app. Readers are users; users feel API changes through clients, so the API has no standalone changelog.
+## Changelog
 
 ```
 changelog/
-├── web/
-│   ├── v0.0.1.md
-│   └── v0.0.2.md
-└── mobile/
-    └── v0.1.0.md
+├── v0.0.1.md
+└── v0.0.2.md
 ```
 
-- An API change visible in web only → web changelog entry.
-- An API change visible in both → entry in each, in client-specific language.
-- Pure infra change (rate limit, queue tuning) → no changelog. API still deploys (path gate).
+One file per release, immutable once committed. Fix typos in the next version, not in place. Filename pattern: `v\d+\.\d+\.\d+\.md`. Rendered at `/changelog`.
 
-### Rules
-- One file per release. **Immutable** once committed — fix typos in a follow-up version, not in place.
-- Filename pattern: `v\d+\.\d+\.\d+\.md`. CI rejects anything else under `changelog/`.
-- Rendered at `/changelog` on the blog (free release notes page).
-
----
+Adding a new version file is the release event: it deploys both web and API to prod.
 
 ## Deploy gates
 
-CI uses [`dorny/paths-filter`](https://github.com/dorny/paths-filter) — handles force-push and first-push safely (raw `git diff ${{ before }}..${{ after }}` does not).
+Uses [dorny/paths-filter](https://github.com/dorny/paths-filter), which handles force-push and first-push cases that raw `git diff` does not.
 
-| Gate             | Trigger                                                  | Deploys              |
-|------------------|----------------------------------------------------------|----------------------|
-| `web-release`    | **Added** file matching `changelog/web/v*.md`            | Web prod             |
-| `web-content`    | Any change under `content/**`                            | Web prod             |
-| `api`            | Any change under `apps/api/**` (incl. `migrations/**`)   | API prod + migrate   |
-| `mobile-release` | **Added** file matching `changelog/mobile/v*.md`         | Mobile release cut   |
-| _staging_        | Every push to master                                     | Staging always       |
+| Gate         | Trigger                          | Deploys             |
+|--------------|----------------------------------|---------------------|
+| `release`    | Added `changelog/v*.md`          | web prod + api prod |
+| `content`    | Any change under `content/**`    | web prod            |
+| _(implicit)_ | Every push to master             | staging always      |
 
-`--diff-filter=A` (added only) on the changelog gates — editing an existing version file does NOT trigger a deploy. Forces immutability without a separate lint.
-
-### Scenarios
-
-| Push contains                          | Staging | Web prod | API prod |
-|----------------------------------------|---------|----------|----------|
-| Only `content-staging/`                | Yes     | No       | No       |
-| New `content/posts/*.md`               | Yes     | Yes      | No       |
-| New `changelog/web/v*.md`              | Yes     | Yes      | No       |
-| `apps/api/**` change                   | Yes     | No       | Yes      |
-| `apps/api/migrations/**`               | Yes     | No       | Yes      |
-| Doc / README / repo housekeeping       | Yes     | No       | No       |
-
----
-
-## Pull requests
-
-PRs run QA only (lint, fmt, typecheck, test). **No deploys from PRs.** Direct pushes to master are the norm; PRs are optional review hygiene.
-
----
+`added`-only on `release` enforces immutability for deploy purposes: editing an existing version file does not trigger a redeploy.
 
 ## Newsletter
 
-Manual only — `workflow_dispatch` in `.github/workflows/send-newsletter.yml`.
+Manual via `workflow_dispatch` in `.github/workflows/send-newsletter.yml`.
 
 Inputs:
-- `issue_slug` — filename under `content/newsletters/` (or `content-staging/newsletters/` for test sends).
-- `environment` — `staging` (test list) or `production` (real subscribers).
+- `issue_slug`: filename under `content/newsletters/` (or `content-staging/newsletters/` for test sends)
+- `environment`: `staging` or `production`
 
-Note: a newsletter file in `content/newsletters/` becomes a public archive page on the next prod deploy regardless of whether the email has been sent. To stage a newsletter:
-
-1. Write the file in `content-staging/newsletters/`.
-2. Test send with `workflow_dispatch` → `environment: staging`.
-3. Move (not copy) to `content/newsletters/` and push → archive page goes live.
-4. Dispatch with `environment: production` → email sends.
-
----
+A newsletter file in `content/newsletters/` becomes a public archive page on the next prod web deploy regardless of whether the email has been sent.
 
 ## Rollback
 
-- **Web code:** revert the offending commit, then add `changelog/web/vX.Y.Z.md` describing the rollback. Version bumps forward, never reuses.
-- **API:** revert the offending commit — path gate redeploys automatically. Migrations are forward-only; write a new migration that reverses the change.
-- **Newsletter:** can't unsend. To remove the public archive page, delete the file under `content/newsletters/` — content gate redeploys without it.
-- **Posts:** delete the file under `content/posts/`. Content gate redeploys without it.
+- **Web or API code:** revert the offending commit, then add a new `changelog/vX.Y.Z.md` describing the rollback. The changelog file is what triggers the redeploy. Versions only move forward.
+- **Migrations:** forward-only. Write a new migration that reverses the change, then ship it via a `changelog/v*.md`.
+- **Posts:** delete the file under `content/posts/`. The `content` gate redeploys without it.
+- **Newsletter:** cannot unsend. To remove the public archive page, delete the file under `content/newsletters/`.
 
-For emergencies, `workflow_dispatch` with explicit env target bypasses all gates.
-
----
+For emergencies, `workflow_dispatch` with an explicit env target bypasses the gates.
 
 ## Infrastructure
 
-| Resource | Staging                       | Production               |
-|----------|-------------------------------|--------------------------|
-| D1       | `blog-db-staging`             | `blog-db`                |
-| R2       | `blog-media-staging`          | `blog-media`             |
-| Queue    | `newsletter-send-staging`     | `newsletter-send`        |
-| DLQ      | `newsletter-dlq-staging`      | `newsletter-dlq`         |
-| KV       | `RATE_LIMIT_KV` (staging)     | `RATE_LIMIT_KV` (prod)   |
-| Worker   | `api-staging` (.workers.dev)  | `api` (route on zone)    |
-| Pages    | `hmziqblog-staging` project   | `hmziqblog` project      |
-| Turnstile| Test keys                     | Real keys                |
-| URL      | `staging.hmziqblog.pages.dev` | `blog.hmziq.rs`          |
-| API      | `api-staging.*.workers.dev`   | `blog.hmziq.rs/api/*`    |
+| Resource | Staging                       | Production              |
+|----------|-------------------------------|-------------------------|
+| D1       | `blog-db-staging`             | `blog-db`               |
+| R2       | `blog-media-staging`          | `blog-media`            |
+| Queue    | `newsletter-send-staging`     | `newsletter-send`       |
+| DLQ      | `newsletter-dlq-staging`      | `newsletter-dlq`        |
+| KV       | `RATE_LIMIT_KV` (staging)     | `RATE_LIMIT_KV` (prod)  |
+| Worker   | `api-staging` (.workers.dev)  | `api` (route on zone)   |
+| Pages    | `hmziqblog-staging` project   | `hmziqblog` project     |
+| Turnstile| Test keys                     | Real keys               |
+| URL      | `staging.hmziqblog.pages.dev` | `blog.hmziq.rs`         |
+| API      | `api-staging.*.workers.dev`   | `blog.hmziq.rs/api/*`   |
 
-Deploys are CLI-driven (`bun run deploy:staging` / `bun run deploy:prod`) targeting different Pages projects. **Not** Cloudflare Pages branch previews.
-
-Secrets follow the existing pattern: `STAGE_` prefix for staging, no prefix for production.
-
----
+CLI-driven (`bun run deploy:staging` / `bun run deploy:prod`) targeting different Pages projects. Not Cloudflare Pages branch previews. Secrets use the existing pattern: `STAGE_` prefix for staging, no prefix for prod.
 
 ## CI workflow shape
 
@@ -166,68 +106,59 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   qa:
     # lint, fmt, typecheck, test — always
 
   detect:
     needs: qa
-    # dorny/paths-filter outputs:
-    #   web-release:    changelog/web/v*.md   (added only)
-    #   web-content:    content/**
-    #   api:            apps/api/**
-    #   mobile-release: changelog/mobile/v*.md (added only)
+    outputs:
+      release: ${{ steps.f.outputs.release }}
+      content: ${{ steps.f.outputs.content }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: f
+        with:
+          filters: |
+            release:
+              - added: 'changelog/v*.md'
+            content:
+              - 'content/**'
 
   deploy-staging:
     needs: qa
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    # bun run media:upload (staging R2)
-    # bun run deploy:staging (CONTENT_DIR=content-staging/posts)
+    # bun run deploy:staging  (CONTENT_DIR=content-staging, full stack)
 
   deploy-web-prod:
     needs: [detect, deploy-staging]
-    if: detect.outputs.web-release == 'true' || detect.outputs.web-content == 'true'
-    # bun run media:upload (prod R2)
-    # bun run deploy:prod (CONTENT_DIR=content/posts)
+    if: needs.detect.outputs.release == 'true' || needs.detect.outputs.content == 'true'
+    # bun run deploy:prod:web  (CONTENT_DIR=content)
 
   deploy-api-prod:
     needs: [detect, deploy-staging]
-    if: detect.outputs.api == 'true'
+    if: needs.detect.outputs.release == 'true'
     # wrangler deploy + apply migrations
-
-  cut-mobile-release:
-    needs: detect
-    if: detect.outputs.mobile-release == 'true'
-    # EAS build / store submit pipeline
 ```
 
-`deploy-staging` is the smoke test for prod — if it fails, prod jobs don't run.
+`deploy-staging` is the smoke test for prod. If it fails, both prod jobs are blocked.
 
----
+`deploy:prod` needs to split into `deploy:prod:web` and `deploy:prod:api` so a content change can ship a web-only deploy without touching the Worker.
 
 ## FAQ
 
-**Q: Why not tags?**
-Tags add manual friction and don't compose with file-gated CI. Versioned changelog files give the same effect and live inline with the change.
+**Q: Why not tags?** Versioned changelog files give the same effect inline with the change, no extra command.
 
-**Q: How do I deploy prod without a changelog or content change?**
-Use `workflow_dispatch` with an explicit env target. The gates are a safety net, not a cage.
-
-**Q: How do I move a post from staging to production?**
-Delete from `content-staging/posts/` and create in `content/posts/` in the same commit.
-
-**Q: Why no API changelog?**
-Changelogs exist for readers. The API has no readers — its consumers are the web and mobile clients. API changes that surface to users get described in those clients' changelogs, in user-facing language.
-
-**Q: Why is newsletter manual?**
-Sending to real subscribers should be deliberate. Not every deploy is announcement-worthy.
-
----
+**Q: Deploy prod without a changelog or content change?** `workflow_dispatch` with an explicit env target. The gates are a safety net, not a cage.
 
 ## Related
 
 - [Staging Environment Setup](./STAGING_SETUP.md)
 - [Production Environment Setup](./PRODUCTION_SETUP.md)
-- `apps/web/src/content.config.ts` — content loader (reads `CONTENT_DIR`)
-- `apps/api/wrangler.toml` — Worker + environment config
-- `.github/workflows/ci.yml` — CI/CD pipeline (current state)
+- `apps/web/src/content.config.ts`: reads `CONTENT_DIR` (currently as posts dir, needs change to read as content root)
+- `apps/api/wrangler.toml`: Worker + environment config
+- `.github/workflows/ci.yml`: current CI (to be replaced)
