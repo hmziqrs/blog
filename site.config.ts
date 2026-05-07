@@ -44,10 +44,11 @@ export const siteConfig = defineSiteConfig({
     about: {
       title: "About",
       description:
-        "9 years building software. I write about my experiences in Programming, Technology and maybe self improvement.",
+        "9 years building software. Full-stack engineer. Writing about programming, technology, and work.",
       paragraphs: [
-        "Full-stack engineer with 9 years of experience. I care more about consistency and what works than conventional architecture.",
-        "I like to use typescript and rust since they be used in backend and cross platform development.",
+        "9 years building software. Full-stack engineer.",
+        "TypeScript, Rust, and Flutter for backend and cross-platform work.",
+        "Writing about programming, technology, and work.",
       ],
       focusAreas: [],
       principles: [],
