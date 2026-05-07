@@ -1,51 +1,86 @@
 ---
 import { getCollection, render } from "astro:content";
-import { pageTitle, siteConfig } from "../config/site";
+import { pageTitle, siteConfig, routes } from "../config/site";
 import PageContainer from "../components/PageContainer.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const entries = await getCollection("changelogs");
 entries.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const latest = entries[0];
 
 const title = pageTitle("Changelog");
 ---
 
 <BaseLayout title={title} description={`Release history for ${siteConfig.name}.`}>
   <PageContainer>
-    <main class="max-w-2xl mx-auto px-4 py-12">
-      <h1 class="text-3xl font-bold mb-8">Changelog</h1>
+    <main class="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+      <header class="mb-10 sm:mb-14">
+        <p class="page-kicker mb-3">Release history</p>
+        <h1 class="text-3xl sm:text-4xl font-bold">Changelog</h1>
+        {
+          latest && (
+            <p class="mt-2 text-sm text-base-content/50">
+              Latest:{" "}
+              <span class="font-mono text-primary/80">v{latest.data.version}</span>
+            </p>
+          )
+        }
+      </header>
 
       {
         entries.length === 0 ? (
-          <p class="text-base-content/70 text-sm">No releases yet.</p>
+          <div class="rounded-xl border border-base-content/10 bg-base-200/60 backdrop-blur-xl p-8 text-center">
+            <p class="text-base-content/50 text-sm">No releases yet.</p>
+          </div>
         ) : (
-          <div class="space-y-8">
-            {entries.map(async (entry) => {
-              const { Content } = await render(entry);
-              const { data } = entry;
-              const dateStr = data.date.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              });
-              return (
-                <article class="border border-base-content/10 rounded-lg p-6">
-                  <div class="flex items-center gap-3 mb-4">
-                    <span class="badge badge-primary badge-sm">{data.version || entry.id}</span>
-                    <time class="text-sm text-base-content/60" datetime={data.date.toISOString()}>
-                      {dateStr}
-                    </time>
-                  </div>
-                  <h2 class="text-xl font-semibold mb-3">{data.title}</h2>
-                  <div class="prose max-w-none">
-                    <Content />
-                  </div>
-                </article>
-              );
-            })}
+          <div class="relative">
+            <div class="absolute left-[1.15rem] top-0 bottom-0 w-px bg-base-content/8 hidden sm:block" aria-hidden="true"></div>
+            <div class="space-y-8 sm:space-y-10">
+              {entries.map(async (entry) => {
+                const { Content } = await render(entry);
+                const { data } = entry;
+                const dateStr = data.date.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                });
+                return (
+                  <article class="relative pl-0 sm:pl-12">
+                    <div class="absolute left-0 top-0 w-9 h-9 rounded-full border border-base-content/10 bg-base-200/60 backdrop-blur-xl hidden sm:flex items-center justify-center">
+                      <div class="w-2 h-2 rounded-full bg-primary/60"></div>
+                    </div>
+                    <div class="rounded-xl border border-base-content/10 bg-base-200/60 backdrop-blur-xl overflow-hidden">
+                      <div class="p-5 sm:p-6">
+                        <div class="flex flex-wrap items-center gap-3 mb-4">
+                          <span class="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-primary/90">
+                            <span class="w-1.5 h-1.5 rounded-full bg-primary/60 sm:hidden"></span>
+                            v{data.version}
+                          </span>
+                          <time class="font-mono text-[0.7rem] tracking-[0.1em] uppercase text-base-content/40" datetime={data.date.toISOString()}>
+                            {dateStr}
+                          </time>
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-semibold mb-3">{data.title}</h2>
+                        <div class="prose max-w-none prose-sm sm:prose-base">
+                          <Content />
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </div>
         )
       }
+
+      <footer class="mt-14 pt-8 border-t border-base-content/8">
+        <p class="text-sm text-base-content/40">
+          <a href={routes.rss} class="hover:text-primary transition-colors">RSS</a>
+          {" "}&middot;{" "}
+          <a href="/" class="hover:text-primary transition-colors">Home</a>
+        </p>
+      </footer>
     </main>
   </PageContainer>
 </BaseLayout>
