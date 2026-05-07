@@ -27,6 +27,7 @@
     "fmt:check": "oxfmt --check",
     "check": "oxlint && oxfmt --write",
     "dev:api": "turbo -F api dev",
+    "dev:newsletter-preview": "turbo -F newsletter-preview dev",
     "test": "turbo test && bun test scripts/__tests__",
     "test:coverage": "turbo -F web test -- --coverage",
     "qa": "bun run lint && bun run fmt:check && turbo -F web check && turbo test",
