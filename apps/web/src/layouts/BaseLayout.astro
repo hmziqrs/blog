@@ -4,6 +4,7 @@ import { extractTwitterHandle } from "../utils/meta";
 import { ClientRouter } from "astro:transitions";
 import { routes, siteConfig, withBasePath } from "../config/site";
 import ConsentBanner from "../components/ConsentBanner.astro";
+import ColorTweaks from "../components/ColorTweaks.astro";
 import LightModeWarningModal from "../components/LightModeWarningModal.astro";
 import NewsletterModal from "../components/NewsletterModal.astro";
 import StructuredData from "../components/StructuredData.astro";
@@ -192,5 +193,6 @@ const twitterHandle = extractTwitterHandle(siteConfig.author.socials);
 
     <NewsletterModal siteKey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} />
     <ConsentBanner />
+    <ColorTweaks />
   </body>
 </html>

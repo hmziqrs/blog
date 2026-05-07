@@ -1,4 +1,5 @@
 ---
+import { getCollection } from "astro:content";
 import { siteConfig } from "../config/site";
 import PageContainer from "./PageContainer.astro";
 
@@ -6,6 +7,10 @@ const year = new Date().getFullYear();
 const hasSponsor = Boolean(siteConfig.advertisement?.href);
 const sponsorName = hasSponsor ? "SPONSOR" : '"your brand"';
 const sponsorHref = hasSponsor ? siteConfig.advertisement?.href : "/contact";
+
+const changelogs = await getCollection("changelogs");
+changelogs.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const latestVersion = changelogs[0]?.data.version;
 ---
 
 <footer class="border-base-300/80 mt-12 border-t">
@@ -31,6 +36,17 @@ const sponsorHref = hasSponsor ? siteConfig.advertisement?.href : "/contact";
         >
           {siteConfig.copyrightSiteName}
         </a>
+        {latestVersion && (
+          <>
+            {" "}&middot;{" "}
+            <a
+              href="/changelog"
+              class="font-mono text-[0.7rem] text-base-content/40 hover:text-primary transition-colors duration-200"
+            >
+              v{latestVersion}
+            </a>
+          </>
+        )}
         . Built with{" "}
         <a
           href="https://astro.build"

@@ -1,0 +1,358 @@
+---
+const primaryPresets = [
+  { name: "Blue", hue: 245 },
+  { name: "Lime", hue: 145 },
+  { name: "Teal", hue: 185 },
+  { name: "Rose", hue: 5 },
+  { name: "Violet", hue: 285 },
+  { name: "Amber", hue: 85 },
+  { name: "Emerald", hue: 155 },
+  { name: "Sky", hue: 215 },
+] as const;
+
+const darkBgPresets = [
+  { name: "Default", hsl: "oklch(0.17 0.012 255)" },
+  { name: "Ink", hsl: "oklch(0.12 0.005 255)" },
+  { name: "Slate", hsl: "oklch(0.18 0.004 250)" },
+  { name: "Navy", hsl: "oklch(0.15 0.025 265)" },
+  { name: "Sepia", hsl: "oklch(0.17 0.01 60)" },
+  { name: "Forest", hsl: "oklch(0.15 0.015 160)" },
+  { name: "Plum", hsl: "oklch(0.16 0.02 300)" },
+  { name: "Charcoal", hsl: "oklch(0.13 0.003 100)" },
+] as const;
+
+const lightBgPresets = [
+  { name: "Default", hsl: "oklch(0.986 0.004 100)" },
+  { name: "Paper", hsl: "oklch(0.97 0.01 95)" },
+  { name: "Cream", hsl: "oklch(0.96 0.02 90)" },
+  { name: "Sky", hsl: "oklch(0.97 0.008 235)" },
+  { name: "Mint", hsl: "oklch(0.97 0.012 160)" },
+  { name: "Rose", hsl: "oklch(0.97 0.012 10)" },
+  { name: "Stone", hsl: "oklch(0.95 0.003 100)" },
+  { name: "Lavender", hsl: "oklch(0.97 0.01 290)" },
+] as const;
+---
+
+<button
+  id="color-tweaks-toggle"
+  class="fixed bottom-20 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-base-content/10 bg-base-200/60 backdrop-blur-xl text-base-content/40 hover:text-primary hover:border-primary/30 transition-all duration-200 sm:bottom-6 sm:right-6"
+  aria-label="Color tweaks"
+  title="Color tweaks"
+>
+  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+</button>
+
+<div
+  id="color-tweaks-panel"
+  class="fixed bottom-[7rem] right-4 z-30 hidden opacity-0 translate-y-2 transition-all duration-200 sm:bottom-[5.5rem] sm:right-6"
+>
+  <div class="rounded-xl border border-base-content/10 bg-base-200/60 backdrop-blur-xl p-3.5 max-w-[15rem]">
+    <p class="text-[0.6rem] font-mono font-semibold uppercase tracking-[0.16em] text-base-content/35 mb-2">Primary</p>
+    <div class="grid grid-cols-4 gap-2 mb-3.5">
+      <button
+        class="group flex flex-col items-center gap-1"
+        data-color-reset="primary"
+        aria-label="Reset primary"
+        title="Reset"
+      >
+        <span class="flex h-7 w-7 items-center justify-center rounded-full border border-base-content/15 bg-base-content/10 text-[0.5rem] font-mono text-base-content/40 group-hover:border-base-content/25 transition-colors">
+          x
+        </span>
+        <span class="text-[0.5rem] font-mono text-base-content/30 group-hover:text-base-content/50 transition-colors">
+          Reset
+        </span>
+      </button>
+      {primaryPresets.map(({ name, hue }) => (
+        <button
+          class="group flex flex-col items-center gap-1"
+          data-primary-hue={hue}
+          aria-label={`${name} primary`}
+          title={name}
+        >
+          <span
+            class="flex h-7 w-7 items-center justify-center rounded-full border border-base-content/15 transition-all group-hover:scale-110 group-hover:border-base-content/25"
+            style={`background: oklch(0.65 0.18 ${hue})`}
+          >
+            <span
+              class="hidden h-2.5 w-2.5 rounded-full bg-base-content/70"
+              data-primary-check={hue}
+            ></span>
+          </span>
+          <span class="text-[0.5rem] font-mono text-base-content/30 group-hover:text-base-content/50 transition-colors">
+            {name}
+          </span>
+        </button>
+      ))}
+    </div>
+
+    <p class="text-[0.6rem] font-mono font-semibold uppercase tracking-[0.16em] text-base-content/35 mb-2">Background</p>
+
+    <div data-bg-preset-group="dark" class="mb-3.5">
+      <p class="text-[0.5rem] font-mono text-base-content/25 mb-1.5 tracking-[0.12em] uppercase">Dark</p>
+      <div class="grid grid-cols-4 gap-2">
+        <button
+          class="group flex flex-col items-center gap-1"
+          data-color-reset="background"
+          aria-label="Reset background"
+          title="Reset"
+        >
+          <span class="flex h-7 w-7 items-center justify-center rounded-full border border-base-content/15 bg-base-content/10 text-[0.5rem] font-mono text-base-content/40 group-hover:border-base-content/25 transition-colors">
+            x
+          </span>
+          <span class="text-[0.5rem] font-mono text-base-content/30 group-hover:text-base-content/50 transition-colors">
+            Reset
+          </span>
+        </button>
+        {darkBgPresets.map(({ name, hsl }) => (
+          <button
+            class="group flex flex-col items-center gap-1"
+            data-bg-color={hsl}
+            aria-label={`${name} background`}
+            title={name}
+          >
+            <span
+              class="flex h-7 w-7 items-center justify-center rounded-full border border-base-content/15 transition-all group-hover:scale-110 group-hover:border-base-content/25"
+              style={`background: ${hsl}`}
+            >
+              <span
+                class="hidden h-2.5 w-2.5 rounded-full bg-base-content/70"
+                data-bg-check={hsl}
+              ></span>
+            </span>
+            <span class="text-[0.5rem] font-mono text-base-content/30 group-hover:text-base-content/50 transition-colors">
+              {name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div data-bg-preset-group="light">
+      <p class="text-[0.5rem] font-mono text-base-content/25 mb-1.5 tracking-[0.12em] uppercase">Light</p>
+      <div class="grid grid-cols-4 gap-2">
+        <button
+          class="group flex flex-col items-center gap-1"
+          data-color-reset="background"
+          aria-label="Reset background"
+          title="Reset"
+        >
+          <span class="flex h-7 w-7 items-center justify-center rounded-full border border-base-content/15 bg-base-content/10 text-[0.5rem] font-mono text-base-content/40 group-hover:border-base-content/25 transition-colors">
+            x
+          </span>
+          <span class="text-[0.5rem] font-mono text-base-content/30 group-hover:text-base-content/50 transition-colors">
+            Reset
+          </span>
+        </button>
+        {lightBgPresets.map(({ name, hsl }) => (
+          <button
+            class="group flex flex-col items-center gap-1"
+            data-bg-color={hsl}
+            aria-label={`${name} background`}
+            title={name}
+          >
+            <span
+              class="flex h-7 w-7 items-center justify-center rounded-full border border-base-content/15 transition-all group-hover:scale-110 group-hover:border-base-content/25"
+              style={`background: ${hsl}`}
+            >
+              <span
+                class="hidden h-2.5 w-2.5 rounded-full bg-base-content/70"
+                data-bg-check={hsl}
+              ></span>
+            </span>
+            <span class="text-[0.5rem] font-mono text-base-content/30 group-hover:text-base-content/50 transition-colors">
+              {name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    const KEY_PRIMARY = "color-preset-primary";
+    const KEY_BG_DARK = "color-preset-bg-dark";
+    const KEY_BG_LIGHT = "color-preset-bg-light";
+    const TOGGLE_ID = "color-tweaks-toggle";
+    const PANEL_ID = "color-tweaks-panel";
+    const VAR_PRIMARY = "--color-primary";
+    const VAR_BG = "--color-base-100";
+
+    function getStored(key) {
+      try { return localStorage.getItem(key); } catch { return null; }
+    }
+    function setStored(key, value) {
+      try { localStorage.setItem(key, value); } catch {}
+    }
+    function clearStored(key) {
+      try { localStorage.removeItem(key); } catch {}
+    }
+
+    // ── theme detection ──
+
+    function getTheme() {
+      return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+    }
+
+    function onThemeChange(cb) {
+      const observer = new MutationObserver(() => cb(getTheme()));
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+      return observer;
+    }
+
+    // ── primary ──
+
+    function applyPrimary(hue) {
+      document.documentElement.style.setProperty(VAR_PRIMARY, `oklch(0.65 0.18 ${hue})`);
+    }
+    function resetPrimary() {
+      document.documentElement.style.removeProperty(VAR_PRIMARY);
+    }
+    function markPrimaryActive(hue) {
+      document.querySelectorAll("[data-primary-check]").forEach((el) => el.classList.add("hidden"));
+      if (hue != null) {
+        const check = document.querySelector(`[data-primary-check="${hue}"]`);
+        if (check) check.classList.remove("hidden");
+      }
+    }
+
+    // ── background ──
+
+    function applyBg(color) {
+      document.documentElement.style.setProperty(VAR_BG, color);
+    }
+    function resetBg() {
+      document.documentElement.style.removeProperty(VAR_BG);
+    }
+    function syncBgFromStorage() {
+      const theme = getTheme();
+      const key = theme === "light" ? KEY_BG_LIGHT : KEY_BG_DARK;
+      const stored = getStored(key);
+      if (stored !== null) {
+        applyBg(stored);
+      } else {
+        resetBg();
+      }
+      markBgActive();
+    }
+    function markBgActive() {
+      const theme = getTheme();
+      const key = theme === "light" ? KEY_BG_LIGHT : KEY_BG_DARK;
+      const stored = getStored(key);
+
+      document.querySelectorAll("[data-bg-check]").forEach((el) => el.classList.add("hidden"));
+      if (stored !== null) {
+        const btn = document.querySelector(`[data-bg-color="${stored}"]`);
+        if (btn) {
+          const check = btn.querySelector("[data-bg-check]");
+          if (check) check.classList.remove("hidden");
+        }
+      }
+    }
+
+    // ── bg group toggle ──
+
+    function syncBgGroups() {
+      const theme = getTheme();
+      const darkGroup = document.querySelector('[data-bg-preset-group="dark"]');
+      const lightGroup = document.querySelector('[data-bg-preset-group="light"]');
+      if (!darkGroup || !lightGroup) return;
+
+      if (theme === "dark") {
+        darkGroup.style.display = "";
+        lightGroup.style.display = "none";
+      } else {
+        darkGroup.style.display = "none";
+        lightGroup.style.display = "";
+      }
+    }
+
+    // ── init ──
+
+    const storedPrimary = getStored(KEY_PRIMARY);
+    if (storedPrimary !== null) {
+      applyPrimary(Number(storedPrimary));
+      markPrimaryActive(Number(storedPrimary));
+    }
+
+    syncBgFromStorage();
+    syncBgGroups();
+    onThemeChange(() => {
+      syncBgFromStorage();
+      syncBgGroups();
+    });
+
+    // ── toggle ──
+
+    const toggle = document.getElementById(TOGGLE_ID);
+    const panel = document.getElementById(PANEL_ID);
+    let open = false;
+
+    toggle.addEventListener("click", () => {
+      open = !open;
+      if (open) {
+        syncBgGroups();
+        panel.classList.remove("hidden");
+        requestAnimationFrame(() => {
+          panel.classList.remove("opacity-0", "translate-y-2");
+        });
+      } else {
+        panel.classList.add("opacity-0", "translate-y-2");
+        setTimeout(() => panel.classList.add("hidden"), 200);
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (open && !toggle.contains(e.target) && !panel.contains(e.target)) {
+        toggle.click();
+      }
+    });
+
+    // ── primary presets ──
+
+    panel.querySelectorAll("[data-primary-hue]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const hue = Number(btn.dataset.primaryHue);
+        applyPrimary(hue);
+        setStored(KEY_PRIMARY, String(hue));
+        markPrimaryActive(hue);
+      });
+    });
+
+    // ── bg presets ──
+
+    panel.querySelectorAll("[data-bg-color]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const color = btn.dataset.bgColor;
+        const theme = getTheme();
+        const key = theme === "light" ? KEY_BG_LIGHT : KEY_BG_DARK;
+        applyBg(color);
+        setStored(key, color);
+        markBgActive();
+      });
+    });
+
+    // ── reset ──
+
+    panel.querySelectorAll("[data-color-reset]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.colorReset;
+        if (target === "primary") {
+          resetPrimary();
+          clearStored(KEY_PRIMARY);
+          markPrimaryActive(null);
+        } else if (target === "background") {
+          const theme = getTheme();
+          const key = theme === "light" ? KEY_BG_LIGHT : KEY_BG_DARK;
+          resetBg();
+          clearStored(key);
+          markBgActive();
+        }
+      });
+    });
+  })();
+</script>
