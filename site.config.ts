@@ -55,8 +55,7 @@ export const siteConfig = defineSiteConfig({
     },
     contact: {
       title: "Contact",
-      description:
-        "Get in touch for freelance, contract, or full-time software work.",
+      description: "Get in touch for freelance, contract, or full-time software work.",
       paragraphs: [
         "Get in touch for freelance, contract, or full-time work.",
         "Fastest reply is on X. Email and Telegram work too.",

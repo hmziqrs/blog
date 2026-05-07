@@ -29,7 +29,7 @@ Each environment renders its own tree. `content-staging/` is **not** a drafts ar
 The build picks one via `CONTENT_DIR`:
 
 | Env     | `CONTENT_DIR`     |
-|---------|-------------------|
+| ------- | ----------------- |
 | prod    | `content`         |
 | staging | `content-staging` |
 
@@ -53,11 +53,11 @@ Adding a new version file is the release event: it deploys both web and API to p
 
 Uses [dorny/paths-filter](https://github.com/dorny/paths-filter), which handles force-push and first-push cases that raw `git diff` does not.
 
-| Gate         | Trigger                          | Deploys             |
-|--------------|----------------------------------|---------------------|
-| `release`    | Added `changelog/v*.md`          | web prod + api prod |
-| `content`    | Any change under `content/**`    | web prod            |
-| _(implicit)_ | Every push to master             | staging always      |
+| Gate         | Trigger                       | Deploys             |
+| ------------ | ----------------------------- | ------------------- |
+| `release`    | Added `changelog/v*.md`       | web prod + api prod |
+| `content`    | Any change under `content/**` | web prod            |
+| _(implicit)_ | Every push to master          | staging always      |
 
 `added`-only on `release` enforces immutability for deploy purposes: editing an existing version file does not trigger a redeploy.
 
@@ -66,6 +66,7 @@ Uses [dorny/paths-filter](https://github.com/dorny/paths-filter), which handles 
 Manual via `workflow_dispatch` in `.github/workflows/send-newsletter.yml`.
 
 Inputs:
+
 - `issue_slug`: filename under `content/newsletters/` (or `content-staging/newsletters/` for test sends)
 - `environment`: `staging` or `production`
 
@@ -82,18 +83,18 @@ For emergencies, `workflow_dispatch` with an explicit env target bypasses the ga
 
 ## Infrastructure
 
-| Resource | Staging                       | Production              |
-|----------|-------------------------------|-------------------------|
-| D1       | `blog-db-staging`             | `blog-db`               |
-| R2       | `blog-media-staging`          | `blog-media`            |
-| Queue    | `newsletter-send-staging`     | `newsletter-send`       |
-| DLQ      | `newsletter-dlq-staging`      | `newsletter-dlq`        |
-| KV       | `RATE_LIMIT_KV` (staging)     | `RATE_LIMIT_KV` (prod)  |
-| Worker   | `api-staging` (.workers.dev)  | `api` (route on zone)   |
-| Pages    | `hmziqblog-staging` project   | `hmziqblog` project     |
-| Turnstile| Test keys                     | Real keys               |
-| URL      | `staging.hmziqblog.pages.dev` | `blog.hmziq.rs`         |
-| API      | `api-staging.*.workers.dev`   | `blog.hmziq.rs/api/*`   |
+| Resource  | Staging                       | Production             |
+| --------- | ----------------------------- | ---------------------- |
+| D1        | `blog-db-staging`             | `blog-db`              |
+| R2        | `blog-media-staging`          | `blog-media`           |
+| Queue     | `newsletter-send-staging`     | `newsletter-send`      |
+| DLQ       | `newsletter-dlq-staging`      | `newsletter-dlq`       |
+| KV        | `RATE_LIMIT_KV` (staging)     | `RATE_LIMIT_KV` (prod) |
+| Worker    | `api-staging` (.workers.dev)  | `api` (route on zone)  |
+| Pages     | `hmziqblog-staging` project   | `hmziqblog` project    |
+| Turnstile | Test keys                     | Real keys              |
+| URL       | `staging.hmziqblog.pages.dev` | `blog.hmziq.rs`        |
+| API       | `api-staging.*.workers.dev`   | `blog.hmziq.rs/api/*`  |
 
 CLI-driven (`bun run deploy:staging` / `bun run deploy:prod`) targeting different Pages projects. Not Cloudflare Pages branch previews. Secrets use the existing pattern: `STAGE_` prefix for staging, no prefix for prod.
 

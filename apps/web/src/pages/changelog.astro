@@ -1,0 +1,51 @@
+---
+import { getCollection, render } from "astro:content";
+import { pageTitle, siteConfig } from "../config/site";
+import PageContainer from "../components/PageContainer.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const entries = await getCollection("changelogs");
+entries.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const title = pageTitle("Changelog");
+---
+
+<BaseLayout title={title} description={`Release history for ${siteConfig.name}.`}>
+  <PageContainer>
+    <main class="max-w-2xl mx-auto px-4 py-12">
+      <h1 class="text-3xl font-bold mb-8">Changelog</h1>
+
+      {
+        entries.length === 0 ? (
+          <p class="text-base-content/70 text-sm">No releases yet.</p>
+        ) : (
+          <div class="space-y-8">
+            {entries.map(async (entry) => {
+              const { Content } = await render(entry);
+              const { data } = entry;
+              const dateStr = data.date.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              });
+              return (
+                <article class="border border-base-content/10 rounded-lg p-6">
+                  <div class="flex items-center gap-3 mb-4">
+                    <span class="badge badge-primary badge-sm">{data.version || entry.id}</span>
+                    <time class="text-sm text-base-content/60" datetime={data.date.toISOString()}>
+                      {dateStr}
+                    </time>
+                  </div>
+                  <h2 class="text-xl font-semibold mb-3">{data.title}</h2>
+                  <div class="prose max-w-none">
+                    <Content />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )
+      }
+    </main>
+  </PageContainer>
+</BaseLayout>

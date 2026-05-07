@@ -6,10 +6,11 @@ import { fileURLToPath } from "node:url";
 
 const monorepoRoot = path.resolve(fileURLToPath(import.meta.url), "../../../../");
 
-const contentDir = process.env.CONTENT_DIR || path.join(monorepoRoot, "content/posts");
+const contentRoot = process.env.CONTENT_DIR || path.join(monorepoRoot, "content");
+const postsDir = path.join(contentRoot, "posts");
 
 const posts = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: contentDir }),
+  loader: glob({ pattern: "**/*.md", base: postsDir }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -24,4 +25,16 @@ const posts = defineCollection({
     }),
 });
 
-export const collections = { posts };
+const changelogsDir = path.join(monorepoRoot, "changelog");
+
+const changelogs = defineCollection({
+  loader: glob({ pattern: "v*.md", base: changelogsDir }),
+  schema: () =>
+    z.object({
+      title: z.string(),
+      date: z.coerce.date(),
+      version: z.string().optional(),
+    }),
+});
+
+export const collections = { posts, changelogs };

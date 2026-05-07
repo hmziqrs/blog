@@ -89,6 +89,7 @@ export interface RoutesConfig {
   favicon: string;
   ogDefault: string;
   sitemapIndex: string;
+  changelog: string;
   post: (slug: string) => string;
   tag: (tag: string) => string;
   category: (category: string) => string;
@@ -156,6 +157,7 @@ export function createRoutes(basePath = "/"): RoutesConfig {
     favicon: withBasePath(basePath, "/author-light.svg"),
     ogDefault: withBasePath(basePath, "/og-default.svg"),
     sitemapIndex: withBasePath(basePath, "/sitemap-index.xml"),
+    changelog: withBasePath(basePath, "/changelog"),
     post: (slug) => withBasePath(basePath, `/posts/${slug}`),
     tag: (tag) => withBasePath(basePath, `/tags/${encodeRouteSegment(tag)}`),
     category: (category) => withBasePath(basePath, `/category/${encodeRouteSegment(category)}`),
