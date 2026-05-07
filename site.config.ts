@@ -28,7 +28,6 @@ export const siteConfig = defineSiteConfig({
     { page: "contact", label: "Contact" },
     { page: "privacy", label: "Privacy" },
     { page: "terms", label: "Terms" },
-    { href: "/changelog", label: "Changelog" },
   ],
   blog: {
     homeTitle: "Hmziq blog",

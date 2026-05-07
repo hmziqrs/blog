@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
-import { pageTitle, siteConfig, routes } from "../config/site";
+import { pageTitle, siteConfig } from "../config/site";
 import PageContainer from "../components/PageContainer.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
@@ -13,15 +13,14 @@ const title = pageTitle("Changelog");
 
 <BaseLayout title={title} description={`Release history for ${siteConfig.name}.`}>
   <PageContainer>
-    <main class="max-w-2xl mx-auto px-4 py-8 sm:py-12">
-      <header class="mb-10 sm:mb-14">
-        <p class="page-kicker mb-3">Release history</p>
-        <h1 class="text-3xl sm:text-4xl font-bold">Changelog</h1>
+    <main class="max-w-xl mx-auto px-4 py-8 sm:py-10">
+      <header class="mb-6 sm:mb-8">
+        <p class="page-kicker mb-1.5">Release history</p>
+        <h1 class="text-2xl sm:text-3xl font-bold">Changelog</h1>
         {
           latest && (
-            <p class="mt-2 text-sm text-base-content/50">
-              Latest:{" "}
-              <span class="font-mono text-primary/80">v{latest.data.version}</span>
+            <p class="mt-1 text-xs text-base-content/40">
+              Latest <span class="font-mono text-primary/70">v{latest.data.version}</span>
             </p>
           )
         }
@@ -29,39 +28,39 @@ const title = pageTitle("Changelog");
 
       {
         entries.length === 0 ? (
-          <div class="rounded-xl border border-base-content/10 bg-base-200/60 backdrop-blur-xl p-8 text-center">
-            <p class="text-base-content/50 text-sm">No releases yet.</p>
+          <div class="rounded-xl border border-base-content/10 bg-base-200/60 backdrop-blur-xl p-6 text-center">
+            <p class="text-base-content/40 text-xs">No releases yet.</p>
           </div>
         ) : (
           <div class="relative">
-            <div class="absolute left-[1.15rem] top-0 bottom-0 w-px bg-base-content/8 hidden sm:block" aria-hidden="true"></div>
-            <div class="space-y-8 sm:space-y-10">
+            <div class="absolute left-[0.95rem] top-1 bottom-1 w-px bg-base-content/8 hidden sm:block" aria-hidden="true"></div>
+            <div class="space-y-5 sm:space-y-6">
               {entries.map(async (entry) => {
                 const { Content } = await render(entry);
                 const { data } = entry;
                 const dateStr = data.date.toLocaleDateString("en-US", {
                   year: "numeric",
-                  month: "long",
+                  month: "short",
                   day: "numeric",
                 });
                 return (
-                  <article class="relative pl-0 sm:pl-12">
-                    <div class="absolute left-0 top-0 w-9 h-9 rounded-full border border-base-content/10 bg-base-200/60 backdrop-blur-xl hidden sm:flex items-center justify-center">
-                      <div class="w-2 h-2 rounded-full bg-primary/60"></div>
+                  <article class="relative pl-0 sm:pl-10">
+                    <div class="absolute left-[0.375rem] top-[0.35rem] w-[1.15rem] h-[1.15rem] rounded-full border border-base-content/10 bg-base-200/60 backdrop-blur-xl hidden sm:flex items-center justify-center">
+                      <div class="w-1.5 h-1.5 rounded-full bg-primary/50"></div>
                     </div>
                     <div class="rounded-xl border border-base-content/10 bg-base-200/60 backdrop-blur-xl overflow-hidden">
-                      <div class="p-5 sm:p-6">
-                        <div class="flex flex-wrap items-center gap-3 mb-4">
-                          <span class="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-primary/90">
-                            <span class="w-1.5 h-1.5 rounded-full bg-primary/60 sm:hidden"></span>
+                      <div class="p-4 sm:p-5">
+                        <div class="flex flex-wrap items-center gap-2 mb-2.5">
+                          <span class="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 font-mono text-[0.6rem] font-semibold tracking-[0.14em] uppercase text-primary/80">
+                            <span class="w-1 h-1 rounded-full bg-primary/50 mr-1.5 sm:hidden"></span>
                             v{data.version}
                           </span>
-                          <time class="font-mono text-[0.7rem] tracking-[0.1em] uppercase text-base-content/40" datetime={data.date.toISOString()}>
+                          <time class="font-mono text-[0.6rem] tracking-[0.1em] uppercase text-base-content/35" datetime={data.date.toISOString()}>
                             {dateStr}
                           </time>
                         </div>
-                        <h2 class="text-lg sm:text-xl font-semibold">{data.title}</h2>
-                        <div class="mt-3 text-sm leading-relaxed text-base-content/75 [&_ul]:space-y-2.5 [&_li]:flex [&_li]:gap-3 [&_li::before]:content-[''] [&_li::before]:mt-[0.5rem] [&_li::before]:w-1.5 [&_li::before]:h-1.5 [&_li::before]:rounded-full [&_li::before]:bg-primary/50 [&_li::before]:shrink-0">
+                        <h2 class="text-sm font-semibold">{data.title}</h2>
+                        <div class="mt-2.5 text-[0.82rem] leading-relaxed text-base-content/65 [&_ul]:space-y-1.5 [&_li]:flex [&_li]:gap-2.5 [&_li::before]:content-[''] [&_li::before]:mt-[0.45rem] [&_li::before]:w-1 [&_li::before]:h-1 [&_li::before]:rounded-full [&_li::before]:bg-primary/40 [&_li::before]:shrink-0">
                           <Content />
                         </div>
                       </div>
@@ -73,14 +72,6 @@ const title = pageTitle("Changelog");
           </div>
         )
       }
-
-      <footer class="mt-14 pt-8 border-t border-base-content/8">
-        <p class="text-sm text-base-content/40">
-          <a href={routes.rss} class="hover:text-primary transition-colors">RSS</a>
-          {" "}&middot;{" "}
-          <a href="/" class="hover:text-primary transition-colors">Home</a>
-        </p>
-      </footer>
     </main>
   </PageContainer>
 </BaseLayout>
