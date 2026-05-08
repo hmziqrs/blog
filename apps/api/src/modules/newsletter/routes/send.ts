@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import type { Bindings } from "../../../env";
+import type { Bindings } from "@/src/env";
 import type { NewsletterMessage } from "../queue";
-import { deriveUnsubscribeToken } from "../../../lib/tokens";
+import { deriveUnsubscribeToken } from "@/src/lib/tokens";
 
 interface SendRequest {
   slug: string;

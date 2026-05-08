@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import icon from "astro-icon";
 import { defineConfig } from "astro/config";
 import { fileURLToPath } from "node:url";
+import path from "node:path";
 import { siteConfig } from "../../site.config.ts";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -15,6 +16,12 @@ export default defineConfig({
   vite: {
     envDir: "../../",
     plugins: [tailwindcss()],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "."),
+        "@root": path.resolve(__dirname, "../../"),
+      },
+    },
     ssr: {
       noExternal: ["@iconify-json/tabler"],
     },

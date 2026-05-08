@@ -1,2 +1,2 @@
-export { pageTitle, routes, siteConfig } from "../../../../site.config";
+export { pageTitle, routes, siteConfig } from "@root/site.config.ts";
 export { toAbsoluteUrl, withBasePath } from "@blog/site";

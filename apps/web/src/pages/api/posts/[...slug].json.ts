@@ -1,6 +1,6 @@
 import { getCollection } from "astro:content";
 import type { GetStaticPaths, APIRoute, ImageMetadata } from "astro";
-import { normalizeCover } from "../../../utils/cover-image";
+import { normalizeCover } from "@/src/utils/cover-image";
 
 export const getStaticPaths = (async () => {
   const posts = await getCollection("posts", ({ data }) => !data.draft);

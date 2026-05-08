@@ -1,6 +1,10 @@
 {
   "extends": "../../packages/config/tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "types": ["@cloudflare/workers-types", "@cloudflare/vitest-pool-workers"]
   },
   "include": ["src/**/*", "test/**/*"],

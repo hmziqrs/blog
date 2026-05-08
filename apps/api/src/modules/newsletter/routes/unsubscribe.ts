@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { Bindings } from "../../../env";
-import { checkUnsubscribeRateLimit } from "../../../lib/rate-limit";
-import { hashToken } from "../../../lib/tokens";
+import type { Bindings } from "@/src/env";
+import { checkUnsubscribeRateLimit } from "@/src/lib/rate-limit";
+import { hashToken } from "@/src/lib/tokens";
 
 const unsubscribeSchema = z.object({
   token: z.string().min(1, "Unsubscribe token required"),

@@ -13,6 +13,11 @@ export default defineConfig(async () => {
         },
       }),
     ],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "."),
+      },
+    },
     test: {
       setupFiles: ["./test/apply-migrations.ts"],
     },

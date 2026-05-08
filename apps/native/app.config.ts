@@ -1,5 +1,5 @@
 import type { ExpoConfig } from "expo/config";
-import { routes, siteConfig } from "../../site.config.ts";
+import { routes, siteConfig } from "@root/site.config.ts";
 
 const config: ExpoConfig = {
   name: siteConfig.name,

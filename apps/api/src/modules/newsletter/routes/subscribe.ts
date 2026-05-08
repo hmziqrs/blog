@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { Bindings } from "../../../env";
-import { normalizeEmail } from "../../../lib/email";
-import { checkSubscribeRateLimit } from "../../../lib/rate-limit";
-import { deriveUnsubscribeToken, hashToken } from "../../../lib/tokens";
+import type { Bindings } from "@/src/env";
+import { normalizeEmail } from "@/src/lib/email";
+import { checkSubscribeRateLimit } from "@/src/lib/rate-limit";
+import { deriveUnsubscribeToken, hashToken } from "@/src/lib/tokens";
 
 const subscribeSchema = z.object({
   email: z.email("Invalid email address"),
