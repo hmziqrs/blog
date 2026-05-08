@@ -20,6 +20,6 @@ export async function GET(context: APIContext) {
       pubDate: post.data.date,
       link: `${routes.post(post.id)}/`,
     })),
-    customData: `<language>en-us</language><atom:link href="${toAbsoluteUrl(siteConfig.siteUrl, routes.rss)}" rel="self" type="application/rss+xml" />`,
+    customData: `<language>en-us</language><atom:link href="${toAbsoluteUrl(siteConfig.publicSiteUrl, routes.rss)}" rel="self" type="application/rss+xml" />`,
   });
 }

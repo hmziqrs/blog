@@ -36,6 +36,8 @@ describe("route helpers", () => {
     const config = defineSiteConfig({
       name: "Example",
       siteUrl: "https://example.com",
+      copyrightSiteURL: "https://example.com",
+      copyrightSiteName: "Example",
       basePath: "/blog",
       author: {
         name: "Example Author",
@@ -58,6 +60,8 @@ describe("site config nav resolution", () => {
     const config = defineSiteConfig({
       name: "Example",
       siteUrl: "https://example.com",
+      copyrightSiteURL: "https://example.com",
+      copyrightSiteName: "Example",
       author: {
         name: "Example Author",
       },

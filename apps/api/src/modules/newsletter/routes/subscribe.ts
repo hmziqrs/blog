@@ -16,7 +16,8 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.post("/", async (c) => {
   // L4: Proper Content-Type parsing instead of substring check
   const contentType = c.req.header("Content-Type") ?? "";
-  if (contentType.split(";")[0].trim() !== "application/json") {
+  const mimeType = contentType.split(";").at(0) ?? "";
+  if (mimeType.trim() !== "application/json") {
     return c.json({ error: "Content-Type must be application/json" }, 415);
   }
 

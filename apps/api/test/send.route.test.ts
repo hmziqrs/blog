@@ -315,10 +315,12 @@ describe("POST /api/newsletter/send", () => {
   });
 
   it("enqueues correct message shape per subscriber", async () => {
-    const batchCalls: { body: NewsletterMessage }[][] = [];
+    const batchCalls: NewsletterQueueMessage[][] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-    env.NEWSLETTER_QUEUE.sendBatch = async (messages: { body: NewsletterMessage }[]) => {
+    env.NEWSLETTER_QUEUE.sendBatch = async (...args) => {
+      const [messages] = args;
       batchCalls.push([...messages]);
+      return { metadata: { metrics: { backlogCount: 0, backlogBytes: 0 } } };
     };
 
     try {
@@ -409,8 +411,10 @@ describe("POST /api/newsletter/send", () => {
 
     const batchCalls: NewsletterQueueMessage[][] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-    env.NEWSLETTER_QUEUE.sendBatch = async (messages: Iterable<NewsletterQueueMessage>) => {
+    env.NEWSLETTER_QUEUE.sendBatch = async (...args) => {
+      const [messages] = args;
       batchCalls.push([...messages]);
+      return { metadata: { metrics: { backlogCount: 0, backlogBytes: 0 } } };
     };
 
     try {
@@ -488,8 +492,10 @@ describe("POST /api/newsletter/send", () => {
 
     const batchCalls: NewsletterQueueMessage[][] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-    env.NEWSLETTER_QUEUE.sendBatch = async (messages: Iterable<NewsletterQueueMessage>) => {
+    env.NEWSLETTER_QUEUE.sendBatch = async (...args) => {
+      const [messages] = args;
       batchCalls.push([...messages]);
+      return { metadata: { metrics: { backlogCount: 0, backlogBytes: 0 } } };
     };
 
     try {
@@ -544,8 +550,10 @@ describe("POST /api/newsletter/send", () => {
 
       const batchCalls: NewsletterQueueMessage[][] = [];
       const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-      env.NEWSLETTER_QUEUE.sendBatch = async (messages: Iterable<NewsletterQueueMessage>) => {
+      env.NEWSLETTER_QUEUE.sendBatch = async (...args) => {
+        const [messages] = args;
         batchCalls.push([...messages]);
+        return { metadata: { metrics: { backlogCount: 0, backlogBytes: 0 } } };
       };
 
       try {

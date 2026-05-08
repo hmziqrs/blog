@@ -203,13 +203,14 @@ describe("handleQueueBatch", () => {
   it("sends HTML email with raw htmlBody and unsubscribe link", async () => {
     const sentEmails: { to: string; from: string; subject: string; html: string }[] = [];
     const originalSend = env.SEND_EMAIL.send;
-    env.SEND_EMAIL.send = async (message) => {
-      const to = Array.isArray(message.to) ? (message.to[0] ?? "") : (message.to ?? "");
+    env.SEND_EMAIL.send = async (...args) => {
+      const m = args[0];
+      const toLine = Array.isArray(m.to) ? String(m.to[0]) : String(m.to);
       sentEmails.push({
-        to,
-        from: message.from ?? "",
-        subject: message.subject ?? "",
-        html: message.html ?? "",
+        to: toLine,
+        from: typeof m.from === "string" ? m.from : m.from.email,
+        subject: "subject" in m ? (m.subject ?? "") : "",
+        html: "html" in m ? (m.html ?? "") : "",
       });
       return { messageId: "test-id" };
     };

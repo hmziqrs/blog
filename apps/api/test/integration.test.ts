@@ -26,12 +26,13 @@ describe("Newsletter end-to-end", () => {
   it("send endpoint enqueues and queue consumer records delivery", async () => {
     const capturedBatch: { body: NewsletterMessage }[] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-    env.NEWSLETTER_QUEUE.sendBatch = async (messages: { body: NewsletterMessage }[]) => {
+    env.NEWSLETTER_QUEUE.sendBatch = async (...args) => {
+      const [messages] = args;
       capturedBatch.push(...messages);
+      return { metadata: { metrics: { backlogCount: 0, backlogBytes: 0 } } };
     };
 
     try {
-      // Step 1: Call send endpoint
       const sendRes = await app.fetch(
         new Request("http://localhost/api/newsletter/send", {
           method: "POST",
@@ -101,8 +102,10 @@ describe("Newsletter end-to-end", () => {
 
     const batchCalls: NewsletterQueueMessage[][] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-    env.NEWSLETTER_QUEUE.sendBatch = async (messages: Iterable<NewsletterQueueMessage>) => {
+    env.NEWSLETTER_QUEUE.sendBatch = async (...args) => {
+      const [messages] = args;
       batchCalls.push([...messages]);
+      return { metadata: { metrics: { backlogCount: 0, backlogBytes: 0 } } };
     };
 
     try {

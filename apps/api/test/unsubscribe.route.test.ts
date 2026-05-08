@@ -31,15 +31,26 @@ describe("POST /api/newsletter/unsubscribe", () => {
     return token;
   }
 
-  // H1: GET handler removed
-  it("rejects GET requests with 404", async () => {
+  // GET handler supports single-click unsubscribe from email links
+  it("unsubscribes via GET with token query param", async () => {
+    originalEnvironment = env.ENVIRONMENT;
+    env.ENVIRONMENT = "test";
     const token = await createSubscriber("test-get@example.com");
     const res = await app.fetch(
       req(`/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}`),
       env,
       ctx,
     );
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { message: string };
+    expect(body.message).toBe("Successfully unsubscribed");
+  });
+
+  it("returns 400 when GET is missing token", async () => {
+    originalEnvironment = env.ENVIRONMENT;
+    env.ENVIRONMENT = "test";
+    const res = await app.fetch(req("/api/newsletter/unsubscribe"), env, ctx);
+    expect(res.status).toBe(400);
   });
 
   // Validation

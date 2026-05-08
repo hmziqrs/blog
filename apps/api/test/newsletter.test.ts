@@ -12,16 +12,16 @@ describe("normalizeEmail", () => {
     expect(normalizeEmail("user+tag@gmail.com")).toBe("user@gmail.com");
   });
 
-  test("preserves dots in local part", () => {
-    expect(normalizeEmail("u.s.e.r@gmail.com")).toBe("u.s.e.r@gmail.com");
+  test("strips dots in local part for gmail", () => {
+    expect(normalizeEmail("u.s.e.r@gmail.com")).toBe("user@gmail.com");
   });
 
-  test("strips plus-addressing and preserves dots", () => {
-    expect(normalizeEmail("u.s.e.r+tag@gmail.com")).toBe("u.s.e.r@gmail.com");
+  test("strips both plus-addressing and dots for gmail", () => {
+    expect(normalizeEmail("u.s.e.r+tag@gmail.com")).toBe("user@gmail.com");
   });
 
-  test("does not normalize googlemail.com", () => {
-    expect(normalizeEmail("user@googlemail.com")).toBe("user@googlemail.com");
+  test("strips dots for googlemail.com too", () => {
+    expect(normalizeEmail("u.s.e.r@googlemail.com")).toBe("user@googlemail.com");
   });
 
   test("strips plus-addressing for any domain", () => {

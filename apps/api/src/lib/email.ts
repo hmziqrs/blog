@@ -14,13 +14,18 @@ export function normalizeEmail(raw: string): string {
   const atIndex = raw.lastIndexOf("@");
   if (atIndex === -1) return raw.toLowerCase().trim();
 
-  const local = raw.slice(0, atIndex).toLowerCase().trim();
-  const domain = raw
+  let local = raw.slice(0, atIndex).toLowerCase().trim();
+  let domain = raw
     .slice(atIndex + 1)
     .toLowerCase()
     .trim();
 
-  const normalizedLocal = local.split("+")[0] ?? local;
+  if (domain === "gmail.com" || domain === "googlemail.com") {
+    local = local.split("+")[0] ?? local;
+    local = local.replaceAll(".", "");
+  } else {
+    local = local.split("+")[0] ?? local;
+  }
 
-  return `${normalizedLocal}@${domain}`;
+  return `${local}@${domain}`;
 }

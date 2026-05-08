@@ -93,8 +93,10 @@ describe("Complete end-to-end newsletter flow", () => {
 
     const capturedMessages: NewsletterMessage[] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-    env.NEWSLETTER_QUEUE.sendBatch = async (messages: { body: NewsletterMessage }[]) => {
+    env.NEWSLETTER_QUEUE.sendBatch = async (...args) => {
+      const [messages] = args;
       for (const m of messages) capturedMessages.push(m.body);
+      return { metadata: { metrics: { backlogCount: 0, backlogBytes: 0 } } };
     };
 
     const sendRes = await (async () => {
@@ -135,13 +137,14 @@ describe("Complete end-to-end newsletter flow", () => {
 
     const sentEmails: { to: string; from: string; subject: string; html: string }[] = [];
     const originalSend = env.SEND_EMAIL.send;
-    env.SEND_EMAIL.send = async (message) => {
-      const to = Array.isArray(message.to) ? (message.to[0] ?? "") : (message.to ?? "");
+    env.SEND_EMAIL.send = async (...args) => {
+      const m = args[0];
+      const toLine = Array.isArray(m.to) ? String(m.to[0]) : String(m.to);
       sentEmails.push({
-        to,
-        from: message.from ?? "",
-        subject: message.subject ?? "",
-        html: message.html ?? "",
+        to: toLine,
+        from: typeof m.from === "string" ? m.from : m.from.email,
+        subject: "subject" in m ? (m.subject ?? "") : "",
+        html: "html" in m ? (m.html ?? "") : "",
       });
       return { messageId: "test-id" };
     };
@@ -215,8 +218,10 @@ describe("Complete end-to-end newsletter flow", () => {
 
     const capturedMessages: NewsletterMessage[] = [];
     const originalSendBatch = env.NEWSLETTER_QUEUE.sendBatch.bind(env.NEWSLETTER_QUEUE);
-    env.NEWSLETTER_QUEUE.sendBatch = async (messages: { body: NewsletterMessage }[]) => {
+    env.NEWSLETTER_QUEUE.sendBatch = async (...args) => {
+      const [messages] = args;
       for (const m of messages) capturedMessages.push(m.body);
+      return { metadata: { metrics: { backlogCount: 0, backlogBytes: 0 } } };
     };
 
     try {
