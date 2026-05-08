@@ -189,30 +189,32 @@ body {
   color: color-mix(in oklab, var(--color-base-content) 84%, transparent);
 }
 
-.text-dim {
-  color: color-mix(in oklab, var(--color-base-content) 28%, transparent);
-}
-.text-faint {
-  color: color-mix(in oklab, var(--color-base-content) 42%, transparent);
-}
-.text-muted {
-  color: color-mix(in oklab, var(--color-base-content) 52%, transparent);
-}
-.text-soft {
-  color: color-mix(in oklab, var(--color-base-content) 65%, transparent);
-}
+@layer utilities {
+  .text-dim {
+    color: color-mix(in oklab, var(--color-base-content) 28%, transparent);
+  }
+  .text-faint {
+    color: color-mix(in oklab, var(--color-base-content) 42%, transparent);
+  }
+  .text-muted {
+    color: color-mix(in oklab, var(--color-base-content) 52%, transparent);
+  }
+  .text-soft {
+    color: color-mix(in oklab, var(--color-base-content) 65%, transparent);
+  }
 
-[data-theme="light"] .text-dim {
-  color: color-mix(in oklab, var(--color-base-content) 68%, transparent);
-}
-[data-theme="light"] .text-faint {
-  color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
-}
-[data-theme="light"] .text-muted {
-  color: color-mix(in oklab, var(--color-base-content) 88%, transparent);
-}
-[data-theme="light"] .text-soft {
-  color: color-mix(in oklab, var(--color-base-content) 92%, transparent);
+  [data-theme="light"] .text-dim {
+    color: color-mix(in oklab, var(--color-base-content) 68%, transparent);
+  }
+  [data-theme="light"] .text-faint {
+    color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
+  }
+  [data-theme="light"] .text-muted {
+    color: color-mix(in oklab, var(--color-base-content) 88%, transparent);
+  }
+  [data-theme="light"] .text-soft {
+    color: color-mix(in oklab, var(--color-base-content) 92%, transparent);
+  }
 }
 
 .page-list {
