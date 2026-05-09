@@ -8,7 +8,7 @@ const { uid = "modal" } = Astro.props;
 
 <div
   id={`${uid}-backdrop`}
-  class="fixed inset-0 z-40 hidden opacity-0 bg-base-100/5 backdrop-blur-xs transition-opacity duration-300"
+  class="fixed inset-0 z-40 hidden opacity-0 bg-base-100/10 dark:bg-base-100/5 backdrop-blur-xs transition-opacity duration-300"
   aria-hidden="true"
 ></div>
 
@@ -22,10 +22,19 @@ const { uid = "modal" } = Astro.props;
 </div>
 
 <script define:vars={{ uid }}>
-  const backdrop = document.getElementById(`${uid}-backdrop`);
-  const modal = document.getElementById(uid);
+  let closeTimer;
+
+  function getEls() {
+    return {
+      backdrop: document.getElementById(`${uid}-backdrop`),
+      modal: document.getElementById(uid),
+    };
+  }
 
   function show() {
+    clearTimeout(closeTimer);
+    const { backdrop, modal } = getEls();
+    if (!backdrop || !modal) return;
     backdrop.classList.remove("hidden");
     modal.classList.remove("hidden");
     modal.classList.add("flex");
@@ -38,35 +47,37 @@ const { uid = "modal" } = Astro.props;
   }
 
   function close() {
+    const { modal } = getEls();
+    if (!modal) return;
     const event = new CustomEvent(`${uid}:beforeclose`, { cancelable: true });
     modal.dispatchEvent(event);
     if (event.defaultPrevented) return;
 
-    backdrop.classList.add("opacity-0");
+    const { backdrop } = getEls();
+    if (backdrop) backdrop.classList.add("opacity-0");
     modal.classList.add("opacity-0");
-    setTimeout(() => {
-      backdrop.classList.add("hidden");
+    closeTimer = setTimeout(() => {
+      if (backdrop) backdrop.classList.add("hidden");
       modal.classList.add("hidden");
       modal.classList.remove("flex");
     }, 300);
   }
 
+  function onKeydown(e) {
+    if (e.key !== "Escape") return;
+    const { modal } = getEls();
+    if (!modal) return;
+    if (!modal.classList.contains("hidden")) close();
+  }
+
   document.addEventListener(`${uid}:show`, show);
   document.addEventListener(`${uid}:close`, close);
 
-  modal?.querySelectorAll("[data-modal-close]").forEach((el) =>
-    el.addEventListener("click", close),
-  );
+  document.addEventListener("keydown", onKeydown);
 
-  backdrop.addEventListener("click", close);
-
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) close();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-      close();
-    }
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(`[data-modal-close]`)) close();
+    if (e.target.id === `${uid}-backdrop`) close();
+    if (e.target.id === uid) close();
   });
 </script>

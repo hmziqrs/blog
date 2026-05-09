@@ -273,74 +273,90 @@ const lightBgPresets = [
 
     // ── init ──
 
-    const storedPrimary = getStored(KEY_PRIMARY);
-    if (storedPrimary !== null) {
-      applyPrimary(Number(storedPrimary));
-      markPrimaryActive(Number(storedPrimary));
+    function applyAllFromStorage() {
+      const storedPrimary = getStored(KEY_PRIMARY);
+      if (storedPrimary !== null) {
+        applyPrimary(Number(storedPrimary));
+        markPrimaryActive(Number(storedPrimary));
+      }
+      syncBgFromStorage();
+      syncBgGroups();
     }
 
-    syncBgFromStorage();
-    syncBgGroups();
+    applyAllFromStorage();
+
     onThemeChange(() => {
       syncBgFromStorage();
       syncBgGroups();
     });
 
-    // ── toggle ──
+    document.addEventListener("astro:after-swap", applyAllFromStorage);
 
-    const toggle = document.getElementById(TOGGLE_ID);
-    const panel = document.getElementById(PANEL_ID);
+    // ── toggle (event delegation) ──
+
     let open = false;
 
-    toggle.addEventListener("click", () => {
-      open = !open;
-      if (open) {
-        syncBgGroups();
-        panel.classList.remove("hidden");
-        requestAnimationFrame(() => {
-          panel.classList.remove("opacity-0", "translate-y-2");
-        });
-      } else {
-        panel.classList.add("opacity-0", "translate-y-2");
-        setTimeout(() => panel.classList.add("hidden"), 200);
-      }
-    });
+    function getToggle() { return document.getElementById(TOGGLE_ID); }
+    function getPanel() { return document.getElementById(PANEL_ID); }
+
+    function openPanel() {
+      syncBgGroups();
+      const panel = getPanel();
+      if (!panel) return;
+      panel.classList.remove("hidden");
+      requestAnimationFrame(() => {
+        panel.classList.remove("opacity-0", "translate-y-2");
+      });
+    }
+
+    function closePanel() {
+      const panel = getPanel();
+      if (!panel) return;
+      panel.classList.add("opacity-0", "translate-y-2");
+      setTimeout(() => panel.classList.add("hidden"), 200);
+    }
 
     document.addEventListener("click", (e) => {
-      if (open && !toggle.contains(e.target) && !panel.contains(e.target)) {
-        toggle.click();
+      const toggle = getToggle();
+      if (!toggle) return;
+
+      if (toggle.contains(e.target)) {
+        open = !open;
+        if (open) openPanel(); else closePanel();
+        return;
       }
-    });
 
-    // ── primary presets ──
+      if (open) {
+        const panel = getPanel();
+        if (panel && !panel.contains(e.target)) {
+          closePanel();
+          open = false;
+        }
+      }
 
-    panel.querySelectorAll("[data-primary-hue]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const hue = Number(btn.dataset.primaryHue);
+      const hueBtn = e.target.closest("[data-primary-hue]");
+      if (hueBtn) {
+        const hue = Number(hueBtn.dataset.primaryHue);
         applyPrimary(hue);
         setStored(KEY_PRIMARY, String(hue));
         markPrimaryActive(hue);
-      });
-    });
+        return;
+      }
 
-    // ── bg presets ──
-
-    panel.querySelectorAll("[data-bg-color]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const color = btn.dataset.bgColor;
+      const bgBtn = e.target.closest("[data-bg-color]");
+      if (bgBtn) {
+        const color = bgBtn.dataset.bgColor;
         const theme = getTheme();
         const key = theme === "light" ? KEY_BG_LIGHT : KEY_BG_DARK;
         applyBg(color);
         setStored(key, color);
         markBgActive();
-      });
-    });
+        return;
+      }
 
-    // ── reset ──
-
-    panel.querySelectorAll("[data-color-reset]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const target = btn.dataset.colorReset;
+      const resetBtn = e.target.closest("[data-color-reset]");
+      if (resetBtn) {
+        const target = resetBtn.dataset.colorReset;
         if (target === "primary") {
           resetPrimary();
           clearStored(KEY_PRIMARY);
@@ -352,7 +368,8 @@ const lightBgPresets = [
           clearStored(key);
           markBgActive();
         }
-      });
+        return;
+      }
     });
   })();
 </script>
