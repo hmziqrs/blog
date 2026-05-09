@@ -1,21 +1,27 @@
 name: Send Newsletter
 on:
-  workflow_dispatch:
-    inputs:
-      issue_slug:
-        description: "Newsletter issue slug (filename under content/newsletters/ without .md)"
-        required: true
-        type: string
-      environment:
-        description: "Target environment"
-        required: true
-        type: choice
-        options:
-          - staging
-          - production
+  push:
+    branches: [master]
+    paths:
+      - "content/newsletters/**"
 
 jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      added: ${{ steps.f.outputs.added_files }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: f
+        run: |
+          ADDED=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- content/newsletters/*.md | sed 's|content/newsletters/||;s|\.md$||' | head -1)
+          echo "added_files=$ADDED" >> "$GITHUB_OUTPUT"
+
   send:
+    needs: detect
+    if: needs.detect.outputs.added != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +29,10 @@ jobs:
       - run: bun install
       - run: bun run newsletter:send
         env:
-          ENVIRONMENT: ${{ inputs.environment }}
-          ISSUE_SLUG: ${{ inputs.issue_slug }}
+          ENVIRONMENT: production
+          ISSUE_SLUG: ${{ needs.detect.outputs.added }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+          NEWSLETTER_SEND_SECRET: ${{ secrets.NEWSLETTER_SEND_SECRET }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          D1_DATABASE_ID: ${{ inputs.environment == 'production' && secrets.D1_DATABASE_ID || secrets.STAGE_D1_DATABASE_ID }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}

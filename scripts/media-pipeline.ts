@@ -15,7 +15,10 @@ import { imageSize } from "image-size";
 
 const REPO_ROOT = path.resolve(import.meta.dir, "..");
 const CONTENT_DIR = path.join(REPO_ROOT, "content");
-const MEDIA_DIR = path.join(CONTENT_DIR, "media");
+const MEDIA_DIRS = [
+  path.join(CONTENT_DIR, "posts", "media"),
+  path.join(CONTENT_DIR, "newsletters", "media"),
+];
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID ?? "";
@@ -83,21 +86,24 @@ function createR2Client(): S3Client {
 // ─── R2 key helpers ────────────────────────────────────────────────────────────
 
 export function buildR2Key(filePath: string, hash: string): string {
-  const relFromMedia = path.relative(MEDIA_DIR, filePath).replaceAll(path.sep, "/");
-  const ext = path.extname(relFromMedia);
-  const stem = relFromMedia.slice(0, relFromMedia.length - ext.length);
-  return `media/${stem}-${hash.slice(0, 8)}${ext}`;
+  const rel = path.relative(CONTENT_DIR, filePath).replaceAll(path.sep, "/");
+  const ext = path.extname(rel);
+  const stem = rel.slice(0, rel.length - ext.length);
+  const cleanStem = stem.replace("/media/", "/");
+  return `${cleanStem}-${hash.slice(0, 8)}${ext}`;
 }
 
-// "media/posts/foo-abc12345.jpg" → "content/media/posts/foo.jpg"
+// "posts/foo-abc12345.jpg" → "content/posts/media/foo.jpg"
 export function reverseR2Key(r2Key: string): string | null {
-  if (!r2Key.startsWith("media/")) return null;
-  const relFromMedia = r2Key.slice("media/".length);
-  const ext = path.extname(relFromMedia);
-  const withoutExt = relFromMedia.slice(0, relFromMedia.length - ext.length);
+  const ext = path.extname(r2Key);
+  const withoutExt = r2Key.slice(0, r2Key.length - ext.length);
   const m = withoutExt.match(/^(.*)-([0-9a-f]{8})$/);
   if (!m) return null;
-  return `content/media/${m[1]}${ext}`;
+  const [_, prefix, _hash] = m;
+  const parts = prefix.split("/");
+  const filename = parts.pop()!;
+  const dir = parts.join("/");
+  return `content/${dir}/media/${filename}${ext}`;
 }
 
 // ─── Sync D1 from R2 (cold-start recovery) ─────────────────────────────────────
@@ -108,33 +114,35 @@ async function syncD1FromR2(client: S3Client): Promise<void> {
 
   console.log("  media table is empty — rebuilding from R2 listing...");
 
-  let token: string | undefined;
   let total = 0;
 
-  do {
-    const res = await client.send(
-      new ListObjectsV2Command({
-        Bucket: R2_BUCKET_NAME,
-        Prefix: "media/",
-        ContinuationToken: token,
-      }),
-    );
-
-    for (const obj of res.Contents ?? []) {
-      const key = obj.Key;
-      if (!key) continue;
-      const localPath = reverseR2Key(key);
-      if (!localPath) continue;
-      const r2Url = `${R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`;
-      await queryD1(
-        `INSERT OR IGNORE INTO media (local_path, r2_key, r2_url, content_hash) VALUES (?, ?, ?, '')`,
-        [localPath, key, r2Url],
+  for (const prefix of ["posts/", "newsletters/"]) {
+    let token: string | undefined;
+    do {
+      const res = await client.send(
+        new ListObjectsV2Command({
+          Bucket: R2_BUCKET_NAME,
+          Prefix: prefix,
+          ContinuationToken: token,
+        }),
       );
-      total++;
-    }
 
-    token = res.NextContinuationToken;
-  } while (token);
+      for (const obj of res.Contents ?? []) {
+        const key = obj.Key;
+        if (!key) continue;
+        const localPath = reverseR2Key(key);
+        if (!localPath) continue;
+        const r2Url = `${R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`;
+        await queryD1(
+          `INSERT OR IGNORE INTO media (local_path, r2_key, r2_url, content_hash) VALUES (?, ?, ?, '')`,
+          [localPath, key, r2Url],
+        );
+        total++;
+      }
+
+      token = res.NextContinuationToken;
+    } while (token);
+  }
 
   console.log(`  rebuilt ${total} entr${total === 1 ? "y" : "ies"} from R2`);
 }
@@ -161,8 +169,8 @@ async function upload() {
     process.exit(1);
   }
 
-  if (!existsSync(MEDIA_DIR)) {
-    console.log("No content/media/ directory found. Nothing to upload.");
+  if (MEDIA_DIRS.every((d) => !existsSync(d))) {
+    console.log("No media directories found. Nothing to upload.");
     return;
   }
 
@@ -170,7 +178,7 @@ async function upload() {
 
   await syncD1FromR2(client);
 
-  const files = scanDir(MEDIA_DIR);
+  const files = MEDIA_DIRS.flatMap((d) => (existsSync(d) ? scanDir(d) : []));
   let uploaded = 0;
   let skipped = 0;
   let oversized = 0;

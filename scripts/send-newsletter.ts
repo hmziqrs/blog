@@ -48,7 +48,7 @@ async function main() {
   }
 
   const args = process.argv.slice(2).filter((a) => a !== "--force");
-  const explicitSlug = args[0];
+  const explicitSlug = args[0] || process.env.ISSUE_SLUG;
   if (explicitSlug) {
     await sendIssue(explicitSlug);
     return;

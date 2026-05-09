@@ -37,7 +37,7 @@ jobs:
             release:
               - added: 'changelog/v*.md'
             content:
-              - 'content/**'
+              - 'content/posts/**'
 
   deploy-staging:
     needs: qa
