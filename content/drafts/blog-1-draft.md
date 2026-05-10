@@ -50,8 +50,8 @@ This was my 3rd attempt at building a personal blog. The first was Next.js on Gi
 
 End Notes
 Also building these projects on side.
-vibekit - SvelteKit based fullstack boilerplate for SaaS
+vibekit.link - SvelteKit based fullstack boilerplate for SaaS
 torii.tools GPUI based native desktop Request client
-mizu.tools GPUI based rich text editor
+bunsho.dev GPUI based rich text editor
 nutter.tools An arsenal for tools general use tools image conversions, video, audio, JSON and whatnot etc.
 
