@@ -52,6 +52,5 @@ End Notes
 Also building these projects on side.
 vibekit.link - SvelteKit based fullstack boilerplate for SaaS
 torii.tools GPUI based native desktop Request client
-bunsho.dev GPUI based rich text editor
 nutter.tools An arsenal for tools general use tools image conversions, video, audio, JSON and whatnot etc.
 
