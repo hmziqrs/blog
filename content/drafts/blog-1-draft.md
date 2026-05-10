@@ -36,12 +36,12 @@ Vibe coding
 Is it vibe coded? Yes and no.
 No: Everything was planned and fixed by me. Nothing was one-shotted. Things like the layout (every page had a different container width, which made the site look hideous), the light/dark theme toggle (even the inverted images on theme switch), the CI/CD workflow for triggering staging and production deployments, using the right database for rate limiting (KV vs D1: the AI had me use D1, which was fine but not optimal). I basically worked as Senior Lead / Project Manager and used AI as my junior engineer.
 
-AI is very smart and fast at prototyping, automnomous testing and verification, but it gets some obvious things very wrong. My personal goal is to never outsource my thinking: I work through the core decisions myself and use AI to implement them.
+AI is very smart and fast at prototyping, autonomous testing and verification, but it gets some obvious things very wrong. My personal goal is to never outsource my thinking: I work through the core decisions myself and use AI to implement them.
 
-AI tools I used: Claude Code (GLM-5.1), Opencode (Kimi-2.6 (when It was 3x :D) and DeepSeek v4 Pro)
+AI tools I used: Claude Code (GLM-5.1), Opencode (Kimi-2.6 (when it was 3x :D) and DeepSeek v4 Pro)
 
 Goal/Roadmap
-My goal was to make this blog modular and pluggable into other projects, but I semi-pivoted away from that idea as I'm also building (vibe coding) svelete kit based fullstack boilerplate If it succeeds, then this won't be modular and won't extend it into a pluggable project.
+My goal was to make this blog modular and pluggable into other projects, but I semi-pivoted away from that idea as I'm also building (vibe coding) SvelteKit based fullstack boilerplate If it succeeds, then this won't be modular and won't extend it into a pluggable project.
 
 My end goal for this project is a dedicated admin panel and getting rid of markdown files, with a proper relational ACID-compliant database, meta fields like tags, categories, and author info, all normalized in the database.
 
@@ -49,7 +49,7 @@ This was my 3rd attempt at building a personal blog. The first was Next.js on Gi
 
 
 End Notes
-Building also building these projects on side.
+Also building these projects on side.
 vibekit - SvelteKit based fullstack boilerplate for SaaS
 torii.tools GPUI based native desktop Request client
 mizu.tools GPUI based rich text editor
