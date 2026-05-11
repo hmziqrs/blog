@@ -247,7 +247,7 @@ bun run db:migrate:prod
 bun run deploy:prod
 ```
 
-Or push to the `master` branch — CI will deploy automatically.
+Push to `master` — CI deploys staging unconditionally, then deploys production web when `content/posts/**` changes, and production API when a new `changelog/v*.md` is added. See [CI/CD Plan](./CICD_PLAN.md) for the full gating logic.
 
 ---
 

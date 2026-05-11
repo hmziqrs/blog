@@ -231,7 +231,7 @@ bun run db:migrate:staging
 bun run deploy:staging
 ```
 
-Or push to the `staging` branch — CI will deploy automatically.
+Staging deploys automatically on every push to `master`. The CI workflow deploys to the `staging` Pages branch as a preview deployment. See [CI/CD Plan](./CICD_PLAN.md) for the full flow.
 
 ---
 

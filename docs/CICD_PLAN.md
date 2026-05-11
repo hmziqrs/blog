@@ -91,12 +91,12 @@ For emergencies, `workflow_dispatch` with an explicit env target bypasses the ga
 | DLQ       | `newsletter-dlq-staging`      | `newsletter-dlq`       |
 | KV        | `RATE_LIMIT_KV` (staging)     | `RATE_LIMIT_KV` (prod) |
 | Worker    | `api-staging` (.workers.dev)  | `api` (route on zone)  |
-| Pages     | `hmziqblog-staging` project   | `hmziqblog` project    |
+| Pages     | `hmziqblog` (staging branch)  | `hmziqblog` (master branch) |
 | Turnstile | Test keys                     | Real keys              |
 | URL       | `staging.hmziqblog.pages.dev` | `blog.hmziq.rs`        |
 | API       | `api-staging.*.workers.dev`   | `blog.hmziq.rs/api/*`  |
 
-CLI-driven (`bun run deploy:staging` / `bun run deploy:prod`) targeting different Pages projects. Not Cloudflare Pages branch previews. Secrets use the existing pattern: `STAGE_` prefix for staging, no prefix for prod.
+Single Pages project (`hmziqblog`). Staging deploys to the `staging` branch as a Cloudflare Pages preview deployment at `staging.hmziqblog.pages.dev`. Production deploys to `master` branch at `blog.hmziq.rs`. Secrets use the existing pattern: `STAGE_` prefix for staging, no prefix for prod.
 
 ## CI workflow shape
 
