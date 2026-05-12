@@ -240,7 +240,7 @@ Staging deploys automatically on every push to `master`. The CI workflow deploys
 | Resource    | URL                                     |
 | ----------- | --------------------------------------- |
 | Web         | `https://staging.hmziqblog.pages.dev`   |
-| API         | `https://api-staging.hmziq.workers.dev` |
+| API         | `https://hmziqblog-api-staging.hmziq.workers.dev` |
 | Subscribe   | `POST /api/newsletter/subscribe`        |
 | Unsubscribe | `POST /api/newsletter/unsubscribe`      |
 

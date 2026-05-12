@@ -1,4 +1,4 @@
-name = "api"
+name = "hmziqblog-api"
 main = "src/index.ts"
 compatibility_date = "2025-10-11"
 compatibility_flags = ["nodejs_compat"]
@@ -45,7 +45,7 @@ queue = "newsletter-dlq"
 
 # ─── Staging ────────────────────────────────────────────
 [env.staging]
-name = "api-staging"
+name = "hmziqblog-api-staging"
 workers_dev = true
 routes = []
 
