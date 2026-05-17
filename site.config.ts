@@ -8,7 +8,7 @@ export const siteConfig = defineSiteConfig({
   basePath: "/",
   author: {
     name: "hmziqrs",
-    url: "https://hmziq.rs/about/",
+    url: "https://hmziq.rs/",
     socials: [
       { platform: "x", url: "https://x.com/hmziqrs" },
       { platform: "github", url: "https://github.com/hmziqrs" },
