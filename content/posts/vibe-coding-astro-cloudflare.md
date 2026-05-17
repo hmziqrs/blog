@@ -2,8 +2,11 @@
 title: "Vibe Coding My Blog in Astro, Deployed on Cloudflare"
 description: "Third attempt at a blog. Finally got this one built."
 date: 2026-05-10
+updated: 2026-05-17
 category: "Engineering"
 tags: ["astro", "cloudflare", "vibe-coding", "blog", "web-dev"]
+cover: "./media/vibe-coding-astro-cloudflare.png"
+cover_alt: "Ethereal monochrome line art of a person working late at a laptop in a minimalist dark scene"
 draft: false
 ---
 
