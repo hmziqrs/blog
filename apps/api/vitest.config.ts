@@ -9,7 +9,11 @@ export default defineConfig(async () => {
       cloudflareTest({
         wrangler: { configPath: "./wrangler.toml" },
         miniflare: {
-          bindings: { TEST_MIGRATIONS: migrations },
+          bindings: {
+            TEST_MIGRATIONS: migrations,
+            NEWSLETTER_SEND_SECRET: "local-dev-secret",
+            EMAIL_FROM_ADDRESS: "noreply@test.example.com",
+          },
         },
       }),
     ],
