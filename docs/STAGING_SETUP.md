@@ -199,7 +199,7 @@ PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 # Firebase vars (PUBLIC_FIREBASE_*) — skip if not using analytics
 ```
 
-> `PUBLIC_SITE_URL` is set inline by the deploy script — don't set it in `.env`.
+> `PUBLIC_SITE_URL` is set inline by the `deploy:web:staging` script in `package.json` — don't set it in `.env`.
 
 ---
 
@@ -307,7 +307,7 @@ CI uses **GitHub Environments** (`stage` / `prod`) — create both at **Settings
 | `R2_BUCKET_NAME`                  | stage | `blog-media-staging`                       |
 | `R2_PUBLIC_URL`                   | stage | Your staging R2 public URL                 |
 | `PUBLIC_TURNSTILE_SITE_KEY`       | stage | `1x00000000000000000000AA` (test key)      |
-| `SITE_URL`                        | stage | `https://staging.hmziqblog.pages.dev`      |
+| `SITE_URL`                        | stage | `https://staging.hmziqblog.pages.dev` (API Worker + scripts — not to be confused with `PUBLIC_SITE_URL` which is hardcoded inline in `deploy:web:staging` in `package.json`) |
 | `D1_DATABASE_ID`                  | stage | `72adfed4-d696-4b04-88a6-9ae61cc21ce1`    |
 | `PUBLIC_FIREBASE_API_KEY`         | stage | — (analytics optional in staging)          |
 | `PUBLIC_FIREBASE_AUTH_DOMAIN`     | stage | — (analytics optional in staging)          |

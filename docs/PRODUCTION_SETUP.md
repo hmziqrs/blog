@@ -194,7 +194,7 @@ PUBLIC_TURNSTILE_SITE_KEY=<your-prod-turnstile-site-key>
 # Firebase vars (PUBLIC_FIREBASE_*) — skip if not using analytics
 ```
 
-> `PUBLIC_SITE_URL` is set inline by the deploy script — don't set it in `.env`.
+> `PUBLIC_SITE_URL` is set inline by the `deploy:web:prod` script in `package.json` — don't set it in `.env`.
 
 Also update `site.config.ts` and any domain-specific URLs.
 
@@ -286,7 +286,7 @@ CI uses **GitHub Environments** (`stage` / `prod`) — create both at **Settings
 | `R2_BUCKET_NAME`                  | prod  | `blog-media`                               |
 | `R2_PUBLIC_URL`                   | prod  | Your production R2 public URL              |
 | `PUBLIC_TURNSTILE_SITE_KEY`       | prod  | Your real Turnstile site key               |
-| `SITE_URL`                        | prod  | `https://blog.hmziq.rs`                    |
+| `SITE_URL`                        | prod  | `https://blog.hmziq.rs` (API Worker + scripts — not to be confused with `PUBLIC_SITE_URL` which is hardcoded inline in `deploy:web:prod` in `package.json`) |
 | `D1_DATABASE_ID`                  | prod  | `66bfbc09-3aa2-4ede-88d3-4e06f280d2bb`    |
 | `PUBLIC_FIREBASE_API_KEY`         | prod  | From Firebase console                      |
 | `PUBLIC_FIREBASE_AUTH_DOMAIN`     | prod  | `<project>.firebaseapp.com`                |
