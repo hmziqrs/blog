@@ -18,13 +18,13 @@ SITE_URL = "https://blog.hmziq.rs"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "<!-- run: wrangler kv namespace create RATE_LIMIT_KV -->"
-preview_id = "<!-- run: wrangler kv namespace create RATE_LIMIT_KV --preview -->"
+id = "57db2a94a1ef4430b6ad14820deecd79"
+# preview_id = "b792ca50c8eb46eea981f0df548aaa81"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "blog-db"
-database_id = "00000000-0000-0000-0000-000000000000" # Replace with real D1 production ID before first deploy
+database_id = "66bfbc09-3aa2-4ede-88d3-4e06f280d2bb"
 
 [[send_email]]
 name = "SEND_EMAIL"

@@ -153,11 +153,11 @@ The newsletter is outbound-only (no-reply). You only need Email Routing enabled 
 These are encrypted in Cloudflare — never stored in files.
 
 ```bash
-wrangler secret put TURNSTILE_SECRET_KEY --config apps/api/wrangler.toml
+wrangler secret put TURNSTILE_SECRET_KEY --env=""  --config apps/api/wrangler.toml
 # → paste your production Turnstile secret key (from step 5)
-wrangler secret put NEWSLETTER_SEND_SECRET --config apps/api/wrangler.toml
+wrangler secret put NEWSLETTER_SEND_SECRET --env=""  --config apps/api/wrangler.toml
 # → generate a random secret (e.g. openssl rand -hex 32)
-wrangler secret put EMAIL_FROM_ADDRESS --config apps/api/wrangler.toml
+wrangler secret put EMAIL_FROM_ADDRESS --env=""  --config apps/api/wrangler.toml
 # → no-reply@<your-domain> (must use a domain with Email Routing enabled)
 ```
 
