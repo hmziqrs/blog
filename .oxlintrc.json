@@ -5,7 +5,7 @@
     "suspicious": "warn",
     "pedantic": "off"
   },
-  "ignorePatterns": ["**/dist/**", "**/public/web-components/**", "**/node_modules/**"],
+  "ignorePatterns": ["**/dist/**", "**/node_modules/**", "**/.wrangler/**", "**/public/web-components/**"],
   "rules": {
     "no-underscore-dangle": ["warn", { "allow": ["__dirname", "__initAnalytics"] }]
   }
