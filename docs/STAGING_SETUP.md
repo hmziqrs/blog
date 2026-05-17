@@ -285,27 +285,27 @@ NEWSLETTER_SEND_SECRET=your-secret bun run newsletter:send
 
 ---
 
-## GitHub Secrets
+## GitHub Actions Configuration
 
-Add these to your repository secrets for CI staging deploys. Staging-specific secrets use the `STAGE_` prefix.
+CI uses **GitHub Environments** (`stage` / `prod`) — create both at **Settings → Environments**. Two types: **Secrets** (encrypted, redacted in logs) for sensitive values, **Variables** (plaintext) for everything else. See [Production Setup](./PRODUCTION_SETUP.md) for the full table including `prod` values.
 
-### Shared (used by both staging and prod)
+### Secrets
 
-| Secret                  | Value                              |
-| ----------------------- | ---------------------------------- |
-| `CLOUDFLARE_API_TOKEN`  | Your Cloudflare API token          |
-| `CLOUDFLARE_ACCOUNT_ID` | `f05ef21f6ee2c5e0d688d6358bcd47f6` |
-| `R2_ACCOUNT_ID`         | Same as Cloudflare account ID      |
+| Secret                 | Scope | Value                                   |
+| ---------------------- | ----- | --------------------------------------- |
+| `CLOUDFLARE_API_TOKEN` | repo  | Your Cloudflare API token               |
+| `R2_ACCESS_KEY_ID`     | stage | R2 token scoped to `blog-media-staging` |
+| `R2_SECRET_ACCESS_KEY` | stage | R2 token scoped to `blog-media-staging` |
 
-### Staging-only (prefixed with `STAGE_`)
+### Variables
 
-| Secret                            | Value                                   |
-| --------------------------------- | --------------------------------------- |
-| `STAGE_R2_ACCESS_KEY_ID`          | R2 token scoped to `blog-media-staging` |
-| `STAGE_R2_SECRET_ACCESS_KEY`      | R2 token scoped to `blog-media-staging` |
-| `STAGE_R2_BUCKET_NAME`            | `blog-media-staging`                    |
-| `STAGE_R2_PUBLIC_URL`             | Your staging R2 public URL              |
-| `STAGE_PUBLIC_TURNSTILE_SITE_KEY` | `1x00000000000000000000AA` (test key)   |
+| Variable                    | Scope | Value                                 |
+| --------------------------- | ----- | ------------------------------------- |
+| `CLOUDFLARE_ACCOUNT_ID`     | repo  | `f05ef21f6ee2c5e0d688d6358bcd47f6`    |
+| `R2_ACCOUNT_ID`             | repo  | Same as Cloudflare account ID         |
+| `R2_BUCKET_NAME`            | stage | `blog-media-staging`                  |
+| `R2_PUBLIC_URL`             | stage | Your staging R2 public URL            |
+| `PUBLIC_TURNSTILE_SITE_KEY` | stage | `1x00000000000000000000AA` (test key) |
 
 ---
 

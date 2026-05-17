@@ -247,7 +247,7 @@ bun run db:migrate:prod
 bun run deploy:prod
 ```
 
-Push to `master` — CI deploys staging unconditionally, then deploys production web when `content/posts/**` changes, and production API when a new `changelog/v*.md` is added. See [CI/CD Plan](./CICD_PLAN.md) for the full gating logic.
+Push to `master` — CI deploys staging unconditionally, then deploys production web when `content/**` changes, and production API when a new `changelog/v*.md` is added. See [CI/CD Plan](./CICD_PLAN.md) for the full gating logic.
 
 ---
 
@@ -264,34 +264,37 @@ Push to `master` — CI deploys staging unconditionally, then deploys production
 
 ---
 
-## GitHub Secrets
+## GitHub Actions Configuration
 
-Add these to your repository secrets for CI production deploys.
+CI uses **GitHub Environments** (`stage` / `prod`) — create both at **Settings → Environments**. Two types: **Secrets** (encrypted, redacted in logs) for sensitive values, **Variables** (plaintext) for everything else. See [Staging Setup](./STAGING_SETUP.md) for the full table including `stage` values.
 
-### Shared (used by both staging and prod)
+### Secrets
 
-| Secret                  | Value                              |
-| ----------------------- | ---------------------------------- |
-| `CLOUDFLARE_API_TOKEN`  | Your Cloudflare API token          |
-| `CLOUDFLARE_ACCOUNT_ID` | `f05ef21f6ee2c5e0d688d6358bcd47f6` |
-| `R2_ACCOUNT_ID`         | Same as Cloudflare account ID      |
+| Secret                   | Scope | Value                                              |
+| ------------------------ | ----- | -------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`   | repo  | Your Cloudflare API token                          |
+| `R2_ACCESS_KEY_ID`       | prod  | R2 token scoped to `blog-media`                    |
+| `R2_SECRET_ACCESS_KEY`   | prod  | R2 token scoped to `blog-media`                    |
+| `NEWSLETTER_SEND_SECRET` | prod  | Secret used to authenticate `/api/newsletter/send` |
 
-### Production-only (no prefix)
+### Variables
 
-| Secret                      | Value                              |
-| --------------------------- | ---------------------------------- |
-| `R2_ACCESS_KEY_ID`          | R2 token scoped to `blog-media`    |
-| `R2_SECRET_ACCESS_KEY`      | R2 token scoped to `blog-media`    |
-| `R2_BUCKET_NAME`            | `blog-media`                       |
-| `R2_PUBLIC_URL`             | Your production R2 public URL      |
-| `PUBLIC_TURNSTILE_SITE_KEY` | Your production Turnstile site key |
-
-### Newsletter workflow (production only)
-
-| Secret                   | Value                           |
-| ------------------------ | ------------------------------- |
-| `SITE_URL`               | `https://blog.hmziq.rs`         |
-| `NEWSLETTER_SEND_SECRET` | Same value as the Worker secret |
+| Variable                          | Scope | Value                                      |
+| --------------------------------- | ----- | ------------------------------------------ |
+| `CLOUDFLARE_ACCOUNT_ID`           | repo  | `f05ef21f6ee2c5e0d688d6358bcd47f6`         |
+| `R2_ACCOUNT_ID`                   | repo  | Same as Cloudflare account ID              |
+| `R2_BUCKET_NAME`                  | prod  | `blog-media`                               |
+| `R2_PUBLIC_URL`                   | prod  | Your production R2 public URL              |
+| `PUBLIC_TURNSTILE_SITE_KEY`       | prod  | Your real Turnstile site key               |
+| `SITE_URL`                        | prod  | `https://blog.hmziq.rs`                    |
+| `D1_DATABASE_ID`                  | prod  | `66bfbc09-3aa2-4ede-88d3-4e06f280d2bb`    |
+| `PUBLIC_FIREBASE_API_KEY`         | prod  | From Firebase console                      |
+| `PUBLIC_FIREBASE_AUTH_DOMAIN`     | prod  | `<project>.firebaseapp.com`                |
+| `PUBLIC_FIREBASE_PROJECT_ID`      | prod  | Firebase project ID                        |
+| `PUBLIC_FIREBASE_STORAGE_BUCKET`  | prod  | `<project>.appspot.com`                    |
+| `PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | prod | Firebase messaging sender ID             |
+| `PUBLIC_FIREBASE_APP_ID`          | prod  | Firebase app ID                            |
+| `PUBLIC_FIREBASE_MEASUREMENT_ID`  | prod  | Firebase measurement ID                    |
 
 ---
 

@@ -2,7 +2,7 @@
 
 Single `master` branch. File-based deploy gates. Push anytime: staging always deploys, prod is gated on specific file changes.
 
-> Status: design doc. Replaces the master+staging branch model in the current `ci.yml`.
+> Status: implemented in `.github/workflows/ci.yml`.
 
 ## How it works
 
@@ -93,7 +93,7 @@ For emergencies, `workflow_dispatch` with an explicit env target bypasses the ga
 | URL       | `staging.hmziqblog.pages.dev` | `blog.hmziq.rs`        |
 | API       | `hmziqblog-api-staging.*.workers.dev` | `blog.hmziq.rs/api/*`  |
 
-Single Pages project (`hmziqblog`). Staging deploys to the `staging` branch as a Cloudflare Pages preview deployment at `staging.hmziqblog.pages.dev`. Production deploys to `master` branch at `blog.hmziq.rs`. Secrets use the existing pattern: `STAGE_` prefix for staging, no prefix for prod.
+Single Pages project (`hmziqblog`). Staging deploys to the `staging` branch as a Cloudflare Pages preview deployment at `staging.hmziqblog.pages.dev`. Production deploys to `master` branch at `blog.hmziq.rs`. Secrets are scoped via GitHub Environments (`stage` / `prod`) — same secret names in each, no prefix needed.
 
 ## CI workflow shape
 
@@ -130,22 +130,23 @@ jobs:
   deploy-staging:
     needs: qa
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    environment: stage
     # bun run deploy:staging  (CONTENT_DIR=content-staging, full stack)
 
   deploy-web-prod:
     needs: [detect, deploy-staging]
     if: needs.detect.outputs.release == 'true' || needs.detect.outputs.content == 'true'
+    environment: prod
     # bun run deploy:prod:web  (CONTENT_DIR=content)
 
   deploy-api-prod:
     needs: [detect, deploy-staging]
     if: needs.detect.outputs.release == 'true'
+    environment: prod
     # wrangler deploy + apply migrations
 ```
 
 `deploy-staging` is the smoke test for prod. If it fails, both prod jobs are blocked.
-
-`deploy:prod` needs to split into `deploy:prod:web` and `deploy:prod:api` so a content change can ship a web-only deploy without touching the Worker.
 
 ## FAQ
 
@@ -159,4 +160,4 @@ jobs:
 - [Production Environment Setup](./PRODUCTION_SETUP.md)
 - `apps/web/src/content.config.ts`: reads `CONTENT_DIR` (currently as posts dir, needs change to read as content root)
 - `apps/api/wrangler.toml`: Worker + environment config
-- `.github/workflows/ci.yml`: current CI (to be replaced)
+- `.github/workflows/ci.yml`: CI/CD workflow

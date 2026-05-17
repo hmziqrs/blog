@@ -23,6 +23,7 @@ jobs:
     needs: detect
     if: needs.detect.outputs.added != ''
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -31,8 +32,8 @@ jobs:
         env:
           ENVIRONMENT: production
           ISSUE_SLUG: ${{ needs.detect.outputs.added }}
-          SITE_URL: ${{ secrets.SITE_URL }}
+          SITE_URL: ${{ vars.SITE_URL }}
           NEWSLETTER_SEND_SECRET: ${{ secrets.NEWSLETTER_SEND_SECRET }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}
