@@ -46,7 +46,7 @@
     "db:console": "wrangler d1 execute blog-db --remote",
     "deploy:api:staging": "wrangler deploy --env staging --config apps/api/wrangler.toml",
     "deploy:api:prod": "wrangler deploy --config apps/api/wrangler.toml",
-    "deploy:web:staging": "PUBLIC_SITE_URL=https://staging.hmziqblog.pages.dev CONTENT_DIR=$(bun run media:rewrite) turbo -F web build:staging && wrangler pages deploy apps/web/dist --project-name=hmziqblog --branch=staging",
+    "deploy:web:staging": "PUBLIC_SITE_URL=https://staging.hmziqblog.pages.dev CONTENT_DIR=content-staging turbo -F web build:staging && wrangler pages deploy apps/web/dist --project-name=hmziqblog --branch=staging",
     "deploy:web:prod": "PUBLIC_SITE_URL=https://blog.hmziq.rs CONTENT_DIR=$(bun run media:rewrite) turbo -F web build:prod && wrangler pages deploy apps/web/dist --project-name=hmziqblog --branch=master",
     "deploy:staging": "bun run db:migrate:staging && bun run media:upload && bun run deploy:api:staging && bun run deploy:web:staging",
     "deploy:staging:nomedia": "bun run db:migrate:staging && bun run deploy:api:staging && bun run deploy:web:staging",
