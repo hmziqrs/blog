@@ -291,21 +291,31 @@ CI uses **GitHub Environments** (`stage` / `prod`) — create both at **Settings
 
 ### Secrets
 
-| Secret                 | Scope | Value                                   |
-| ---------------------- | ----- | --------------------------------------- |
-| `CLOUDFLARE_API_TOKEN` | repo  | Your Cloudflare API token               |
-| `R2_ACCESS_KEY_ID`     | stage | R2 token scoped to `blog-media-staging` |
-| `R2_SECRET_ACCESS_KEY` | stage | R2 token scoped to `blog-media-staging` |
+| Secret                   | Scope | Value                                              |
+| ------------------------ | ----- | -------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`   | repo  | Your Cloudflare API token                          |
+| `R2_ACCESS_KEY_ID`       | stage | R2 token scoped to `blog-media-staging`            |
+| `R2_SECRET_ACCESS_KEY`   | stage | R2 token scoped to `blog-media-staging`            |
+| `NEWSLETTER_SEND_SECRET` | stage | — (newsletter sends target prod only)              |
 
 ### Variables
 
-| Variable                    | Scope | Value                                 |
-| --------------------------- | ----- | ------------------------------------- |
-| `CLOUDFLARE_ACCOUNT_ID`     | repo  | `f05ef21f6ee2c5e0d688d6358bcd47f6`    |
-| `R2_ACCOUNT_ID`             | repo  | Same as Cloudflare account ID         |
-| `R2_BUCKET_NAME`            | stage | `blog-media-staging`                  |
-| `R2_PUBLIC_URL`             | stage | Your staging R2 public URL            |
-| `PUBLIC_TURNSTILE_SITE_KEY` | stage | `1x00000000000000000000AA` (test key) |
+| Variable                          | Scope | Value                                      |
+| --------------------------------- | ----- | ------------------------------------------ |
+| `CLOUDFLARE_ACCOUNT_ID`           | repo  | `f05ef21f6ee2c5e0d688d6358bcd47f6`         |
+| `R2_ACCOUNT_ID`                   | repo  | Same as Cloudflare account ID              |
+| `R2_BUCKET_NAME`                  | stage | `blog-media-staging`                       |
+| `R2_PUBLIC_URL`                   | stage | Your staging R2 public URL                 |
+| `PUBLIC_TURNSTILE_SITE_KEY`       | stage | `1x00000000000000000000AA` (test key)      |
+| `SITE_URL`                        | stage | `https://staging.hmziqblog.pages.dev`      |
+| `D1_DATABASE_ID`                  | stage | `72adfed4-d696-4b04-88a6-9ae61cc21ce1`    |
+| `PUBLIC_FIREBASE_API_KEY`         | stage | — (analytics optional in staging)          |
+| `PUBLIC_FIREBASE_AUTH_DOMAIN`     | stage | — (analytics optional in staging)          |
+| `PUBLIC_FIREBASE_PROJECT_ID`      | stage | — (analytics optional in staging)          |
+| `PUBLIC_FIREBASE_STORAGE_BUCKET`  | stage | — (analytics optional in staging)          |
+| `PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | stage | — (analytics optional in staging)      |
+| `PUBLIC_FIREBASE_APP_ID`          | stage | — (analytics optional in staging)          |
+| `PUBLIC_FIREBASE_MEASUREMENT_ID`  | stage | — (analytics optional in staging)          |
 
 ---
 
