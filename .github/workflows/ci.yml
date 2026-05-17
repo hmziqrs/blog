@@ -18,7 +18,7 @@ jobs:
       - run: bun install
       - run: bun run lint
       - run: bun run fmt:check
-      - run: turbo -F web check
+      - run: bunx turbo -F web check
       - run: bun run test
 
   detect:
