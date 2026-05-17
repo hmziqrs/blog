@@ -1,4 +1,5 @@
 ---
+import { getCollection } from "astro:content";
 import { pageTitle, siteConfig } from "../config/site";
 import NewsletterForm from "../components/NewsletterForm.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -6,6 +7,9 @@ import PageContainer from "../components/PageContainer.astro";
 
 const title = pageTitle("Newsletter");
 const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+
+const issues = await getCollection("newsletters");
+issues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 
 <BaseLayout title={title} description="Subscribe to the Hmziq blog newsletter">
@@ -37,6 +41,41 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
           >.
         </p>
       </div>
+
+      {
+        issues.length > 0 && (
+          <div class="mt-12">
+            <h2 class="text-lg font-semibold mb-4">Past issues</h2>
+            <ul class="space-y-3">
+              {issues.map((issue) => {
+                const dateStr = issue.data.date.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                });
+                return (
+                  <li>
+                    <a
+                      href={`/newsletter/${issue.id}`}
+                      class="group flex items-baseline justify-between gap-4 rounded-lg border border-base-content/10 bg-base-100 px-4 py-3 hover:border-base-content/20 hover:bg-base-200/40 transition-all"
+                    >
+                      <span class="text-sm font-medium group-hover:text-primary transition-colors">
+                        {issue.data.title}
+                      </span>
+                      <time
+                        class="font-mono text-[0.65rem] uppercase tracking-[0.1em] text-base-content/35 shrink-0"
+                        datetime={issue.data.date.toISOString()}
+                      >
+                        {dateStr}
+                      </time>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )
+      }
     </main>
   </PageContainer>
 </BaseLayout>

@@ -61,7 +61,7 @@ id = "b792ca50c8eb46eea981f0df548aaa81"
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "blog-db-staging"
-database_id = "72adfed4-d696-4b04-88a6-9ae61cc21ce1" # Replace with real D1 staging ID before first deploy
+database_id = "72adfed4-d696-4b04-88a6-9ae61cc21ce1"
 
 [[env.staging.send_email]]
 name = "SEND_EMAIL"

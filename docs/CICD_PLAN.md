@@ -63,12 +63,9 @@ Uses [dorny/paths-filter](https://github.com/dorny/paths-filter), which handles 
 
 ## Newsletter
 
-Manual via `workflow_dispatch` in `.github/workflows/send-newsletter.yml`.
+Auto-send via `.github/workflows/send-newsletter.yml`. Triggers on push to master when a new file is added under `content/newsletters/**`. The workflow detects the added slug with `git diff --diff-filter=A` and fires the send script against production.
 
-Inputs:
-
-- `issue_slug`: filename under `content/newsletters/` (or `content-staging/newsletters/` for test sends)
-- `environment`: `staging` or `production`
+Staging test sends run locally: `bun run newsletter:send`.
 
 A newsletter file in `content/newsletters/` becomes a public archive page on the next prod web deploy regardless of whether the email has been sent.
 

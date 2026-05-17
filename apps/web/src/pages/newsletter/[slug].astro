@@ -1,0 +1,55 @@
+---
+import { getCollection, render } from "astro:content";
+import { pageTitle } from "../../config/site";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageContainer from "../../components/PageContainer.astro";
+
+export async function getStaticPaths() {
+  const issues = await getCollection("newsletters");
+  return issues.map((issue) => ({
+    params: { slug: issue.id },
+    props: { issue },
+  }));
+}
+
+const { issue } = Astro.props;
+const { Content } = await render(issue);
+const dateStr = issue.data.date.toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+---
+
+<BaseLayout
+  title={pageTitle(issue.data.title)}
+  description={issue.data.description ?? issue.data.title}
+>
+  <PageContainer>
+    <main class="max-w-2xl mx-auto px-4 py-12">
+      <a
+        href="/newsletter"
+        class="inline-flex items-center gap-1.5 font-mono text-[0.7rem] uppercase tracking-[0.14em] text-base-content/40 hover:text-base-content/70 mb-8 transition-colors"
+      >
+        &larr; Newsletter
+      </a>
+      <header class="mb-8">
+        <time
+          class="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-base-content/40"
+          datetime={issue.data.date.toISOString()}
+        >
+          {dateStr}
+        </time>
+        <h1 class="text-2xl sm:text-3xl font-bold mt-1">{issue.data.title}</h1>
+        {
+          issue.data.description && (
+            <p class="mt-2 text-base-content/60 text-sm">{issue.data.description}</p>
+          )
+        }
+      </header>
+      <article class="prose max-w-none">
+        <Content />
+      </article>
+    </main>
+  </PageContainer>
+</BaseLayout>

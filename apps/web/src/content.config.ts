@@ -7,7 +7,12 @@ import { fileURLToPath } from "node:url";
 const monorepoRoot = path.resolve(fileURLToPath(import.meta.url), "../../../../");
 
 const defaultContentDir = import.meta.env.DEV ? "content-staging" : "content";
-const contentRoot = process.env.CONTENT_DIR || path.join(monorepoRoot, defaultContentDir);
+const envContentDir = process.env.CONTENT_DIR;
+const contentRoot = envContentDir
+  ? path.isAbsolute(envContentDir)
+    ? envContentDir
+    : path.join(monorepoRoot, envContentDir)
+  : path.join(monorepoRoot, defaultContentDir);
 const postsDir = path.join(contentRoot, "posts");
 
 const posts = defineCollection({
@@ -38,4 +43,16 @@ const changelogs = defineCollection({
     }),
 });
 
-export const collections = { posts, changelogs };
+const newslettersDir = path.join(contentRoot, "newsletters");
+
+const newsletters = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: newslettersDir }),
+  schema: () =>
+    z.object({
+      title: z.string(),
+      date: z.coerce.date(),
+      description: z.string().optional(),
+    }),
+});
+
+export const collections = { posts, changelogs, newsletters };
