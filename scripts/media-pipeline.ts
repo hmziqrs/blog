@@ -353,7 +353,7 @@ async function rewrite(outDir?: string) {
   }
   fs.writeFileSync(path.join(targetDir, "media-manifest.json"), JSON.stringify(manifest, null, 2));
 
-  console.log(outPostsDir);
+  console.log(targetDir);
 }
 
 export function rewriteImageRefs(content: string, replacements: Map<string, string>): string {
