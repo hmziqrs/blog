@@ -18,8 +18,12 @@ const sortedPosts = sortByDateDesc(posts);
     emptyMessage && <p class="text-muted text-sm">{emptyMessage}</p>
   ) : (
     <div class:list={["flex flex-col gap-5", className]}>
-      {sortedPosts.map((post) => (
-        <PostCard post={post} />
+      {sortedPosts.map((post, i) => (
+        <PostCard
+          post={post}
+          loading={i === 0 ? "eager" : undefined}
+          fetchpriority={i === 0 ? "high" : undefined}
+        />
       ))}
     </div>
   )

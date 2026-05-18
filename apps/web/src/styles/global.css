@@ -191,10 +191,10 @@ body {
 
 @layer utilities {
   .text-dim {
-    color: color-mix(in oklab, var(--color-base-content) 28%, transparent);
+    color: color-mix(in oklab, var(--color-base-content) 52%, transparent);
   }
   .text-faint {
-    color: color-mix(in oklab, var(--color-base-content) 42%, transparent);
+    color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
   }
   .text-muted {
     color: color-mix(in oklab, var(--color-base-content) 52%, transparent);
@@ -204,10 +204,10 @@ body {
   }
 
   [data-theme="light"] .text-dim {
-    color: color-mix(in oklab, var(--color-base-content) 68%, transparent);
+    color: color-mix(in oklab, var(--color-base-content) 58%, transparent);
   }
   [data-theme="light"] .text-faint {
-    color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
+    color: color-mix(in oklab, var(--color-base-content) 68%, transparent);
   }
   [data-theme="light"] .text-muted {
     color: color-mix(in oklab, var(--color-base-content) 88%, transparent);

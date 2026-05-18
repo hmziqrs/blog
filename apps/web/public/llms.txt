@@ -1,0 +1,23 @@
+# Hmziq Blog
+
+> Writing about software engineering, tools, and ideas.
+
+## Posts
+
+- [Vibe Coding My Blog in Astro, Deployed on Cloudflare](/posts/vibe-coding-astro-cloudflare): Third attempt at a blog. Finally got this one built.
+
+## Pages
+
+- [About](/about): 9 years building software. Full-stack engineer.
+- [Contact](/contact): Get in touch for freelance, contract, or full-time software work.
+- [Newsletter](/newsletter): Subscribe for updates when new posts are published.
+- [Tags](/tags): Browse posts by tag.
+- [Categories](/categories): Browse posts by category.
+- [Changelog](/changelog): Site version history.
+
+## Info
+
+- Author: hmziqrs
+- Site: https://blog.hmziq.rs
+- Built with: Astro 6, Tailwind v4, DaisyUI 5
+- Deployed on: Cloudflare Pages
