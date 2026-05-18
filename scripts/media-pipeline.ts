@@ -51,7 +51,10 @@ async function queryD1<T = Record<string, unknown>>(
     },
   );
 
-  if (!response.ok) throw new Error(`D1 query failed: ${response.statusText}`);
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`D1 query failed (${response.status}): ${body}`);
+  }
 
   const data = await response.json<{
     success: boolean;
