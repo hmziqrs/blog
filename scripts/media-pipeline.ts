@@ -14,7 +14,7 @@ import { imageSize } from "image-size";
 // ─── Config ────────────────────────────────────────────────────────────────────
 
 const REPO_ROOT = path.resolve(import.meta.dir, "..");
-const CONTENT_DIR = path.join(REPO_ROOT, "content");
+const CONTENT_DIR = path.join(REPO_ROOT, process.env.MEDIA_CONTENT_DIR ?? "content");
 const MEDIA_DIRS = [
   path.join(CONTENT_DIR, "posts", "media"),
   path.join(CONTENT_DIR, "newsletters", "media"),

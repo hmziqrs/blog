@@ -1,0 +1,93 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "Hmziq blog" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e6]:
+        - navigation [ref=e7]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+          - link "Contact" [ref=e11] [cursor=pointer]:
+            - /url: /contact
+        - button "Switch to light mode" [ref=e12]:
+          - img [ref=e13]
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - link "Advertisement Advertise here" [ref=e17] [cursor=pointer]:
+        - /url: /contact
+        - generic [ref=e20]:
+          - paragraph [ref=e21]: Advertisement
+          - paragraph [ref=e22]: Advertise here
+      - article [ref=e24] [cursor=pointer]:
+        - generic:
+          - generic:
+            - img "Ethereal monochrome line art of a person working late at a laptop in a minimalist dark scene"
+          - generic:
+            - generic:
+              - time: May 10, 2026
+              - generic: /
+              - link "Engineering" [ref=e25]:
+                - /url: /category/Engineering
+              - generic: /
+              - generic: hmziqrs
+            - heading "Vibe Coding My Blog in Astro, Deployed on Cloudflare" [level=2]:
+              - link "Vibe Coding My Blog in Astro, Deployed on Cloudflare" [ref=e26]:
+                - /url: /posts/vibe-coding-astro-cloudflare
+            - paragraph: Third attempt at a blog. Finally got this one built.
+            - generic:
+              - link "#astro" [ref=e27]:
+                - /url: /tags/astro
+              - link "#cloudflare" [ref=e28]:
+                - /url: /tags/cloudflare
+              - link "#vibe-coding" [ref=e29]:
+                - /url: /tags/vibe-coding
+              - link "#blog" [ref=e30]:
+                - /url: /tags/blog
+              - link "#web-dev" [ref=e31]:
+                - /url: /tags/web-dev
+  - contentinfo [ref=e32]:
+    - generic [ref=e34]:
+      - navigation [ref=e35]:
+        - link "Tags" [ref=e36] [cursor=pointer]:
+          - /url: /tags
+        - link "Categories" [ref=e37] [cursor=pointer]:
+          - /url: /categories
+        - link "Newsletter" [ref=e38] [cursor=pointer]:
+          - /url: /newsletter
+        - link "Advertise" [ref=e39] [cursor=pointer]:
+          - /url: /advertise
+        - link "Contact" [ref=e40] [cursor=pointer]:
+          - /url: /contact
+        - link "Privacy" [ref=e41] [cursor=pointer]:
+          - /url: /privacy
+        - link "Terms" [ref=e42] [cursor=pointer]:
+          - /url: /terms
+        - link "Changelog" [ref=e43] [cursor=pointer]:
+          - /url: /changelog
+      - paragraph [ref=e44]:
+        - text: © 2026
+        - link "hmziq.rs" [ref=e45] [cursor=pointer]:
+          - /url: https://hmziq.rs
+        - text: ·
+        - link "v0.0.1" [ref=e46] [cursor=pointer]:
+          - /url: /changelog
+        - text: . Built with
+        - link "Astro" [ref=e47] [cursor=pointer]:
+          - /url: https://astro.build
+        - text: and deployed on
+        - link "Cloudflare" [ref=e48] [cursor=pointer]:
+          - /url: https://pages.cloudflare.com
+        - text: .
+      - paragraph [ref=e49]:
+        - text: Powered by
+        - link "\"your brand\"" [ref=e50] [cursor=pointer]:
+          - /url: /contact
+        - text: .
+  - dialog "This site uses analytics to understand how content performs. No personal data is sold or shared." [ref=e51]:
+    - generic [ref=e53]:
+      - img [ref=e54]
+      - generic [ref=e56]:
+        - paragraph [ref=e57]: This site uses analytics to understand how content performs. No personal data is sold or shared.
+        - generic [ref=e58]:
+          - button "Decline" [ref=e59] [cursor=pointer]
+          - button "Accept" [ref=e60] [cursor=pointer]

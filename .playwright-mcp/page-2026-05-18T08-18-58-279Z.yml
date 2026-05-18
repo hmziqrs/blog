@@ -1,0 +1,125 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "Hmziq blog" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e6]:
+        - navigation [ref=e7]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+          - link "Contact" [ref=e11] [cursor=pointer]:
+            - /url: /contact
+        - button "Switch to light mode" [ref=e12]:
+          - img [ref=e13]
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - link "Advertisement Advertise here" [ref=e17] [cursor=pointer]:
+        - /url: /contact
+        - generic [ref=e20]:
+          - paragraph [ref=e21]: Advertisement
+          - paragraph [ref=e22]: Advertise here
+      - generic [ref=e23]:
+        - article [ref=e24] [cursor=pointer]:
+          - generic:
+            - generic:
+              - time: Mar 12, 2026
+              - generic: /
+              - link "opinions" [ref=e25]:
+                - /url: /category/opinions
+              - generic: /
+              - generic: hmziqrs
+            - heading "Shipping With Less" [level=2]:
+              - link "Shipping With Less" [ref=e26]:
+                - /url: /posts/shipping-with-less
+            - paragraph: Why removing optional complexity is often the fastest path to a better product.
+            - generic:
+              - link "#product" [ref=e27]:
+                - /url: /tags/product
+              - link "#engineering" [ref=e28]:
+                - /url: /tags/engineering
+              - link "#writing" [ref=e29]:
+                - /url: /tags/writing
+        - article [ref=e30] [cursor=pointer]:
+          - generic:
+            - generic:
+              - img "Illustrated cover image for the Building a Static Blog with Astro 6 article"
+            - generic:
+              - generic:
+                - time: Feb 26, 2026
+                - generic: /
+                - link "engineering" [ref=e31]:
+                  - /url: /category/engineering
+                - generic: /
+                - generic: hmziqrs
+              - heading "Building a Static Blog with Astro 6" [level=2]:
+                - link "Building a Static Blog with Astro 6" [ref=e32]:
+                  - /url: /posts/building-with-astro-6
+              - paragraph: How I set up this blog using Astro 6 beta, Tailwind v4, DaisyUI 5, and Cloudflare Pages.
+              - generic:
+                - link "#astro" [ref=e33]:
+                  - /url: /tags/astro
+                - link "#tailwind" [ref=e34]:
+                  - /url: /tags/tailwind
+                - link "#cloudflare" [ref=e35]:
+                  - /url: /tags/cloudflare
+                - link "#bun" [ref=e36]:
+                  - /url: /tags/bun
+        - article [ref=e37] [cursor=pointer]:
+          - generic:
+            - generic:
+              - img "Abstract blog cover artwork for the Welcome to the Blog post"
+            - generic:
+              - generic:
+                - time: Jan 1, 2026
+                - generic: /
+                - link "news" [ref=e38]:
+                  - /url: /category/news
+                - generic: /
+                - generic: hmziqrs
+              - heading "Welcome to the Blog" [level=2]:
+                - link "Welcome to the Blog" [ref=e39]:
+                  - /url: /posts/hello-world
+              - paragraph: First post. What this blog is about.
+              - generic:
+                - link "#meta" [ref=e40]:
+                  - /url: /tags/meta
+                - link "#introduction" [ref=e41]:
+                  - /url: /tags/introduction
+  - contentinfo [ref=e42]:
+    - generic [ref=e44]:
+      - navigation [ref=e45]:
+        - link "Tags" [ref=e46] [cursor=pointer]:
+          - /url: /tags
+        - link "Categories" [ref=e47] [cursor=pointer]:
+          - /url: /categories
+        - link "Newsletter" [ref=e48] [cursor=pointer]:
+          - /url: /newsletter
+        - link "Advertise" [ref=e49] [cursor=pointer]:
+          - /url: /advertise
+        - link "Contact" [ref=e50] [cursor=pointer]:
+          - /url: /contact
+        - link "Privacy" [ref=e51] [cursor=pointer]:
+          - /url: /privacy
+        - link "Terms" [ref=e52] [cursor=pointer]:
+          - /url: /terms
+        - link "Changelog" [ref=e53] [cursor=pointer]:
+          - /url: /changelog
+      - paragraph [ref=e54]:
+        - text: © 2026
+        - link "hmziq.rs" [ref=e55] [cursor=pointer]:
+          - /url: https://hmziq.rs
+        - text: ·
+        - link "v0.0.1" [ref=e56] [cursor=pointer]:
+          - /url: /changelog
+        - text: . Built with
+        - link "Astro" [ref=e57] [cursor=pointer]:
+          - /url: https://astro.build
+        - text: and deployed on
+        - link "Cloudflare" [ref=e58] [cursor=pointer]:
+          - /url: https://pages.cloudflare.com
+        - text: .
+      - paragraph [ref=e59]:
+        - text: Powered by
+        - link "\"your brand\"" [ref=e60] [cursor=pointer]:
+          - /url: /contact
+        - text: .
