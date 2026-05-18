@@ -53,7 +53,10 @@
     "deploy:prod": "bun run db:migrate:prod && bun run media:upload && bun run deploy:api:prod && bun run deploy:web:prod",
     "deploy:prod:nomedia": "bun run db:migrate:prod && bun run deploy:api:prod && bun run deploy:web:prod",
     "deploy:prod:web": "PUBLIC_SITE_URL=https://blog.hmziq.rs CONTENT_DIR=$(bun run media:rewrite) turbo -F web build:prod && wrangler pages deploy apps/web/dist --project-name=hmziqblog --branch=master",
-    "deploy:prod:api": "bun run db:migrate:prod && bun run deploy:api:prod"
+    "deploy:prod:api": "bun run db:migrate:prod && bun run deploy:api:prod",
+    "ci:staging": "gh workflow run ci.yml -f deploy-staging=true",
+    "ci:web-prod": "gh workflow run ci.yml -f deploy-web-prod=true",
+    "ci:api-prod": "gh workflow run ci.yml -f deploy-api-prod=true"
   },
   "dependencies": {},
   "devDependencies": {
