@@ -23,14 +23,26 @@ For example layouts:
     For example content of every pages was set up incorrectly even the parts of the header, body, and footer.
     I had to prompt it mutliple times to get the correct layout.
     But after wasting a few minutes I did it manually.
+
 For example CI/CD:
     Ai had written different tags for different environments and I had to manually change them and make sure they are correct. Which require the human input and it's kind of double work like write the code/article first and then go check the latest version of the app and then increment it like so many steps which had to be all manually. which increase friction.
 
     So I put the staging and prod both in the same branch and added path based filters if I added a newsletter file then send the newsletter If add a new content in prod dir it deploys to prod. Also there are manual ci commands which I can trigger manually via my CLI.
 
+    Also AI didn't write proper document for setup like github actions proviede enviroment based variables for dedicated environments like prod, stage, and etc. AI didn't considered this and the initial document was setup with STAGE_ prefix to distinguish between stage and prod. and another case for secret and public variables AI initially wrote documents with all the variables as secret but I had steer it in right direction to seprate them based on sensitivity.
+
     Again this is not a standard practive for deployments of stage and prod
     But I had to go to this route simply for reducing frcition I'm an indie dev and have been jugling around so many projects and remembering/documenting so many projects tax your brain power soo much.
+    that's why it's better for an indie dev follow un orthodox ways.
 
+For example Architecture and database:
+    AI had be using D1 for rate-limiting stuff that would be fine if we we're self deploying on a VPS and were on limited resources. But cloudflare provides us with a very generous tier with lots of usage. So that doesn't made sense that we shouldn't utilize the already available KV, and queues.
+
+
+Post development fatigue
+Again If you are an engineer like me with no other skills than programming than the most tiring thing is deployment.
+like You've to setup API keys with ttl add reminders to rotate your keys then deployment pipelines make sure the deployment is smooth and error free. Then post-publish stuff like add website to search engines. and market it let people know about it and if it's an mobile app then seting up app stores listing adding age ratings handling rejections and making changes for those rejections all that stuff that.
+you don't enjoy or don't know burns you out so bad. that's why learning other things is so important just to you you uncomfortable and move you out of your comfort zone. so when stuff like these happens it doesn't irritates or burns you out.
 
 End notes
 Practice patiece and peace that's the most important skill in VIBE coding things will never not go the way you want it to be.
