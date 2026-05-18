@@ -130,7 +130,7 @@ jobs:
 
   deploy-api-prod:
     needs: [detect, deploy-staging]
-    if: needs.detect.outputs.release == 'true'
+    if: needs.detect.outputs.release == 'true' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     environment: prod
     steps:
