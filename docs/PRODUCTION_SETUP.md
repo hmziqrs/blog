@@ -26,6 +26,7 @@ Create a token at **My Profile → API Tokens → Create Token** → start with 
 | Cloudflare Pages   | Edit   |
 | Queues             | Edit   |
 | Workers R2 Storage | Edit   |
+| Workers KV Storage | Edit   |
 
 ### Zone-level permission (select "Zone" dropdown)
 
