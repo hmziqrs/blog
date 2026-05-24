@@ -7,9 +7,9 @@ const title = pageTitle("Unsubscribe");
 const apiBase = import.meta.env.PUBLIC_API_BASE ?? "";
 ---
 
-<BaseLayout title={title} description="Unsubscribe from the newsletter">
+<BaseLayout title={title} description="Unsubscribe from the newsletter" noindex>
   <PageContainer>
-    <main class="max-w-2xl mx-auto px-4 py-16 text-center">
+    <section class="max-w-2xl mx-auto px-4 py-16 text-center">
       <div id="loading">
         <p class="text-base-content/70">Processing your request…</p>
       </div>
@@ -25,7 +25,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE ?? "";
         <p id="error-msg" class="text-error"></p>
         <a href="/" class="btn btn-ghost mt-8">Back to blog</a>
       </div>
-    </main>
+    </section>
   </PageContainer>
 </BaseLayout>
 

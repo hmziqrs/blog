@@ -26,7 +26,7 @@ const dateStr = issue.data.date.toLocaleDateString("en-US", {
   description={issue.data.description ?? issue.data.title}
 >
   <PageContainer>
-    <main class="max-w-2xl mx-auto px-4 py-12">
+    <section class="max-w-2xl mx-auto px-4 py-12">
       <a
         href="/newsletter"
         class="inline-flex items-center gap-1.5 font-mono text-[0.7rem] uppercase tracking-[0.14em] text-base-content/40 hover:text-base-content/70 mb-8 transition-colors"
@@ -50,6 +50,6 @@ const dateStr = issue.data.date.toLocaleDateString("en-US", {
       <article class="prose max-w-none">
         <Content />
       </article>
-    </main>
+    </section>
   </PageContainer>
 </BaseLayout>
