@@ -26,11 +26,19 @@ export const GET: APIRoute = () => {
           light: toAbsoluteUrl(siteConfig.siteUrl, avatarLight),
           dark: toAbsoluteUrl(siteConfig.siteUrl, avatarDark),
         },
+        websites: {
+          main: siteConfig.copyrightSiteURL,
+          blog: siteConfig.siteUrl,
+        },
         socials: socials.map((social) => ({
           platform: social.platform,
           url: social.url,
         })),
-        sameAs: socials.map((social) => social.url),
+        sameAs: [
+          siteConfig.copyrightSiteURL,
+          siteConfig.siteUrl,
+          ...socials.map((social) => social.url),
+        ],
       },
     }),
     { headers: { "Content-Type": "application/json" } },
