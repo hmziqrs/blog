@@ -12,8 +12,7 @@ export const GET: APIRoute = () => {
   const emailMethod = siteConfig.pages.contact?.methods.find(
     (m) => m.label.toLowerCase() === "email",
   );
-  const bio =
-    siteConfig.pages.about?.description ?? siteConfig.pages.about?.paragraphs[0] ?? null;
+  const bio = siteConfig.pages.about?.description ?? siteConfig.pages.about?.paragraphs[0] ?? null;
 
   return new Response(
     JSON.stringify({
