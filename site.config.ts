@@ -14,6 +14,7 @@ export const siteConfig = defineSiteConfig({
       { platform: "github", url: "https://github.com/hmziqrs" },
       { platform: "linkedin", url: "https://www.linkedin.com/in/hmziqrs" },
       { platform: "telegram", url: "https://t.me/hmziqrs" },
+      { platform: "reddit", url: "https://www.reddit.com/user/hmziq_rs" },
     ],
   },
   primaryNav: [
