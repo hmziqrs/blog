@@ -85,6 +85,7 @@ export interface RoutesConfig {
   categories: string;
   advertise: string;
   rss: string;
+  atom: string;
   robots: string;
   favicon: string;
   ogDefault: string;
@@ -153,6 +154,7 @@ export function createRoutes(basePath = "/"): RoutesConfig {
     categories: withBasePath(basePath, "/categories"),
     advertise: withBasePath(basePath, "/advertise"),
     rss: withBasePath(basePath, "/rss.xml"),
+    atom: withBasePath(basePath, "/atom.xml"),
     robots: withBasePath(basePath, "/robots.txt"),
     favicon: withBasePath(basePath, "/author-light.svg"),
     ogDefault: withBasePath(basePath, "/og-default.svg"),

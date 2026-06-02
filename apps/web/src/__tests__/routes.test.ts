@@ -7,6 +7,7 @@ describe("route helpers", () => {
 
     expect(routes.home).toBe("/");
     expect(routes.rss).toBe("/rss.xml");
+    expect(routes.atom).toBe("/atom.xml");
     expect(routes.post("hello-world")).toBe("/posts/hello-world");
   });
 
@@ -16,6 +17,7 @@ describe("route helpers", () => {
     expect(routes.home).toBe("/blog");
     expect(routes.tags).toBe("/blog/tags");
     expect(routes.rss).toBe("/blog/rss.xml");
+    expect(routes.atom).toBe("/blog/atom.xml");
     expect(routes.post("hello-world")).toBe("/blog/posts/hello-world");
   });
 
