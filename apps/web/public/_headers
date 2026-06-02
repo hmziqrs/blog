@@ -1,0 +1,9 @@
+/api/*
+  X-Robots-Tag: noindex
+  Cache-Control: public, max-age=3600
+
+/sitemap-index.xml
+  Cache-Control: public, max-age=3600
+
+/robots.txt
+  Cache-Control: public, max-age=3600

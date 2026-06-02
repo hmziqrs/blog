@@ -1,19 +1,17 @@
 import { getCollection } from "astro:content";
-import type { APIContext } from "astro";
+import type { APIRoute } from "astro";
 import { routes, siteConfig, toAbsoluteUrl } from "../config/site";
 
-export async function GET(context: APIContext) {
-  if (!context.site) throw new Error("site must be set in astro.config.ts");
-
+export const GET: APIRoute = async () => {
   const posts = await getCollection("posts", ({ data }) => !data.draft);
   const sorted = posts.toSorted((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
   const atomUrl = toAbsoluteUrl(siteConfig.publicSiteUrl, routes.atom);
-  const siteUrl = context.site.toString();
+  const siteUrl = siteConfig.publicSiteUrl;
 
   const entries = sorted
     .map((post) => {
-      const postUrl = toAbsoluteUrl(siteUrl, `${routes.post(post.id)}/`);
+      const postUrl = toAbsoluteUrl(siteConfig.publicSiteUrl, `${routes.post(post.id)}/`);
       const updated = post.data.date.toISOString();
       const id = `tag:${new URL(siteUrl).hostname},${post.data.date.toISOString().slice(0, 10)}:${post.id}`;
       return `    <entry>
@@ -21,7 +19,9 @@ export async function GET(context: APIContext) {
       <link href="${postUrl}" rel="alternate" type="text/html" />
       <id>${id}</id>
       <updated>${updated}</updated>
+      <author><name>${escapeXml(siteConfig.author.name)}</name><uri>${escapeXml(siteConfig.author.url ?? siteUrl)}</uri></author>
       <summary>${escapeXml(post.data.description)}</summary>
+      <content type="html">${escapeXml(post.data.description)}</content>
     </entry>`;
     })
     .join("\n");
@@ -41,7 +41,7 @@ ${entries}
   return new Response(xml, {
     headers: { "Content-Type": "application/atom+xml; charset=utf-8" },
   });
-}
+};
 
 function escapeXml(str: string): string {
   return str

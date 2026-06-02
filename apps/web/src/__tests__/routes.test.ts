@@ -85,7 +85,7 @@ describe("site config nav resolution", () => {
           description: "About page",
           paragraphs: ["One paragraph."],
           focusAreas: [{ title: "Focus", body: "Area." }],
-          principles: ["One principle."],
+          principles: [{ title: "Principle", body: "One principle." }],
         },
       },
     });

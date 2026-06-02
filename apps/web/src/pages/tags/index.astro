@@ -9,14 +9,24 @@ import { countSortedValues } from "../../utils/posts";
 
 const posts = await getCollection("posts", ({ data }) => !data.draft);
 const tags = countSortedValues(posts.flatMap((post) => post.data.tags));
+
+const collectionSchema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "All Tags",
+  description: `Browse all blog topics and tags on ${siteConfig.name}`,
+  url: `${siteConfig.publicSiteUrl}/tags`,
+  isPartOf: { "@type": "WebSite", "@id": `${siteConfig.publicSiteUrl}/#website` },
+};
 ---
 
 <BaseLayout
-  title={pageTitle("Tags")}
-  description={`Browse ${tags.length} recurring topics on ${siteConfig.name}.`}
+  title={pageTitle("Browse All Blog Topics & Tags")}
+  description="Explore all topics covered on Hmziq Blog. Find posts tagged with Astro, Cloudflare, TypeScript, Web Development, and more."
+  structuredData={collectionSchema}
 >
   <PageContainer>
-    <PageHeader title="Tags" class="mb-8" />
+    <PageHeader title="Browse All Blog Topics & Tags" description={`Explore all ${tags.length} topics covered on ${siteConfig.name}. Find posts tagged with Astro, Cloudflare, TypeScript, Web Development, and more.`} class="mb-8" />
     {
       tags.length === 0 ? (
         <p class="text-muted text-sm">No tags yet.</p>

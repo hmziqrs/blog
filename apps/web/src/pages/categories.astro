@@ -9,14 +9,24 @@ import { countSortedValues } from "../utils/posts";
 
 const posts = await getCollection("posts", ({ data }) => !data.draft);
 const categories = countSortedValues(posts.map((post) => post.data.category));
+
+const collectionSchema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Blog Categories",
+  description: `Browse all blog categories on ${siteConfig.name}`,
+  url: `${siteConfig.publicSiteUrl}/categories`,
+  isPartOf: { "@type": "WebSite", "@id": `${siteConfig.publicSiteUrl}/#website` },
+};
 ---
 
 <BaseLayout
-  title={pageTitle("Categories")}
-  description={`Browse ${categories.length} categories on ${siteConfig.name}.`}
+  title={pageTitle("Blog Categories — Browse by Topic")}
+  description={`Browse ${categories.length} categories on ${siteConfig.name}. Find posts organized by topic including web development, cloud infrastructure, developer tooling, and more.`}
+  structuredData={collectionSchema}
 >
   <PageContainer>
-    <PageHeader title="Categories" class="mb-8" />
+    <PageHeader title="Blog Categories — Browse by Topic" description={`Browse ${categories.length} categories on ${siteConfig.name}. Find posts organized by topic.`} class="mb-8" />
     {
       categories.length === 0 ? (
         <p class="text-muted text-sm">No categories yet.</p>

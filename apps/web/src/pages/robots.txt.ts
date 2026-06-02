@@ -4,7 +4,7 @@ import { toAbsoluteUrl } from "../config/site";
 
 export const GET: APIRoute = () =>
   new Response(
-    `User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${toAbsoluteUrl(siteConfig.publicSiteUrl, siteConfig.routes.sitemapIndex)}\n`,
+    `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /newsletter/unsubscribe\nDisallow: /newsletter\nCrawl-delay: 10\n\nSitemap: ${toAbsoluteUrl(siteConfig.publicSiteUrl, siteConfig.routes.sitemapIndex)}\n`,
     {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",

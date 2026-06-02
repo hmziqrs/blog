@@ -12,7 +12,7 @@ export async function getStaticPaths() {
   const posts = await getCollection("posts", ({ data }) => !data.draft);
   const categories = collectSortedValues(posts.map((post) => post.data.category));
   return categories.map((category) => ({
-    params: { category: encodeURIComponent(category) },
+    params: { category: encodeURIComponent(category.toLowerCase()) },
     props: {
       posts: posts.filter((p) => p.data.category === category),
       categories,
@@ -29,14 +29,16 @@ interface Props {
 
 const { posts, categories, category } = Astro.props as Props;
 const postLabel = `${posts.length} ${posts.length === 1 ? "post" : "posts"}`;
-const title = pageTitle(`${category} articles`);
-const description = `${postLabel} in the ${category} category on ${siteConfig.name}.`;
+const displayName = category.charAt(0).toUpperCase() + category.slice(1);
+const title = pageTitle(`${displayName} Articles & Tutorials`);
+const description = `${postLabel} in the ${displayName} category on ${siteConfig.name}. Browse tutorials, guides, and engineering articles.`;
 ---
 
 <BaseLayout title={title} description={description}>
   <PageContainer>
     <PageHeader
-      title={category}
+      title={displayName}
+      description={`${postLabel} in the ${displayName} category. Browse tutorials, guides, and engineering articles.`}
       titleClass="mb-6 text-4xl font-semibold tracking-tight capitalize sm:text-5xl"
     />
     <div class="mb-8">

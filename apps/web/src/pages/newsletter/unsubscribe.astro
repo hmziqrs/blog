@@ -7,23 +7,33 @@ const title = pageTitle("Unsubscribe");
 const apiBase = import.meta.env.PUBLIC_API_BASE ?? "";
 ---
 
-<BaseLayout title={title} description="Unsubscribe from the newsletter" noindex>
+<BaseLayout title={title} description="Unsubscribe from the newsletter" noindex={true}>
   <PageContainer>
     <section class="max-w-2xl mx-auto px-4 py-16 text-center">
       <div id="loading">
-        <p class="text-base-content/70">Processing your request…</p>
+        <h1 class="text-2xl font-semibold mb-3">Unsubscribing...</h1>
+        <p class="text-base-content/70 mb-2">Processing your request. This won't take long.</p>
+        <p class="text-base-content/50 text-sm">You will stop receiving newsletter emails. You can always re-subscribe from the <a href="/newsletter" class="text-primary hover:underline">newsletter page</a>.</p>
       </div>
       <div id="success" class="hidden">
-        <h1 class="text-3xl font-bold mb-4">Unsubscribed</h1>
+        <h1 class="text-3xl font-bold mb-4">Successfully Unsubscribed</h1>
         <p class="text-base-content/70">
           You've been removed from the newsletter. Sorry to see you go.
         </p>
-        <a href="/" class="btn btn-primary mt-8">Back to blog</a>
+        <div class="flex flex-wrap justify-center gap-3 mt-8">
+          <a href="/" class="btn btn-primary">Back to blog</a>
+          <a href="/newsletter" class="btn btn-ghost">Newsletter info</a>
+          <a href="/contact" class="btn btn-ghost">Contact</a>
+        </div>
       </div>
       <div id="error" class="hidden">
-        <h1 class="text-3xl font-bold mb-4">Unsubscribe failed</h1>
+        <h2 class="text-3xl font-bold mb-4">Unsubscribe failed</h2>
         <p id="error-msg" class="text-error"></p>
-        <a href="/" class="btn btn-ghost mt-8">Back to blog</a>
+        <div class="flex flex-wrap justify-center gap-3 mt-8">
+          <a href="/" class="btn btn-ghost">Back to blog</a>
+          <a href="/contact" class="btn btn-ghost">Contact support</a>
+          <a href="/privacy" class="btn btn-ghost">Privacy policy</a>
+        </div>
       </div>
     </section>
   </PageContainer>

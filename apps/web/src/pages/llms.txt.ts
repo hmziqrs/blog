@@ -52,7 +52,7 @@ export const GET: APIRoute = async () => {
   const lines = [
     `# ${siteConfig.name}`,
     "",
-    `> ${siteConfig.blog.homeDescription}`,
+    `> ${siteConfig.blog.homeDescription} Written by ${siteConfig.author.name}, a full-stack engineer specializing in TypeScript, Rust, Astro, Cloudflare, and modern web development. Posts include hands-on engineering guides, architecture breakdowns, and opinionated takes on developer tooling and workflow.`,
     "",
     "## Posts",
     "",

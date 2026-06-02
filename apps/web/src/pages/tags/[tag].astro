@@ -26,14 +26,14 @@ interface Props {
 
 const { posts, tag } = Astro.props as Props;
 const postLabel = `${posts.length} ${posts.length === 1 ? "post" : "posts"}`;
-const title = pageTitle(`${tag} posts`);
-const description = `${postLabel} tagged with ${tag} on ${siteConfig.name}.`;
+const displayName = siteConfig.tagDisplayNames?.[tag] || tag;
+const title = pageTitle(`${displayName} Articles — Posts Tagged ${displayName}`);
+const description = `${postLabel} tagged with ${displayName} on ${siteConfig.name}. Browse articles about ${displayName} including tutorials, guides, and engineering deep-dives.`;
 ---
 
 <BaseLayout title={title} description={description}>
   <PageContainer>
-    <PageHeader title={`#${tag}`} class="mb-8">
-      <p class="text-muted text-sm leading-6">{postLabel}</p>
+    <PageHeader title={displayName} description={`All articles tagged with ${displayName} — ${postLabel} published on ${siteConfig.name}.`} class="mb-8">
     </PageHeader>
     <PostList posts={posts} />
   </PageContainer>

@@ -31,9 +31,19 @@ export const siteConfig = defineSiteConfig({
     { page: "terms", label: "Terms" },
     { href: "/changelog", label: "Changelog" },
   ],
+  tagDisplayNames: {
+    astro: "Astro",
+    blog: "Blog",
+    cloudflare: "Cloudflare",
+    "web-dev": "Web Development",
+    typescript: "TypeScript",
+    rust: "Rust",
+    flutter: "Flutter",
+  },
   blog: {
-    homeTitle: "Hmziq blog",
-    homeDescription: "Writing about software engineering, tools, and ideas.",
+    homeTitle: "Hmziq Blog — Software Engineering, Web Dev & Tools",
+    homeDescription:
+      "Practical software engineering insights on TypeScript, Rust, Astro, Cloudflare, and modern web development. Learn from real projects, code examples, and engineering deep-dives.",
   },
   advertisement: {
     href: "",
@@ -44,23 +54,53 @@ export const siteConfig = defineSiteConfig({
   },
   pages: {
     about: {
-      title: "About",
+      title: "About Hmziq — Full-Stack Engineer & Software Writer",
       description:
-        "9 years building software. Full-stack engineer. Writing about programming, technology, and work.",
+        "Learn about Hmziq, a full-stack engineer specializing in TypeScript, Rust, and cloud-native web development. Building tools, writing about software, and shipping production apps.",
       paragraphs: [
-        "9 years building software. Full-stack engineer.",
-        "TypeScript, Rust, and Flutter for backend and cross-platform work.",
-        "Writing about programming, technology, and work.",
+        "I have been building software for nearly a decade, working across full-stack web development, mobile applications, and cloud infrastructure. My day-to-day revolves around TypeScript, Rust, and modern frontend frameworks — writing production code that ships to real users, not just demos. Over the years I have shipped SaaS products, CLI tools, mobile apps, and everything in between.",
+        "This blog is where I write about what I learn along the way. Posts range from hands-on engineering guides and architecture breakdowns to opinionated takes on developer tooling and workflow. The focus is practical: real code, real projects, and lessons that come from things breaking in production rather than polished tutorials that only work in isolation.",
+        "The tech stack I write about most includes Astro for static sites and content-driven apps, Cloudflare Workers and D1 for edge computing, Rust for performance-critical tooling, and TypeScript for just about everything else. I also maintain and contribute to open-source projects, and I occasionally write about Flutter for cross-platform mobile work.",
+        "If you want to follow along, subscribe to the newsletter or find me on GitHub and X. I share new posts, project updates, and the occasional unfiltered take on software engineering.",
       ],
-      focusAreas: [],
-      principles: [],
+      focusAreas: [
+        {
+          title: "Full-Stack Web Development",
+          body: "Building production apps with TypeScript, Astro, and modern frameworks",
+        },
+        {
+          title: "Cloud Infrastructure",
+          body: "Deploying on Cloudflare Workers, D1, R2, and edge computing",
+        },
+        {
+          title: "Developer Tooling",
+          body: "Creating CLI tools and dev utilities in Rust and TypeScript",
+        },
+        { title: "Open Source", body: "Contributing to and maintaining open-source projects" },
+      ],
+      principles: [
+        {
+          title: "Ship Fast, Ship Often",
+          body: "Real projects over tutorials. Production experience over theory.",
+        },
+        {
+          title: "Practical Over Perfect",
+          body: "Working solutions that solve real problems, not over-engineered abstractions.",
+        },
+        {
+          title: "Learn in Public",
+          body: "Sharing the process — mistakes, iterations, and wins alike.",
+        },
+      ],
     },
     contact: {
-      title: "Contact",
-      description: "Get in touch for freelance, contract, or full-time software work.",
+      title: "Contact Hmziq — Get in Touch for Collaboration & Projects",
+      description:
+        "Reach out to Hmziq for software engineering collaboration, open-source projects, technical writing opportunities, or just to chat about web development and developer tooling.",
       paragraphs: [
-        "Get in touch for freelance, contract, or full-time work.",
-        "Fastest reply is on X. Email and Telegram work too.",
+        "Whether you have a project idea, an open-source collaboration in mind, or a technical writing opportunity, I am always open to hearing from fellow developers and teams. I work across full-stack web development, cloud infrastructure, and developer tooling — so if your project involves shipping real software, chances are we can find common ground.",
+        "I typically respond within a day or two, sometimes faster on X. For longer proposals or project briefs, email works best. If you want to see what I am currently working on, check my GitHub — it is usually the most up-to-date reflection of what I am building.",
+        "I am currently available for freelance and contract work, open-source collaborations, and technical writing or content partnerships. If any of that sounds like a fit, reach out through any of the channels below.",
       ],
       methods: [
         {
@@ -91,9 +131,9 @@ export const siteConfig = defineSiteConfig({
       ],
     },
     privacy: {
-      title: "Privacy",
+      title: "Privacy Policy — How Hmziq Blog Handles Your Data",
       description:
-        "A concise explanation of what this site collects, what it does not collect, how analytics are used, and how advertising appears on the site.",
+        "Comprehensive privacy policy for Hmziq Blog covering data collection, analytics, newsletter subscriber info, cookies, and how your personal information is protected.",
       badgeLabel: "Policy",
       effectiveDate: "April 19, 2026",
       preamble: [
@@ -131,9 +171,9 @@ export const siteConfig = defineSiteConfig({
       ],
     },
     terms: {
-      title: "Terms",
+      title: "Terms of Use — Hmziq Blog Usage Guidelines & Policies",
       description:
-        "A straightforward set of conditions for reading, referencing, and using the site.",
+        "Terms and conditions for using Hmziq Blog. Understand your rights and responsibilities when accessing our content, newsletter, and developer resources.",
       badgeLabel: "Terms Of Use",
       effectiveDate: "March 31, 2026",
       preamble: [

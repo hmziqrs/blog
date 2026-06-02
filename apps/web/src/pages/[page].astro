@@ -46,9 +46,23 @@ const aboutParagraphs = aboutPage?.paragraphs ?? [];
 const contactParagraphs = contactPage?.paragraphs ?? [];
 const legalPreamble = legalPage?.preamble ?? [];
 const contactMethods = contactPage?.methods ?? [];
+
+const personSchema = aboutPage
+  ? {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: siteConfig.author.name,
+      url: siteConfig.author.url,
+      sameAs: siteConfig.author.socials?.map((s) => s.url).filter(Boolean) ?? [],
+      jobTitle: "Full-Stack Software Engineer",
+      description: aboutPage.description,
+    }
+  : null;
+
+const structuredData = personSchema ? [personSchema] : undefined;
 ---
 
-<BaseLayout title={pageTitle(config.title)} description={config.description}>
+<BaseLayout title={pageTitle(config.title)} description={config.description} structuredData={structuredData}>
   <PageContainer>
     {
       aboutPage ? (

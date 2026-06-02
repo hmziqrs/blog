@@ -7,24 +7,44 @@ import PostList from "../components/PostList.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const posts = await getCollection("posts", ({ data }) => !data.draft);
-const structuredData = [
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: siteConfig.name,
-    url: siteConfig.publicSiteUrl,
-    description: siteConfig.blog.homeDescription,
-    inLanguage: "en-US",
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.publicSiteUrl,
+  logo: `${siteConfig.publicSiteUrl}${siteConfig.routes.ogDefault}`,
+  sameAs: siteConfig.author.socials?.map((s) => s.url).filter(Boolean) ?? [],
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: siteConfig.name,
+  url: siteConfig.publicSiteUrl,
+  description: siteConfig.blog.homeDescription,
+  inLanguage: "en-US",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${siteConfig.publicSiteUrl}/tags/{search_term_string}`,
+    "query-input": "required name=search_term_string",
   },
-  {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    name: siteConfig.name,
-    url: siteConfig.publicSiteUrl,
-    description: siteConfig.blog.homeDescription,
-    inLanguage: "en-US",
+};
+
+const blogSchema = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  name: siteConfig.name,
+  url: siteConfig.publicSiteUrl,
+  description: siteConfig.blog.homeDescription,
+  inLanguage: "en-US",
+  author: {
+    "@type": "Person",
+    name: siteConfig.author.name,
+    url: siteConfig.author.url,
   },
-];
+};
+
+const structuredData = [organizationSchema, websiteSchema, blogSchema];
 ---
 
 <BaseLayout
@@ -33,6 +53,14 @@ const structuredData = [
   structuredData={structuredData}
 >
   <PageContainer>
+    <section class="mb-12">
+      <h1 class="mb-3 text-4xl font-semibold tracking-tight sm:text-5xl">
+        {siteConfig.blog.homeTitle}
+      </h1>
+      <p class="max-w-2xl text-base leading-7 text-soft sm:text-[1.05rem]">
+        {siteConfig.blog.homeDescription}
+      </p>
+    </section>
     <AdvertisementBanner
       href={siteConfig.advertisement?.href || ""}
       imageUrl={siteConfig.advertisement?.imageUrl}
