@@ -51,14 +51,7 @@ const structuredData = [
   structuredData={structuredData}
 >
   <PageContainer>
-    <section class="mb-12">
-      <h1 class="mb-3 text-4xl font-semibold tracking-tight sm:text-5xl">
-        {siteConfig.blog.homeTitle}
-      </h1>
-      <p class="max-w-2xl text-base leading-7 text-soft sm:text-[1.05rem]">
-        {siteConfig.blog.homeDescription}
-      </p>
-    </section>
+    <h1 class="sr-only">{siteConfig.blog.homeTitle}</h1>
     <AdvertisementBanner
       href={siteConfig.advertisement?.href || ""}
       imageUrl={siteConfig.advertisement?.imageUrl}
