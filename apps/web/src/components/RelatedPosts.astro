@@ -1,0 +1,74 @@
+---
+interface PostData {
+  id: string;
+  data: {
+    title: string;
+    description?: string;
+    date: Date;
+    category: string;
+    tags: string[];
+    draft?: boolean;
+  };
+}
+
+interface Props {
+  currentId: string;
+  currentTags: string[];
+  currentCategory: string;
+  allPosts: PostData[];
+  limit?: number;
+}
+
+const { currentId, currentTags, currentCategory, allPosts, limit = 3 } = Astro.props;
+
+const related = allPosts
+  .filter((p) => !p.data.draft && p.id !== currentId)
+  .map((post) => {
+    let score = 0;
+    if (post.data.tags) {
+      for (const tag of currentTags) {
+        if (post.data.tags.includes(tag)) score += 2;
+      }
+    }
+    if (post.data.category === currentCategory) score += 1;
+    return { post, score };
+  })
+  .filter(({ score }) => score > 0)
+  .sort(
+    (a, b) =>
+      b.score - a.score ||
+      b.post.data.date.getTime() - a.post.data.date.getTime(),
+  )
+  .slice(0, limit)
+  .map(({ post }) => post);
+---
+
+{related.length > 0 && (
+  <section class="mt-12 border-t border-base-300/80 pt-8">
+    <h2 class="mb-6 text-xl font-semibold">Related Posts</h2>
+    <div class="flex flex-col gap-4">
+      {related.map((post) => (
+        <a
+          href={`/posts/${post.id}`}
+          class="group block rounded-lg border border-base-300/80 bg-base-200/55 p-4 transition-colors duration-200 hover:border-primary/40 hover:bg-base-200/80"
+        >
+          <h3 class="font-semibold transition-colors group-hover:text-primary">
+            {post.data.title}
+          </h3>
+          {post.data.description && (
+            <p class="mt-1 line-clamp-2 text-sm text-soft">
+              {post.data.description}
+            </p>
+          )}
+          <time class="mt-2 block font-mono text-xs text-dim">
+            {post.data.date.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </time>
+        </a>
+      ))}
+    </div>
+  </section>
+)}

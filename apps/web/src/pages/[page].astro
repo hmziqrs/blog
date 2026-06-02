@@ -53,26 +53,54 @@ const personSchema = aboutPage
       "@type": "Person",
       name: siteConfig.author.name,
       url: siteConfig.author.url,
-      sameAs: siteConfig.author.socials?.map((s) => s.url).filter(Boolean) ?? [],
+      sameAs: Object.values(siteConfig.author.socials).filter(Boolean),
       jobTitle: "Full-Stack Software Engineer",
-      description: aboutPage.description,
+      description: config.description,
     }
-  : null;
-
-const structuredData = personSchema ? [personSchema] : undefined;
+  : undefined;
 ---
 
-<BaseLayout title={pageTitle(config.title)} description={config.description} structuredData={structuredData}>
+<BaseLayout title={pageTitle(config.title)} description={config.description} structuredData={personSchema}>
   <PageContainer>
     {
       aboutPage ? (
         <section class="max-w-3xl">
-          <PageHeader title={aboutPage.title} description={aboutPage.description} class="mb-8" />
           <div class="max-w-2xl space-y-4 text-base leading-7 text-base-content sm:text-[1.02rem]">
             {aboutParagraphs.map((paragraph) => (
               <p>{paragraph}</p>
             ))}
           </div>
+
+          {aboutPage.focusAreas && aboutPage.focusAreas.length > 0 && (
+            <section class="mt-8">
+              <h2 class="mb-4 text-xl font-semibold">Focus Areas</h2>
+              <div class="grid gap-4 sm:grid-cols-2">
+                {aboutPage.focusAreas.map((area) => (
+                  <div class="rounded-lg border border-base-300/80 bg-base-200/60 p-4">
+                    <h3 class="font-medium">{area.title}</h3>
+                    <p class="mt-1 text-sm text-soft">{area.body}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {aboutPage.principles && aboutPage.principles.length > 0 && (
+            <section class="mt-8">
+              <h2 class="mb-4 text-xl font-semibold">Principles</h2>
+              <div class="space-y-3">
+                {aboutPage.principles.map((principle) => (
+                  <div class="flex gap-3">
+                    <span class="text-primary mt-0.5 text-lg">→</span>
+                    <div>
+                      <h3 class="font-medium">{principle.title}</h3>
+                      <p class="text-sm text-soft">{principle.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           <div class="mt-6 flex flex-wrap items-center gap-2">
             <ButtonLink href={routes.tags} size="sm" class="font-mono uppercase tracking-[0.14em]">
@@ -98,11 +126,6 @@ const structuredData = personSchema ? [personSchema] : undefined;
       ) : contactPage ? (
         <>
           <section class="max-w-3xl">
-            <PageHeader
-              title={contactPage.title}
-              description={contactPage.description}
-              class="mb-8"
-            />
             <div class="max-w-2xl space-y-3 text-base leading-7 text-base-content/78 sm:text-[1.02rem]">
               {contactParagraphs.map((paragraph, index) => (
                 <p class:list={[index === contactParagraphs.length - 1 && "text-base-content"]}>

@@ -10,7 +10,10 @@ import PageContainer from "../components/PageContainer.astro";
 import SharePost from "../components/SharePost.astro";
 import TagBadge from "../components/TagBadge.astro";
 import ThemedImage from "../components/ThemedImage.astro";
+import TableOfContents from "../components/TableOfContents.astro";
+import RelatedPosts from "../components/RelatedPosts.astro";
 import { Icon } from "astro-icon/components";
+import type { CollectionEntry } from "astro:content";
 
 interface Props {
   frontmatter: {
@@ -24,9 +27,12 @@ interface Props {
     cover_alt?: string;
   };
   readingTime?: number;
+  headings?: { depth: number; slug: string; text: string }[];
+  postId?: string;
+  allPosts?: CollectionEntry<"posts">[];
 }
 
-const { frontmatter, readingTime } = Astro.props;
+const { frontmatter, readingTime, headings, postId, allPosts } = Astro.props;
 const cover = normalizeCover(frontmatter.cover);
 
 const slug = Astro.params.slug;
@@ -57,7 +63,7 @@ const coverPath = cover
   ? cover.src.startsWith("/") ? withBasePath(siteConfig.basePath, cover.src) : cover.src
   : undefined;
 const imageUrl = new URL(coverPath ?? routes.ogDefault, Astro.site ?? Astro.url).href;
-const blogPostingSchema = {
+const structuredData = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   headline: frontmatter.title,
@@ -68,8 +74,7 @@ const blogPostingSchema = {
   url: canonicalUrl,
   image: imageUrl,
   inLanguage: "en-US",
-  keywords: frontmatter.tags?.join(", "),
-  ...(readingTime ? { wordCount: Math.round(readingTime * 200) } : {}),
+  articleBody: frontmatter.description,
   author: {
     "@type": "Person",
     name: siteConfig.author.name,
@@ -92,12 +97,17 @@ const breadcrumbSchema = {
   "@type": "BreadcrumbList",
   itemListElement: [
     { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.publicSiteUrl },
-    { "@type": "ListItem", position: 2, name: frontmatter.category, item: `${siteConfig.publicSiteUrl}/category/${frontmatter.category.toLowerCase()}` },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: frontmatter.category,
+      item: `${siteConfig.publicSiteUrl}/category/${frontmatter.category.toLowerCase()}`,
+    },
     { "@type": "ListItem", position: 3, name: frontmatter.title, item: canonicalUrl },
   ],
 };
 
-const structuredData = [blogPostingSchema, breadcrumbSchema];
+const allStructuredData = [structuredData, breadcrumbSchema];
 ---
 
 <BaseLayout
@@ -107,7 +117,7 @@ const structuredData = [blogPostingSchema, breadcrumbSchema];
   ogType="article"
   publishedTime={frontmatter.date.toISOString()}
   modifiedTime={frontmatter.updated?.toISOString()}
-  structuredData={structuredData}
+  structuredData={allStructuredData}
 >
   <PageContainer class={cover ? "" : "pb-5 sm:pb-6"}>
     <AdvertisementBanner
@@ -158,9 +168,23 @@ const structuredData = [blogPostingSchema, breadcrumbSchema];
 
   <PageContainer class={cover ? "" : "pt-5 sm:pt-6"}>
     <div class="max-w-3xl">
+      {headings && <TableOfContents headings={headings} />}
       <article class="prose max-w-none text-[1.03rem] leading-8">
         <slot />
       </article>
+
+      {allPosts && postId && (
+        <RelatedPosts
+          currentId={postId}
+          currentTags={frontmatter.tags || []}
+          currentCategory={frontmatter.category}
+          allPosts={allPosts.map((p) => ({
+            id: p.id,
+            data: p.data,
+          }))}
+        />
+      )}
+
       <hr class="my-10 border-base-content/10" />
       <SharePost title={frontmatter.title} url={canonicalUrl} />
       <hr class="my-10 border-base-content/10" />
@@ -169,7 +193,7 @@ const structuredData = [blogPostingSchema, breadcrumbSchema];
         <div class="flex items-center gap-3.5">
           <img
             src="/author-light.svg"
-            alt="Author avatar — hmziqrs"
+            alt=""
             class="h-12 w-12 shrink-0 object-cover theme-invert-dark ring-1 ring-base-content/10"
           />
           <div class="min-w-0">
@@ -190,7 +214,7 @@ const structuredData = [blogPostingSchema, breadcrumbSchema];
                 <a
                   href={social.url}
                   target="_blank"
-                  rel="noopener noreferrer me"
+                  rel="noopener noreferrer"
                   class="text-dim hover:text-primary transition-colors duration-200"
                   aria-label={social.platform}
                 >

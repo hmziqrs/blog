@@ -32,14 +32,36 @@ const postLabel = `${posts.length} ${posts.length === 1 ? "post" : "posts"}`;
 const displayName = category.charAt(0).toUpperCase() + category.slice(1);
 const title = pageTitle(`${displayName} Articles & Tutorials`);
 const description = `${postLabel} in the ${displayName} category on ${siteConfig.name}. Browse tutorials, guides, and engineering articles.`;
+
+const categorySchema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: `${displayName} Articles & Tutorials`,
+  description: `Browse all posts in the ${displayName} category on Hmziq Blog`,
+  url: `${siteConfig.publicSiteUrl}/category/${category.toLowerCase()}`,
+  isPartOf: {
+    "@type": "CollectionPage",
+    "@id": `${siteConfig.publicSiteUrl}/categories/#collection`,
+  },
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: posts.length,
+    itemListElement: posts.map((post, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${siteConfig.publicSiteUrl}/posts/${post.id}`,
+      name: post.data.title,
+    })),
+  },
+};
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} structuredData={categorySchema}>
   <PageContainer>
     <PageHeader
-      title={displayName}
+      title={`${displayName} Articles`}
       description={`${postLabel} in the ${displayName} category. Browse tutorials, guides, and engineering articles.`}
-      titleClass="mb-6 text-4xl font-semibold tracking-tight capitalize sm:text-5xl"
+      titleClass="mb-6 text-4xl font-semibold tracking-tight sm:text-5xl"
     />
     <div class="mb-8">
       <CategoryNav active={category} categories={categories} />

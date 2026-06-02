@@ -87,6 +87,8 @@ export const GET: APIRoute = async () => {
     `- Site: ${siteConfig.publicSiteUrl}`,
     "- Built with: Astro 6, Tailwind v4, DaisyUI 5",
     "- Deployed on: Cloudflare Pages",
+    `- RSS Feed: ${siteConfig.publicSiteUrl}/rss.xml`,
+    `- Atom Feed: ${siteConfig.publicSiteUrl}/atom.xml`,
     "",
   ];
 

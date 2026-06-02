@@ -7,48 +7,46 @@ import PostList from "../components/PostList.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const posts = await getCollection("posts", ({ data }) => !data.draft);
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: siteConfig.name,
-  url: siteConfig.publicSiteUrl,
-  logo: `${siteConfig.publicSiteUrl}${siteConfig.routes.ogDefault}`,
-  sameAs: siteConfig.author.socials?.map((s) => s.url).filter(Boolean) ?? [],
-};
-
-const websiteSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: siteConfig.name,
-  url: siteConfig.publicSiteUrl,
-  description: siteConfig.blog.homeDescription,
-  inLanguage: "en-US",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: `${siteConfig.publicSiteUrl}/tags/{search_term_string}`,
-    "query-input": "required name=search_term_string",
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: siteConfig.name,
+    url: siteConfig.publicSiteUrl,
+    logo: `${siteConfig.publicSiteUrl}${siteConfig.routes.ogDefault}`,
+    sameAs: Object.values(siteConfig.author.socials).filter(Boolean),
   },
-};
-
-const blogSchema = {
-  "@context": "https://schema.org",
-  "@type": "Blog",
-  name: siteConfig.name,
-  url: siteConfig.publicSiteUrl,
-  description: siteConfig.blog.homeDescription,
-  inLanguage: "en-US",
-  author: {
-    "@type": "Person",
-    name: siteConfig.author.name,
-    url: siteConfig.author.url,
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteConfig.name,
+    url: siteConfig.publicSiteUrl,
+    description: siteConfig.blog.homeDescription,
+    inLanguage: "en-US",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteConfig.publicSiteUrl}/tags/{search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
   },
-};
-
-const structuredData = [organizationSchema, websiteSchema, blogSchema];
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: siteConfig.name,
+    url: siteConfig.publicSiteUrl,
+    description: siteConfig.blog.homeDescription,
+    inLanguage: "en-US",
+    author: {
+      "@type": "Person",
+      name: siteConfig.author.name,
+      url: siteConfig.author.url,
+    },
+  },
+];
 ---
 
 <BaseLayout
-  title={siteConfig.name}
+  title={siteConfig.blog.homeTitle}
   description={siteConfig.blog.homeDescription}
   structuredData={structuredData}
 >

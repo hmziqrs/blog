@@ -3,39 +3,47 @@ import { pageTitle } from "../../config/site";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageContainer from "../../components/PageContainer.astro";
 
-const title = pageTitle("Unsubscribe");
+const title = pageTitle("Unsubscribe from Newsletter — Manage Email Preferences");
 const apiBase = import.meta.env.PUBLIC_API_BASE ?? "";
 ---
 
-<BaseLayout title={title} description="Unsubscribe from the newsletter" noindex={true}>
+<BaseLayout
+  title={title}
+  description="Manage your newsletter subscription preferences. Unsubscribe from the Hmziq Blog newsletter to stop receiving email updates about new posts and engineering content."
+  noindex={true}
+>
   <PageContainer>
-    <section class="max-w-2xl mx-auto px-4 py-16 text-center">
+    <main class="mx-auto max-w-2xl px-4 py-16 text-center">
       <div id="loading">
-        <h1 class="text-2xl font-semibold mb-3">Unsubscribing...</h1>
-        <p class="text-base-content/70 mb-2">Processing your request. This won't take long.</p>
-        <p class="text-base-content/50 text-sm">You will stop receiving newsletter emails. You can always re-subscribe from the <a href="/newsletter" class="text-primary hover:underline">newsletter page</a>.</p>
+        <h1 class="mb-4 text-3xl font-bold">Unsubscribing…</h1>
+        <p class="text-base-content/70">
+          Processing your request. This won't take long.
+        </p>
+        <p class="mt-2 text-sm text-soft">
+          You will stop receiving newsletter emails.
+          <a href="/newsletter" class="text-primary hover:underline">Re-subscribe anytime</a>.
+        </p>
       </div>
       <div id="success" class="hidden">
-        <h1 class="text-3xl font-bold mb-4">Successfully Unsubscribed</h1>
+        <h1 class="mb-4 text-3xl font-bold">Successfully Unsubscribed</h1>
         <p class="text-base-content/70">
           You've been removed from the newsletter. Sorry to see you go.
         </p>
-        <div class="flex flex-wrap justify-center gap-3 mt-8">
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
           <a href="/" class="btn btn-primary">Back to blog</a>
-          <a href="/newsletter" class="btn btn-ghost">Newsletter info</a>
-          <a href="/contact" class="btn btn-ghost">Contact</a>
+          <a href="/contact" class="btn btn-ghost">Contact us</a>
         </div>
       </div>
       <div id="error" class="hidden">
-        <h2 class="text-3xl font-bold mb-4">Unsubscribe failed</h2>
+        <h2 class="mb-4 text-3xl font-bold">Unsubscribe failed</h2>
         <p id="error-msg" class="text-error"></p>
-        <div class="flex flex-wrap justify-center gap-3 mt-8">
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
           <a href="/" class="btn btn-ghost">Back to blog</a>
           <a href="/contact" class="btn btn-ghost">Contact support</a>
           <a href="/privacy" class="btn btn-ghost">Privacy policy</a>
         </div>
       </div>
-    </section>
+    </main>
   </PageContainer>
 </BaseLayout>
 

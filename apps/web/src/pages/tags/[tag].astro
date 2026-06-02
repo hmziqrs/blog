@@ -29,9 +29,31 @@ const postLabel = `${posts.length} ${posts.length === 1 ? "post" : "posts"}`;
 const displayName = siteConfig.tagDisplayNames?.[tag] || tag;
 const title = pageTitle(`${displayName} Articles — Posts Tagged ${displayName}`);
 const description = `${postLabel} tagged with ${displayName} on ${siteConfig.name}. Browse articles about ${displayName} including tutorials, guides, and engineering deep-dives.`;
+
+const tagSchema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: `${displayName} Articles`,
+  description: `Browse all posts tagged with ${displayName} on Hmziq Blog`,
+  url: `${siteConfig.publicSiteUrl}/tags/${tag}`,
+  isPartOf: {
+    "@type": "CollectionPage",
+    "@id": `${siteConfig.publicSiteUrl}/tags/#collection`,
+  },
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: posts.length,
+    itemListElement: posts.map((post, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${siteConfig.publicSiteUrl}/posts/${post.id}`,
+      name: post.data.title,
+    })),
+  },
+};
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} structuredData={tagSchema}>
   <PageContainer>
     <PageHeader title={displayName} description={`All articles tagged with ${displayName} — ${postLabel} published on ${siteConfig.name}.`} class="mb-8">
     </PageHeader>
