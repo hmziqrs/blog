@@ -30,8 +30,8 @@ interface Props {
 const { posts, categories, category } = Astro.props as Props;
 const postLabel = `${posts.length} ${posts.length === 1 ? "post" : "posts"}`;
 const displayName = category.charAt(0).toUpperCase() + category.slice(1);
-const title = pageTitle(`${displayName} Articles & Tutorials`);
-const description = `${postLabel} in the ${displayName} category on ${siteConfig.name}. Browse tutorials, guides, and engineering articles.`;
+const title = pageTitle(displayName);
+const description = `${postLabel} in ${displayName} on ${siteConfig.name}.`;
 
 const categorySchema = {
   "@context": "https://schema.org",
@@ -59,8 +59,8 @@ const categorySchema = {
 <BaseLayout title={title} description={description} structuredData={categorySchema}>
   <PageContainer>
     <PageHeader
-      title={`${displayName} Articles`}
-      description={`${postLabel} in the ${displayName} category. Browse tutorials, guides, and engineering articles.`}
+      title={displayName}
+      description={`${postLabel} in ${displayName}.`}
       titleClass="mb-6 text-4xl font-semibold tracking-tight sm:text-5xl"
     />
     <div class="mb-8">

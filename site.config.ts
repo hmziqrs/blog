@@ -31,19 +31,9 @@ export const siteConfig = defineSiteConfig({
     { page: "terms", label: "Terms" },
     { href: "/changelog", label: "Changelog" },
   ],
-  tagDisplayNames: {
-    astro: "Astro",
-    blog: "Blog",
-    cloudflare: "Cloudflare",
-    "web-dev": "Web Development",
-    typescript: "TypeScript",
-    rust: "Rust",
-    flutter: "Flutter",
-  },
   blog: {
-    homeTitle: "Hmziq Blog — Software Engineering, Web Dev & Tools",
-    homeDescription:
-      "Practical software engineering insights on TypeScript, Rust, Astro, Cloudflare, and modern web development. Learn from real projects, code examples, and engineering deep-dives.",
+    homeTitle: "Hmziq blog",
+    homeDescription: "Software, tools, and whatever I learned the hard way. Rust, TypeScript, Flutter, and shipping real things.",
   },
   advertisement: {
     href: "",
@@ -54,53 +44,23 @@ export const siteConfig = defineSiteConfig({
   },
   pages: {
     about: {
-      title: "About Hmziq — Full-Stack Engineer & Software Writer",
+      title: "About",
       description:
-        "Learn about Hmziq, a full-stack engineer specializing in TypeScript, Rust, and cloud-native web development. Building tools, writing about software, and shipping production apps.",
+        "Building software for 9 years. TypeScript, Rust, Flutter. Writing about things I broke and fixed.",
       paragraphs: [
-        "I have been building software for nearly a decade, working across full-stack web development, mobile applications, and cloud infrastructure. My day-to-day revolves around TypeScript, Rust, and modern frontend frameworks — writing production code that ships to real users, not just demos. Over the years I have shipped SaaS products, CLI tools, mobile apps, and everything in between.",
-        "This blog is where I write about what I learn along the way. Posts range from hands-on engineering guides and architecture breakdowns to opinionated takes on developer tooling and workflow. The focus is practical: real code, real projects, and lessons that come from things breaking in production rather than polished tutorials that only work in isolation.",
-        "The tech stack I write about most includes Astro for static sites and content-driven apps, Cloudflare Workers and D1 for edge computing, Rust for performance-critical tooling, and TypeScript for just about everything else. I also maintain and contribute to open-source projects, and I occasionally write about Flutter for cross-platform mobile work.",
-        "If you want to follow along, subscribe to the newsletter or find me on GitHub and X. I share new posts, project updates, and the occasional unfiltered take on software engineering.",
+        "I build software. Have for 9 years. Mostly TypeScript and Rust on the backend, Flutter for cross-platform, whatever gets the job done.",
+        "Shipped vibekit.link, torii.tools, nutter.tools, and this blog. Each one taught me something I would have rather learned by reading someone else's post. So I write about it here.",
+        "Right now I use AI as a junior engineer. It's fast at prototyping and testing. It also gets some obvious things very wrong. The blog covers both sides of that.",
       ],
-      focusAreas: [
-        {
-          title: "Full-Stack Web Development",
-          body: "Building production apps with TypeScript, Astro, and modern frameworks",
-        },
-        {
-          title: "Cloud Infrastructure",
-          body: "Deploying on Cloudflare Workers, D1, R2, and edge computing",
-        },
-        {
-          title: "Developer Tooling",
-          body: "Creating CLI tools and dev utilities in Rust and TypeScript",
-        },
-        { title: "Open Source", body: "Contributing to and maintaining open-source projects" },
-      ],
-      principles: [
-        {
-          title: "Ship Fast, Ship Often",
-          body: "Real projects over tutorials. Production experience over theory.",
-        },
-        {
-          title: "Practical Over Perfect",
-          body: "Working solutions that solve real problems, not over-engineered abstractions.",
-        },
-        {
-          title: "Learn in Public",
-          body: "Sharing the process — mistakes, iterations, and wins alike.",
-        },
-      ],
+      focusAreas: [],
+      principles: [],
     },
     contact: {
-      title: "Contact Hmziq — Get in Touch for Collaboration & Projects",
-      description:
-        "Reach out to Hmziq for software engineering collaboration, open-source projects, technical writing opportunities, or just to chat about web development and developer tooling.",
+      title: "Contact",
+      description: "Got a project or want to work together. Reach out on X, email, or Telegram.",
       paragraphs: [
-        "Whether you have a project idea, an open-source collaboration in mind, or a technical writing opportunity, I am always open to hearing from fellow developers and teams. I work across full-stack web development, cloud infrastructure, and developer tooling — so if your project involves shipping real software, chances are we can find common ground.",
-        "I typically respond within a day or two, sometimes faster on X. For longer proposals or project briefs, email works best. If you want to see what I am currently working on, check my GitHub — it is usually the most up-to-date reflection of what I am building.",
-        "I am currently available for freelance and contract work, open-source collaborations, and technical writing or content partnerships. If any of that sounds like a fit, reach out through any of the channels below.",
+        "Got a project? Want to collab on something? Need someone to build software with?",
+        "Fastest way to reach me is X. Email and Telegram work too. I reply to all of them.",
       ],
       methods: [
         {
@@ -131,9 +91,9 @@ export const siteConfig = defineSiteConfig({
       ],
     },
     privacy: {
-      title: "Privacy Policy — How Hmziq Blog Handles Your Data",
+      title: "Privacy",
       description:
-        "Comprehensive privacy policy for Hmziq Blog covering data collection, analytics, newsletter subscriber info, cookies, and how your personal information is protected.",
+        "What this site collects, what it doesn't, how analytics work, and how ads appear.",
       badgeLabel: "Policy",
       effectiveDate: "April 19, 2026",
       preamble: [
@@ -171,9 +131,9 @@ export const siteConfig = defineSiteConfig({
       ],
     },
     terms: {
-      title: "Terms of Use — Hmziq Blog Usage Guidelines & Policies",
+      title: "Terms",
       description:
-        "Terms and conditions for using Hmziq Blog. Understand your rights and responsibilities when accessing our content, newsletter, and developer resources.",
+        "Conditions for reading, referencing, and using this site.",
       badgeLabel: "Terms Of Use",
       effectiveDate: "March 31, 2026",
       preamble: [

@@ -3,13 +3,13 @@ import { pageTitle } from "../../config/site";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageContainer from "../../components/PageContainer.astro";
 
-const title = pageTitle("Unsubscribe from Newsletter — Manage Email Preferences");
+const title = pageTitle("Unsubscribe");
 const apiBase = import.meta.env.PUBLIC_API_BASE ?? "";
 ---
 
 <BaseLayout
   title={title}
-  description="Manage your newsletter subscription preferences. Unsubscribe from the Hmziq Blog newsletter to stop receiving email updates about new posts and engineering content."
+  description="Stop receiving newsletter emails. You can resubscribe anytime."
   noindex={true}
 >
   <PageContainer>
