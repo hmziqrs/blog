@@ -327,79 +327,6 @@ Every unique string across titles, descriptions, headings, and OG fields was exa
 
 ---
 
-## Programmatic SEO Strategy
-
-### Unique Edge
-
-This blog is built on Astro 6 + Tailwind v4 (CSS-only config) + Bun monorepo + Hono Workers + Cloudflare D1/KV/R2/Queues. This exact stack combination has almost zero dedicated content online. Every comparison, code example, and cheatsheet can be sourced from real working code in this repository, vibekit.link, torii.tools, and nutter.tools.
-
-### Top 3 Playbooks by ROI
-
-| Rank | Playbook | Pages | Monthly Volume | Effort | Why |
-|---|---|---|---|---|---|
-| 1 | **Code Examples** | 200 | 40K-1M aggregate | Low | Lowest competition, highest long-tail. Real code from shipping projects. |
-| 2 | **Comparisons** | 80-120 | 20K-500K aggregate | Medium | Captures high-intent traffic. "I use both" authority. |
-| 3 | **Cheatsheets** | 40-60 | 15K-200K aggregate | Low | Currency advantage -- Astro 6, Tailwind v4, Bun, Hono are all new. |
-
-**Additional playbooks (lower priority):** Templates (50-80 pages, copy-paste configs from real projects), Glossary (80-100 pages, internal linking infrastructure).
-
-**Skip:** Directory playbook -- saturated by awesome-lists, AlternativeTo, StackShare.
-
-### Code Examples Playbook (200 pages)
-
-URL pattern: `/snippets/{language}/{topic}`
-
-Distribution: TypeScript (40), Rust (30), Astro (30), Cloudflare Workers (30), Hono (25), Tailwind CSS (25), Bun (20).
-
-Each snippet: problem statement, code block from real project, 2-4 sentence explanation, gotcha callout. Stored as markdown in new `content/snippets/` collection. Dynamic routes via `apps/web/src/pages/snippets/[...slug].astro`.
-
-### Comparisons Playbook (80-120 pages)
-
-URL pattern: `/compare/{tool-a}-vs-{tool-b}`
-
-Key comparisons: Astro vs Next.js, Hono vs Express, Bun vs Deno, Cloudflare Workers vs Vercel Edge, Tailwind v4 vs v3, D1 vs Turso, R2 vs S3.
-
-Each comparison: feature matrix table, "Why I Chose X" section with real project code, "When Y Makes More Sense" counterpoint, verdict. Every page must include at least one real project reference.
-
-### Cheatsheets Playbook (40-60 pages)
-
-URL pattern: `/cheatsheet/{topic}`
-
-Key topics: Tailwind v4 syntax, Astro 6 Content Layer, Bun CLI, Hono routing, Cloudflare Wrangler, TypeScript utility types, Zod 4.
-
-Each cheatsheet: dense reference tables, "From My Setup" section showing real config, migration table (old way vs new way), gotchas.
-
-### Internal Linking Architecture
-
-Hub-and-spoke model with bidirectional links between all playbook types:
-
-- Every blog post links to 3-5 related snippets, 1-2 comparisons, 1 cheatsheet
-- Every snippet links to parent cheatsheet, related snippets, demonstrating blog post
-- Every comparison links to snippets for each tool, winning tool's cheatsheet, starter template
-- Every cheatsheet links to all snippets in topic, relevant templates, glossary terms
-- Every glossary term links to 2-3 related terms, 1-2 demonstrating snippets, relevant comparison
-
-### Scale Targets
-
-| Phase | Timeline | Snippets | Comparisons | Cheatsheets | Templates | Glossary | Total |
-|---|---|---|---|---|---|---|---|
-| Seed | Week 3-4 | 20 | 5 | 3 | 0 | 5 | 33 |
-| Scale | Month 3 | 100 | 20 | 10 | 15 | 40 | 185 |
-| Full | Month 6 | 150 | 60 | 30 | 40 | 70 | 350 |
-| Target | Ongoing | 200 | 100 | 50 | 70 | 90 | 510 |
-
-### Implementation Requirements
-
-New content collections: `snippets`, `comparisons`, `cheatsheets`, `templates`, `glossary` in `content.config.ts`.
-
-New route directories: `pages/snippets/`, `pages/compare/`, `pages/cheatsheet/`, `pages/template/`, `pages/glossary/`.
-
-New components: `SnippetCard.astro`, `ComparisonTable.astro`, `CodeBlock.astro`, `PSEOContext.astro`, `FilterBar.astro`, `AlphabetIndex.astro`.
-
-New layout: `PSEOLayout.astro` extending BaseLayout with breadcrumb, sidebar, and cross-linking.
-
-SEO meta templates per playbook type (50-60 char titles, 150-160 char descriptions with specific patterns for each type).
-
 ---
 
 ## Action Plan
@@ -444,25 +371,33 @@ SEO meta templates per playbook type (50-60 char titles, 150-160 char descriptio
 | 19 | Fix uppercase `/category/Engineering/` URL | 15 min | Medium |
 | 20 | Add `X-Robots-Tag: noindex` to JSON API endpoints | 15 min | Low |
 
-### Priority 5: Programmatic SEO Foundation (Week 1-2)
+### Priority 5: Remaining Technical Polish
 
 | # | Action | Effort | Impact |
 |---|---|---|---|
-| 21 | Set up 5 new content collections in `content.config.ts` | 1 hr | High -- enables all pSEO |
-| 22 | Create `PSEOLayout.astro` with breadcrumb, sidebar, cross-linking | 2 hr | High |
-| 23 | Create all dynamic route files and index pages | 2 hr | High |
-| 24 | Create `CodeBlock.astro` with copy-to-clipboard | 1 hr | Medium |
-| 25 | Write 20 seed snippets from existing codebase | 3 hr | High -- first pSEO content |
+| 21 | Add `@id` references to connect schema graph entities | 1 hr | High -- schema is disconnected |
+| 22 | Add `publisher.logo` to BlogPosting schema (required for rich results) | 15 min | High -- blocks rich snippets |
+| 23 | Generate dynamic OG images per page type | 2 hr | Medium -- all non-post pages use generic SVG |
 
-### Priority 6: Ongoing Content Production (Month 2+)
+### Status of Previously Implemented Items (Local, Not Yet Deployed)
 
-- Publish 2-3 blog posts per month (1,500-2,500 words each, with code examples and diagrams)
-- Add 10-15 snippets per week
-- Add 2-3 comparisons per week
-- Add 1 cheatsheet per week
-- Add 5 glossary terms per week
-- Add 2-3 templates per week
-- Expand About page to 300-500 words with Person schema
-- Add `rel="me"` to all social links
-- Generate dynamic OG images per page type
-- Build "Related Posts" component for PostLayout
+The following items are fixed in local code but NOT reflected on the live site:
+
+- [x] H1 on homepage (sr-only), About, Contact, tags, categories
+- [x] All titles expanded to 50-60 chars in `site.config.ts`
+- [x] All descriptions expanded to 150-160 chars in `site.config.ts`
+- [x] Organization + WebSite/SearchAction + Blog/author schemas on homepage
+- [x] Person schema on About page
+- [x] BreadcrumbList schema on blog posts
+- [x] CollectionPage + ItemList on tag/category pages
+- [x] Modal H2s changed to divs
+- [x] Tag display names, lowercase category URLs
+- [x] Security headers in `_headers` (HSTS, X-Frame-Options, etc.)
+- [x] `robots.txt` Crawl-delay + disallow rules
+- [x] Atom/RSS author attribution + content elements
+- [x] `llms-full.txt` endpoint, JSON Feed alternate link
+- [x] TOC + RelatedPosts components
+- [x] `rel="me"` on social links
+- [x] Avatar alt text
+- [x] Sitemap changefreq + priority via `serialize()`
+- [x] All copy humanized to match author voice
