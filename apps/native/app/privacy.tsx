@@ -1,30 +1,40 @@
 import { ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Container } from "@/components/container";
 import { PageHeader } from "@/components/page-header";
-import { ActivityIndicator } from "react-native";
+import { ErrorState, LoadingState } from "@/components/screen-state";
 import { getPageConfig } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
+import { SITE } from "@/lib/site";
 import type { LegalPageConfig } from "@/lib/types";
 
-export default function PrivacyScreen() {
-  const { data, loading, error } = useApi(() => getPageConfig("privacy"));
+function LegalBadge({ label }: { label: string }) {
+  return (
+    <View className="rounded-full border border-base-300 bg-base-200 px-3 py-1">
+      <Text className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-soft">
+        {label}
+      </Text>
+    </View>
+  );
+}
 
-  if (loading) {
+export default function PrivacyScreen() {
+  const { data, loading, error, refetch } = useApi(() => getPageConfig("privacy"));
+  const insets = useSafeAreaInsets();
+
+  if (loading && !data) {
     return (
       <Container isScrollable={false}>
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" />
-        </View>
+        <LoadingState />
       </Container>
     );
   }
 
   if (error || !data) {
     return (
-      <Container isScrollable={false} className="px-4">
-        <PageHeader title="Privacy" />
-        <Text className="text-sm text-red-500">{error ?? "Failed to load page"}</Text>
+      <Container isScrollable={false}>
+        <ErrorState message={error ?? "Failed to load page"} onRetry={refetch} />
       </Container>
     );
   }
@@ -37,34 +47,34 @@ export default function PrivacyScreen() {
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 16,
-          paddingBottom: 32,
+          paddingBottom: insets.bottom + 24,
           gap: 20,
         }}
         keyboardShouldPersistTaps="handled"
       >
-        <PageHeader title={config.title} description={config.description} />
+        <PageHeader title={config.title} description={config.description} className="mb-8" />
 
-        <View className="flex-row items-center gap-3">
-          <View className="rounded-full border border-base-content/12 bg-base-200/60 px-3 py-1">
-            <Text className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/62">
-              {config.badgeLabel}
-            </Text>
-          </View>
-          <Text className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-base-content/48">
+        <View className="flex-row flex-wrap items-center gap-3">
+          <LegalBadge label={config.badgeLabel} />
+          <Text className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-muted">
             Effective {config.effectiveDate}
           </Text>
         </View>
 
         {config.preamble.map((paragraph, i) => (
-          <Text key={i} className="text-base leading-7 text-base-content/80">
-            {paragraph}
+          <Text key={i} className="max-w-3xl text-base leading-7 text-base-content/80">
+            {paragraph.replaceAll("this site", SITE.name)}
           </Text>
         ))}
 
-        {config.sections.map((section, i) => (
-          <View key={i}>
-            <Text className="mb-2 text-lg font-semibold text-foreground">{section.title}</Text>
-            <Text className="text-base leading-7 text-base-content/78">{section.body}</Text>
+        {config.sections.map((section) => (
+          <View key={section.title} className="max-w-3xl gap-2">
+            <Text className="font-mono text-[0.82rem] font-semibold uppercase tracking-[0.16em] text-base-content/92">
+              {section.title}
+            </Text>
+            <Text className="text-base leading-7 text-base-content/78">
+              {section.body.replaceAll("this site", SITE.name)}
+            </Text>
           </View>
         ))}
       </ScrollView>

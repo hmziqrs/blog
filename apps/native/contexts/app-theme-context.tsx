@@ -1,7 +1,10 @@
-import React, { createContext, useCallback, useContext, useMemo } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo } from "react";
+import * as SecureStore from "expo-secure-store";
 import { Uniwind, useUniwind } from "uniwind";
 
 type ThemeName = "light" | "dark";
+
+const THEME_STORAGE_KEY = "app-theme";
 
 type AppThemeContextType = {
   currentTheme: string;
@@ -13,24 +16,35 @@ type AppThemeContextType = {
 
 const AppThemeContext = createContext<AppThemeContextType | undefined>(undefined);
 
+function persistTheme(theme: ThemeName) {
+  SecureStore.setItemAsync(THEME_STORAGE_KEY, theme).catch(() => {});
+}
+
 export const AppThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const { theme } = useUniwind();
 
-  const isLight = useMemo(() => {
-    return theme === "light";
-  }, [theme]);
+  useEffect(() => {
+    SecureStore.getItemAsync(THEME_STORAGE_KEY).then((saved) => {
+      if (saved === "light" || saved === "dark") {
+        Uniwind.setTheme(saved);
+      } else {
+        Uniwind.setTheme("dark");
+      }
+    });
+  }, []);
 
-  const isDark = useMemo(() => {
-    return theme === "dark";
-  }, [theme]);
+  const isLight = useMemo(() => theme === "light", [theme]);
+  const isDark = useMemo(() => theme === "dark", [theme]);
 
   const setTheme = useCallback((newTheme: ThemeName) => {
     Uniwind.setTheme(newTheme);
+    persistTheme(newTheme);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    Uniwind.setTheme(theme === "light" ? "dark" : "light");
-  }, [theme]);
+    const nextTheme: ThemeName = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+  }, [setTheme, theme]);
 
   const value = useMemo(
     () => ({

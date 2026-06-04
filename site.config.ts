@@ -10,11 +10,10 @@ export const siteConfig = defineSiteConfig({
     name: "hmziqrs",
     url: "https://hmziq.rs/",
     socials: [
-      { platform: "x", url: "https://x.com/hmziqrs" },
-      { platform: "github", url: "https://github.com/hmziqrs" },
-      { platform: "linkedin", url: "https://www.linkedin.com/in/hmziqrs" },
-      { platform: "telegram", url: "https://t.me/hmziqrs" },
-      { platform: "reddit", url: "https://www.reddit.com/user/hmziq_rs" },
+      { platform: "x", url: "https://x.com/hmziqrs?ref=blog.hmziq.rs" },
+      { platform: "github", url: "https://github.com/hmziqrs?ref=blog.hmziq.rs" },
+      { platform: "linkedin", url: "https://www.linkedin.com/in/hmziqrs?ref=blog.hmziq.rs" },
+      { platform: "reddit", url: "https://www.reddit.com/user/hmziq_rs?ref=blog.hmziq.rs" },
     ],
   },
   primaryNav: [
@@ -57,16 +56,16 @@ export const siteConfig = defineSiteConfig({
     },
     contact: {
       title: "Contact",
-      description: "Got a project or want to work together. Reach out on X, email, or Telegram.",
+      description: "Got a project or want to work together. Reach out on X or email.",
       paragraphs: [
         "Got a project? Want to collab on something? Need someone to build software with?",
-        "Fastest way to reach me is X. Email and Telegram work too. I reply to all of them.",
+        "Fastest way to reach me is X. Email works too. I reply to both.",
       ],
       methods: [
         {
           label: "X",
           value: "@hmziqrs",
-          href: "https://x.com/hmziqrs",
+          href: "https://x.com/hmziqrs?ref=blog.hmziq.rs",
         },
         {
           label: "Email",
@@ -74,19 +73,14 @@ export const siteConfig = defineSiteConfig({
           href: "mailto:hmziqrs@gmail.com",
         },
         {
-          label: "Telegram",
-          value: "@hmziqrs",
-          href: "https://t.me/hmziqrs",
-        },
-        {
           label: "GitHub",
           value: "hmziqrs",
-          href: "https://github.com/hmziqrs",
+          href: "https://github.com/hmziqrs?ref=blog.hmziq.rs",
         },
         {
           label: "LinkedIn",
           value: "hmziqrs",
-          href: "https://www.linkedin.com/in/hmziqrs",
+          href: "https://www.linkedin.com/in/hmziqrs?ref=blog.hmziq.rs",
         },
       ],
     },

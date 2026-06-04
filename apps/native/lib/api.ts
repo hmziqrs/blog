@@ -1,3 +1,4 @@
+import { SITE } from "./site";
 import type {
   CategoriesResponse,
   CategoryPostsResponse,
@@ -9,7 +10,21 @@ import type {
   TagPostsResponse,
 } from "./types";
 
-const BASE = process.env.EXPO_PUBLIC_SITE_URL ?? "https://hmziq.rs";
+const BASE = (process.env.EXPO_PUBLIC_SITE_URL ?? SITE.siteUrl).replace(/\/$/, "");
+
+type CoverInput = string | { src: string; width?: number; height?: number } | null | undefined;
+
+function resolveCoverUrl(cover: CoverInput): string | null {
+  if (!cover) return null;
+  const src = typeof cover === "string" ? cover : cover.src;
+  if (!src) return null;
+  if (src.startsWith("http")) return src;
+  return `${BASE}${src.startsWith("/") ? src : `/${src}`}`;
+}
+
+function normalizePost<T extends { cover: CoverInput }>(post: T): T & { cover: string | null } {
+  return { ...post, cover: resolveCoverUrl(post.cover) };
+}
 
 async function fetchApi<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`);
@@ -17,22 +32,16 @@ async function fetchApi<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-function resolveCover(post: PostSummary): PostSummary {
-  if (!post.cover || post.cover.startsWith("http")) return post;
-  return { ...post, cover: `${BASE}${post.cover}` };
-}
-
 export function getPosts() {
   return fetchApi<PostsResponse>("/api/index.json").then((r) => ({
-    posts: r.posts.map(resolveCover),
+    posts: r.posts
+      .map(normalizePost)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
   }));
 }
 
 export function getPost(slug: string) {
-  return fetchApi<PostDetail>(`/api/posts/${slug}.json`).then((post) => {
-    if (!post.cover || post.cover.startsWith("http")) return post;
-    return { ...post, cover: `${BASE}${post.cover}` };
-  });
+  return fetchApi<PostDetail>(`/api/posts/${slug}.json`).then(normalizePost);
 }
 
 export function getTags() {
@@ -42,7 +51,7 @@ export function getTags() {
 export function getTagPosts(tag: string) {
   return fetchApi<TagPostsResponse>(`/api/tags/${encodeURIComponent(tag)}.json`).then((r) => ({
     tag: r.tag,
-    posts: r.posts.map(resolveCover),
+    posts: r.posts.map(normalizePost),
   }));
 }
 
@@ -52,7 +61,7 @@ export function getCategories() {
 
 export function getCategoryPosts(category: string) {
   return fetchApi<CategoryPostsResponse>(`/api/category/${encodeURIComponent(category)}.json`).then(
-    (r) => ({ category: r.category, posts: r.posts.map(resolveCover) }),
+    (r) => ({ category: r.category, posts: r.posts.map(normalizePost) }),
   );
 }
 

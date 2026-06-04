@@ -1,33 +1,35 @@
 import { useLocalSearchParams } from "expo-router";
-import { FlatList, Text, View } from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Container } from "@/components/container";
 import { PageHeader } from "@/components/page-header";
 import { PostCard } from "@/components/post-card";
-import { ActivityIndicator } from "react-native";
+import { ErrorState, LoadingState } from "@/components/screen-state";
 import { getTagPosts } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 
 export default function TagPostsScreen() {
   const { tag } = useLocalSearchParams<{ tag: string }>();
   const decodedTag = decodeURIComponent(tag ?? "");
-  const { data, loading, error } = useApi(() => getTagPosts(decodedTag), [decodedTag]);
+  const { data, loading, refreshing, error, refetch } = useApi(
+    () => getTagPosts(decodedTag),
+    [decodedTag],
+  );
+  const insets = useSafeAreaInsets();
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Container isScrollable={false}>
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" />
-        </View>
+        <LoadingState />
       </Container>
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
-      <Container isScrollable={false} className="px-4">
-        <PageHeader title={decodedTag} />
-        <Text className="text-sm text-red-500">{error}</Text>
+      <Container isScrollable={false}>
+        <ErrorState message={error} onRetry={refetch} />
       </Container>
     );
   }
@@ -40,6 +42,7 @@ export default function TagPostsScreen() {
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <PostCard post={item} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
         ListHeaderComponent={
           <View className="px-4 pt-4 pb-2">
             <PageHeader title={decodedTag} description={`Posts tagged with "${decodedTag}"`} />
@@ -52,7 +55,11 @@ export default function TagPostsScreen() {
             </Text>
           </View>
         }
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: insets.bottom + 24,
+          gap: 20,
+        }}
       />
     </Container>
   );

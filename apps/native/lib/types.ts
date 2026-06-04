@@ -62,7 +62,7 @@ export interface AboutPageConfig {
   description: string;
   paragraphs: string[];
   focusAreas: ContentSection[];
-  principles: string[];
+  principles: ContentSection[];
 }
 
 export interface ContactPageConfig {

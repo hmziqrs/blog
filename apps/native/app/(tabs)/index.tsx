@@ -1,33 +1,33 @@
-import { FlatList, Text, View } from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Container } from "@/components/container";
 import { PostCard } from "@/components/post-card";
-import { ActivityIndicator } from "react-native";
+import { ErrorState, LoadingState } from "@/components/screen-state";
+import { ScreenHeader } from "@/components/screen-header";
+import { SiteFooter } from "@/components/site-footer";
 import { getPosts } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 
 export default function HomeScreen() {
-  const { data, loading, error } = useApi(() => getPosts());
+  const { data, loading, refreshing, error, refetch } = useApi(() => getPosts());
   const posts = data?.posts ?? [];
   const insets = useSafeAreaInsets();
 
-  if (loading) {
+  if (loading && !data) {
     return (
-      <Container isScrollable={false} className="px-4">
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" />
-        </View>
+      <Container isScrollable={false}>
+        <ScreenHeader />
+        <LoadingState />
       </Container>
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
-      <Container isScrollable={false} className="px-4">
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-sm text-red-500">{error}</Text>
-        </View>
+      <Container isScrollable={false}>
+        <ScreenHeader />
+        <ErrorState message={error} onRetry={refetch} />
       </Container>
     );
   }
@@ -38,23 +38,22 @@ export default function HomeScreen() {
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <PostCard post={item} />}
-        ListHeaderComponent={
-          <View className="px-4 pt-6 pb-2">
-            <Text className="text-3xl font-semibold tracking-tight text-foreground">hmziq.rs</Text>
-            <Text className="mt-1 text-sm text-base-content/56">
-              Writing about software engineering, tools, and ideas.
-            </Text>
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
+        ListHeaderComponent={<ScreenHeader />}
+        ListFooterComponent={
+          <View className="px-4 pt-4">
+            <SiteFooter />
           </View>
         }
         ListEmptyComponent={
           <View className="px-4">
-            <Text className="text-sm text-base-content/40">No posts yet. Check back soon.</Text>
+            <Text className="text-sm text-muted">No posts yet. Check back soon.</Text>
           </View>
         }
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: insets.bottom + 24,
-          gap: 16,
+          gap: 20,
         }}
       />
     </Container>

@@ -1,6 +1,8 @@
 import { router } from "expo-router";
 import { Pressable, Text } from "react-native";
 
+import { triggerSelectionHaptic } from "@/lib/haptics";
+
 interface TagBadgeProps {
   tag: string;
   count?: number;
@@ -13,7 +15,10 @@ export function TagBadge({ tag, count, size = "md" }: TagBadgeProps) {
 
   return (
     <Pressable
-      onPress={() => router.push(`/tags/${encodeURIComponent(tag)}`)}
+      onPress={() => {
+        triggerSelectionHaptic();
+        router.push(`/tags/${encodeURIComponent(tag)}`);
+      }}
       className={`items-center justify-center rounded-full border border-base-300 bg-base-100/80 active:border-primary active:bg-primary/8 ${sizeClass}`}
     >
       <Text

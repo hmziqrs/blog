@@ -58,6 +58,6 @@ My end goal is a dedicated admin panel later on, no more markdown files, proper 
 
 Also building these projects on side.
 
-- [vibekit.link](https://vibekit.link) — SvelteKit based fullstack boilerplate for SaaS
-- [torii.tools](https://torii.tools) torii.tools — GPUI based native desktop Request client
-- [nutter.tools](https://nutter.tools) — An arsenal of tools: image conversions, video, audio, JSON, and whatnot.
+- [vibekit.link](https://vibekit.link?ref=blog.hmziq.rs) — SvelteKit based fullstack boilerplate for SaaS
+- [torii.tools](https://torii.tools?ref=blog.hmziq.rs) torii.tools — GPUI based native desktop Request client
+- [nutter.tools](https://nutter.tools?ref=blog.hmziq.rs) — An arsenal of tools: image conversions, video, audio, JSON, and whatnot.

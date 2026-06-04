@@ -1,16 +1,25 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { useThemeColor } from "heroui-native";
+import { Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const foreground = useThemeColor("foreground");
   const background = useThemeColor("background");
+  const separator = useThemeColor("separator");
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { backgroundColor: background },
+        tabBarStyle: {
+          backgroundColor: background,
+          borderTopColor: separator,
+          paddingBottom: Platform.OS === "ios" ? Math.max(insets.bottom - 8, 4) : 8,
+          height: Platform.OS === "ios" ? 56 + Math.max(insets.bottom - 8, 0) : 64,
+        },
         tabBarActiveTintColor: foreground,
         tabBarInactiveTintColor: `${foreground}88`,
       }}

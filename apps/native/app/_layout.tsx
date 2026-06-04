@@ -1,10 +1,11 @@
 import "@/global.css";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { HeroUINativeProvider, useThemeColor } from "heroui-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
-import { AppThemeProvider } from "@/contexts/app-theme-context";
+import { AppThemeProvider, useAppTheme } from "@/contexts/app-theme-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const unstable_settings = {
@@ -14,9 +15,12 @@ export const unstable_settings = {
 function StackLayout() {
   const background = useThemeColor("background");
   const foreground = useThemeColor("foreground");
+  const { isDark } = useAppTheme();
 
   return (
-    <Stack
+    <>
+      <StatusBar style={isDark ? "light" : "dark"} />
+      <Stack
       screenOptions={{
         headerRight: () => <ThemeToggle />,
         headerStyle: { backgroundColor: background },
@@ -41,6 +45,7 @@ function StackLayout() {
       <Stack.Screen name="privacy" options={{ title: "Privacy", headerBackTitle: "Back" }} />
       <Stack.Screen name="terms" options={{ title: "Terms", headerBackTitle: "Back" }} />
     </Stack>
+    </>
   );
 }
 
