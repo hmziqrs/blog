@@ -14,7 +14,6 @@ const config: ExpoConfig = {
   plugins: ["expo-font"],
   experiments: {
     typedRoutes: true,
-    reactCompiler: true,
   },
   extra: {
     siteName: siteConfig.name,
