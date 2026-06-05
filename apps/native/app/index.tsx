@@ -38,6 +38,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-base-100">
+      <AppHeader />
       <FlatList
         data={recentPosts}
         keyExtractor={(item) => item.id}
@@ -45,9 +46,8 @@ export default function HomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
         ListHeaderComponent={
           <View>
-            <AppHeader />
             {heroPost ? (
-              <View className="px-4">
+              <View className="px-4 pt-4">
                 <HeroPostCard post={heroPost} />
               </View>
             ) : null}

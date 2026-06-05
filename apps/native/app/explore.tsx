@@ -51,6 +51,7 @@ export default function ExploreScreen() {
 
   return (
     <View className="flex-1 bg-base-100">
+      <AppHeader />
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
@@ -60,8 +61,6 @@ export default function ExploreScreen() {
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
         showsVerticalScrollIndicator={false}
       >
-        <AppHeader />
-
         <View className="gap-10 pt-4">
           <View>
             <PageHeader

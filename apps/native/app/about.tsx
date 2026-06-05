@@ -37,6 +37,7 @@ export default function AboutScreen() {
 
   return (
     <View className="flex-1 bg-base-100">
+      <AppHeader />
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
@@ -45,8 +46,6 @@ export default function AboutScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <AppHeader />
-
         <View className="max-w-3xl gap-4 pt-4">
           {config.paragraphs.map((paragraph, i) => (
             <Text key={i} className="max-w-2xl text-base leading-7 tracking-body text-base-content">
