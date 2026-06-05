@@ -2,15 +2,13 @@ import { router } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AppHeader } from "@/components/app-header";
 import { ButtonLink } from "@/components/button-link";
-import { Container } from "@/components/container";
 import { ErrorState, LoadingState } from "@/components/screen-state";
 import { InlineNewsletter } from "@/components/inline-newsletter";
-import { ScreenHeader } from "@/components/screen-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getPageConfig } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
-import { SITE } from "@/lib/site";
 import type { AboutPageConfig } from "@/lib/types";
 
 export default function AboutScreen() {
@@ -19,36 +17,37 @@ export default function AboutScreen() {
 
   if (loading && !data) {
     return (
-      <Container isScrollable={false}>
-        <ScreenHeader />
+      <View className="flex-1 bg-base-100">
+        <AppHeader />
         <LoadingState />
-      </Container>
+      </View>
     );
   }
 
   if (error || !data) {
     return (
-      <Container isScrollable={false}>
-        <ScreenHeader />
+      <View className="flex-1 bg-base-100">
+        <AppHeader />
         <ErrorState message={error ?? "Failed to load page"} onRetry={refetch} />
-      </Container>
+      </View>
     );
   }
 
   const config = data.config as AboutPageConfig;
 
   return (
-    <Container isScrollable={false}>
+    <View className="flex-1 bg-base-100">
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: insets.bottom + 24,
         }}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader />
+        <AppHeader />
 
-        <View className="max-w-3xl gap-4 pt-6">
+        <View className="max-w-3xl gap-4 pt-4">
           {config.paragraphs.map((paragraph, i) => (
             <Text key={i} className="max-w-2xl text-base leading-7 tracking-body text-base-content">
               {paragraph}
@@ -62,10 +61,10 @@ export default function AboutScreen() {
                 {config.focusAreas.map((area) => (
                   <View
                     key={area.title}
-                    className="rounded-lg border border-base-300/80 bg-base-200/60 p-4"
+                    className="rounded-2xl border border-base-content/8 bg-base-200/50 p-5"
                   >
                     <Text className="font-medium text-foreground">{area.title}</Text>
-                    <Text className="mt-1 text-sm text-soft">{area.body}</Text>
+                    <Text className="mt-1.5 text-sm leading-relaxed text-soft">{area.body}</Text>
                   </View>
                 ))}
               </View>
@@ -91,14 +90,14 @@ export default function AboutScreen() {
 
           <View className="mt-6 flex-row flex-wrap gap-2">
             <ButtonLink
-              onPress={() => router.push("/(tabs)/explore")}
+              onPress={() => router.push("/explore")}
               className="font-mono uppercase tracking-[0.14em]"
             >
               Tags
             </ButtonLink>
             <ButtonLink
               variant="primary"
-              onPress={() => router.push("/(tabs)/explore")}
+              onPress={() => router.push("/explore")}
               className="font-mono uppercase tracking-[0.14em]"
             >
               Categories
@@ -112,6 +111,6 @@ export default function AboutScreen() {
           <SiteFooter />
         </View>
       </ScrollView>
-    </Container>
+    </View>
   );
 }

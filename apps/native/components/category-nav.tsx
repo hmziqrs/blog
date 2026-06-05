@@ -17,7 +17,7 @@ export function CategoryNav({ categories, active }: CategoryNavProps) {
     >
       <ButtonLink
         variant={!active ? "primary" : "ghost"}
-        onPress={() => router.push("/(tabs)")}
+        onPress={() => router.push("/")}
         className="tracking-[0.12em] uppercase"
       >
         All

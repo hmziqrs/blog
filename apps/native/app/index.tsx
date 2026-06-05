@@ -1,10 +1,11 @@
 import { FlatList, RefreshControl, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Container } from "@/components/container";
+import { AppHeader } from "@/components/app-header";
+import { HeroPostCard } from "@/components/hero-post-card";
 import { PostCard } from "@/components/post-card";
+import { SectionHeader } from "@/components/section-header";
 import { ErrorState, LoadingState } from "@/components/screen-state";
-import { ScreenHeader } from "@/components/screen-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getPosts } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
@@ -14,48 +15,67 @@ export default function HomeScreen() {
   const posts = data?.posts ?? [];
   const insets = useSafeAreaInsets();
 
+  const heroPost = posts[0];
+  const recentPosts = posts.slice(1);
+
   if (loading && !data) {
     return (
-      <Container isScrollable={false}>
-        <ScreenHeader />
+      <View className="flex-1 bg-base-100">
+        <AppHeader />
         <LoadingState />
-      </Container>
+      </View>
     );
   }
 
   if (error && !data) {
     return (
-      <Container isScrollable={false}>
-        <ScreenHeader />
+      <View className="flex-1 bg-base-100">
+        <AppHeader />
         <ErrorState message={error} onRetry={refetch} />
-      </Container>
+      </View>
     );
   }
 
   return (
-    <Container isScrollable={false}>
+    <View className="flex-1 bg-base-100">
       <FlatList
-        data={posts}
+        data={recentPosts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <PostCard post={item} />}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
-        ListHeaderComponent={<ScreenHeader />}
+        ListHeaderComponent={
+          <View>
+            <AppHeader />
+            {heroPost ? (
+              <View className="px-4">
+                <HeroPostCard post={heroPost} />
+              </View>
+            ) : null}
+            {recentPosts.length > 0 ? (
+              <View className="px-4 pt-8 pb-2">
+                <SectionHeader title="Recent Posts" count={recentPosts.length} />
+              </View>
+            ) : null}
+          </View>
+        }
         ListFooterComponent={
           <View className="px-4 pt-4">
             <SiteFooter />
           </View>
         }
         ListEmptyComponent={
-          <View className="px-4">
-            <Text className="text-sm text-muted">No posts yet. Check back soon.</Text>
-          </View>
+          heroPost ? null : (
+            <View className="px-4 pt-4">
+              <Text className="text-sm text-muted">No posts yet. Check back soon.</Text>
+            </View>
+          )
         }
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: insets.bottom + 24,
-          gap: 20,
         }}
+        showsVerticalScrollIndicator={false}
       />
-    </Container>
+    </View>
   );
 }

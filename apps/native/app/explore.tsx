@@ -1,11 +1,10 @@
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AppHeader } from "@/components/app-header";
 import { CategoryBadge } from "@/components/category-badge";
-import { Container } from "@/components/container";
 import { PageHeader } from "@/components/page-header";
 import { ErrorState, LoadingState } from "@/components/screen-state";
-import { ScreenHeader } from "@/components/screen-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TagBadge } from "@/components/tag-badge";
 import { getCategories, getTags } from "@/lib/api";
@@ -26,10 +25,10 @@ export default function ExploreScreen() {
 
   if (isLoading) {
     return (
-      <Container isScrollable={false}>
-        <ScreenHeader />
+      <View className="flex-1 bg-base-100">
+        <AppHeader />
         <LoadingState />
-      </Container>
+      </View>
     );
   }
 
@@ -37,13 +36,13 @@ export default function ExploreScreen() {
 
   if (hasError) {
     return (
-      <Container isScrollable={false}>
-        <ScreenHeader />
+      <View className="flex-1 bg-base-100">
+        <AppHeader />
         <ErrorState
           message={tags.error ?? categories.error ?? "Failed to load explore data"}
           onRetry={handleRefresh}
         />
-      </Container>
+      </View>
     );
   }
 
@@ -51,7 +50,7 @@ export default function ExploreScreen() {
   const categoryCount = categories.data?.categories.length ?? 0;
 
   return (
-    <Container isScrollable={false}>
+    <View className="flex-1 bg-base-100">
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
@@ -59,10 +58,11 @@ export default function ExploreScreen() {
         }}
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
+        showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader />
+        <AppHeader />
 
-        <View className="gap-12 pt-6">
+        <View className="gap-10 pt-4">
           <View>
             <PageHeader
               title="Tags"
@@ -104,6 +104,6 @@ export default function ExploreScreen() {
           <SiteFooter />
         </View>
       </ScrollView>
-    </Container>
+    </View>
   );
 }

@@ -6,10 +6,10 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { AppThemeProvider, useAppTheme } from "@/contexts/app-theme-context";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { DrawerProvider } from "@/components/drawer-provider";
 
 export const unstable_settings = {
-  initialRouteName: "(tabs)",
+  initialRouteName: "index",
 };
 
 function StackLayout() {
@@ -21,30 +21,31 @@ function StackLayout() {
     <>
       <StatusBar style={isDark ? "light" : "dark"} />
       <Stack
-      screenOptions={{
-        headerRight: () => <ThemeToggle />,
-        headerStyle: { backgroundColor: background },
-        headerTintColor: foreground,
-        headerTitleStyle: {
-          fontWeight: "600",
-          color: foreground,
-        },
-        headerBackTitleStyle: {
-          fontFamily: undefined,
-        },
-      }}
-    >
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="posts/[slug]" options={{ title: "Post", headerBackTitle: "Back" }} />
-      <Stack.Screen name="tags/[tag]" options={{ title: "Tag", headerBackTitle: "Back" }} />
-      <Stack.Screen
-        name="category/[category]"
-        options={{ title: "Category", headerBackTitle: "Back" }}
-      />
-      <Stack.Screen name="contact" options={{ title: "Contact", headerBackTitle: "Back" }} />
-      <Stack.Screen name="privacy" options={{ title: "Privacy", headerBackTitle: "Back" }} />
-      <Stack.Screen name="terms" options={{ title: "Terms", headerBackTitle: "Back" }} />
-    </Stack>
+        screenOptions={{
+          headerStyle: { backgroundColor: background },
+          headerTintColor: foreground,
+          headerTitleStyle: {
+            fontWeight: "600",
+            color: foreground,
+          },
+          headerBackTitleStyle: {
+            fontFamily: undefined,
+          },
+        }}
+      >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="explore" options={{ headerShown: false }} />
+        <Stack.Screen name="about" options={{ headerShown: false }} />
+        <Stack.Screen name="posts/[slug]" options={{ title: "Post", headerBackTitle: "Back" }} />
+        <Stack.Screen name="tags/[tag]" options={{ title: "Tag", headerBackTitle: "Back" }} />
+        <Stack.Screen
+          name="category/[category]"
+          options={{ title: "Category", headerBackTitle: "Back" }}
+        />
+        <Stack.Screen name="contact" options={{ title: "Contact", headerBackTitle: "Back" }} />
+        <Stack.Screen name="privacy" options={{ title: "Privacy", headerBackTitle: "Back" }} />
+        <Stack.Screen name="terms" options={{ title: "Terms", headerBackTitle: "Back" }} />
+      </Stack>
     </>
   );
 }
@@ -55,7 +56,9 @@ export default function Layout() {
       <KeyboardProvider>
         <AppThemeProvider>
           <HeroUINativeProvider>
-            <StackLayout />
+            <DrawerProvider>
+              <StackLayout />
+            </DrawerProvider>
           </HeroUINativeProvider>
         </AppThemeProvider>
       </KeyboardProvider>

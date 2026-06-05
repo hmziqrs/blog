@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ContactMethodRow } from "@/components/contact-method-row";
 import { Container } from "@/components/container";
 import { ErrorState, LoadingState } from "@/components/screen-state";
-import { ScreenHeader } from "@/components/screen-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getPageConfig } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
