@@ -1,19 +1,23 @@
 {
   "name": "blog",
-  "private": true,
-  "workspaces": {
-    "packages": [
-      "apps/*",
-      "packages/*"
-    ],
-    "catalog": {
-      "zod": "^4.1.13",
-      "typescript": "^5",
-      "@cloudflare/workers-types": "^4.20251213.0",
-      "tailwindcss": "^4.1.18"
-    }
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1028.0",
+    "@blog/config": "workspace:*",
+    "@cloudflare/workers-types": "catalog:",
+    "@iconify-json/tabler": "^1.2.33",
+    "@tailwindcss/typography": "^0.5.19",
+    "@types/node": "^22.10.2",
+    "daisyui": "^5.5.19",
+    "image-size": "^2.0.2",
+    "marked": "^18.0.3",
+    "oxfmt": "^0.42.0",
+    "oxlint": "^1.57.0",
+    "turbo": "^2.6.3",
+    "typescript": "catalog:",
+    "wrangler": "^4.92.0"
   },
-  "type": "module",
+  "packageManager": "bun@1.3.8",
+  "private": true,
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -58,22 +62,17 @@
     "ci:web-prod": "gh workflow run ci.yml -f deploy-web-prod=true",
     "ci:api-prod": "gh workflow run ci.yml -f deploy-api-prod=true"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "@aws-sdk/client-s3": "^3.1028.0",
-    "@blog/config": "workspace:*",
-    "@cloudflare/workers-types": "catalog:",
-    "@iconify-json/tabler": "^1.2.33",
-    "@tailwindcss/typography": "^0.5.19",
-    "@types/node": "^22.10.2",
-    "daisyui": "^5.5.19",
-    "image-size": "^2.0.2",
-    "marked": "^18.0.3",
-    "oxfmt": "^0.42.0",
-    "oxlint": "^1.57.0",
-    "turbo": "^2.6.3",
-    "typescript": "catalog:",
-    "wrangler": "^4.92.0"
-  },
-  "packageManager": "bun@1.3.8"
+  "type": "module",
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "zod": "^4.1.13",
+      "typescript": "^5",
+      "@cloudflare/workers-types": "^4.20251213.0",
+      "tailwindcss": "^4.1.18"
+    }
+  }
 }
