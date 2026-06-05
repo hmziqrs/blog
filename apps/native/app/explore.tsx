@@ -5,7 +5,6 @@ import { AppHeader } from "@/components/app-header";
 import { CategoryBadge } from "@/components/category-badge";
 import { PageHeader } from "@/components/page-header";
 import { ErrorState, LoadingState } from "@/components/screen-state";
-import { SiteFooter } from "@/components/site-footer";
 import { TagBadge } from "@/components/tag-badge";
 import { getCategories, getTags } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
@@ -100,7 +99,7 @@ export default function ExploreScreen() {
             </View>
           </View>
 
-          <SiteFooter />
+          <View style={{ height: 40 }} />
         </View>
       </ScrollView>
     </View>

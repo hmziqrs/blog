@@ -6,7 +6,6 @@ import { AppHeader } from "@/components/app-header";
 import { ButtonLink } from "@/components/button-link";
 import { ErrorState, LoadingState } from "@/components/screen-state";
 import { InlineNewsletter } from "@/components/inline-newsletter";
-import { SiteFooter } from "@/components/site-footer";
 import { getPageConfig } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import type { AboutPageConfig } from "@/lib/types";
@@ -107,7 +106,7 @@ export default function AboutScreen() {
             <InlineNewsletter />
           </View>
 
-          <SiteFooter />
+          <View style={{ height: 40 }} />
         </View>
       </ScrollView>
     </View>

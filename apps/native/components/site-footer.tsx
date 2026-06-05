@@ -1,7 +1,30 @@
 import { Linking, Pressable, Text, View } from "react-native";
+import { router } from "expo-router";
 
 import { triggerSelectionHaptic } from "@/lib/haptics";
-import { SITE, absoluteUrl } from "@/lib/site";
+import { SITE } from "@/lib/site";
+
+/** Map internal page keys and hrefs to native app routes */
+const INTERNAL_ROUTES: Record<string, string> = {
+  tags: "/explore",
+  categories: "/explore",
+  contact: "/contact",
+  privacy: "/privacy",
+  terms: "/terms",
+  "/newsletter": "/newsletter",
+  "/changelog": "/changelog",
+  advertise: "/contact",
+};
+
+function navigateFooterLink(href: string) {
+  triggerSelectionHaptic();
+  const internal = INTERNAL_ROUTES[href];
+  if (internal) {
+    router.push(internal as any);
+  } else {
+    Linking.openURL(href).catch(() => {});
+  }
+}
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -12,10 +35,7 @@ export function SiteFooter() {
         {SITE.footerNav.map((link) => (
           <Pressable
             key={link.href}
-            onPress={() => {
-              triggerSelectionHaptic();
-              Linking.openURL(absoluteUrl(link.href)).catch(() => {});
-            }}
+            onPress={() => navigateFooterLink(link.href)}
           >
             <Text className="font-mono text-[0.72rem] tracking-[0.14em] uppercase text-muted active:text-primary">
               {link.label}
@@ -27,7 +47,10 @@ export function SiteFooter() {
         © {year}{" "}
         <Text
           className="text-faint active:text-primary"
-          onPress={() => Linking.openURL(SITE.copyrightSiteURL).catch(() => {})}
+          onPress={() => {
+            triggerSelectionHaptic();
+            Linking.openURL(SITE.copyrightSiteURL).catch(() => {});
+          }}
         >
           {SITE.copyrightSiteName}
         </Text>

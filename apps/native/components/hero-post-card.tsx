@@ -3,10 +3,8 @@ import { Image, Pressable, Text, View } from "react-native";
 
 import { CategoryBadge } from "./category-badge";
 import { CoverOverlay } from "./cover-overlay";
-import { PageKicker } from "./page-kicker";
 import { formatDate } from "@/lib/format";
 import { triggerSelectionHaptic } from "@/lib/haptics";
-import { SITE } from "@/lib/site";
 import type { PostSummary } from "@/lib/types";
 
 interface HeroPostCardProps {
@@ -20,10 +18,10 @@ export function HeroPostCard({ post }: HeroPostCardProps) {
         triggerSelectionHaptic();
         router.push(`/posts/${post.id}`);
       }}
-      className="overflow-hidden rounded-[1.5rem] active:opacity-95"
+      className="overflow-hidden rounded-2xl active:opacity-90"
     >
       {post.cover ? (
-        <View className="relative min-h-[18rem] overflow-hidden bg-base-200">
+        <View className="relative h-52 overflow-hidden bg-base-200">
           <Image
             source={{ uri: post.cover }}
             alt={post.cover_alt ?? post.title}
@@ -31,60 +29,43 @@ export function HeroPostCard({ post }: HeroPostCardProps) {
             resizeMode="cover"
           />
           <CoverOverlay />
-          <View className="absolute inset-x-0 bottom-0 z-10 px-5 pb-5 pt-6">
-            <View className="flex-row items-center gap-2">
-              <CategoryBadge category={post.category} />
-              <Text className="text-xs font-mono tracking-wide text-base-content/70">
-                {formatDate(post.date, "long")}
-              </Text>
-            </View>
+          <View className="absolute inset-x-0 bottom-0 z-10 px-4 pb-3.5 pt-8">
             <Text
-              className="mt-3 text-2xl font-bold leading-tight tracking-tight text-base-content"
-              numberOfLines={3}
+              className="text-xl font-bold leading-tight tracking-tight text-base-content"
+              numberOfLines={2}
             >
               {post.title}
             </Text>
-            {post.description && (
-              <Text
-                className="mt-2 text-sm leading-relaxed text-base-content/70"
-                numberOfLines={2}
-              >
-                {post.description}
+            <View className="mt-2 flex-row items-center gap-2">
+              <CategoryBadge category={post.category} />
+              <Text className="text-[0.68rem] font-mono tracking-wide text-base-content/60">
+                {formatDate(post.date)}
               </Text>
-            )}
+            </View>
           </View>
         </View>
       ) : (
-        <View className="glass-panel p-5">
+        <View className="rounded-2xl border border-base-content/8 bg-base-200/50 p-5">
           <View className="flex-row items-center gap-2">
             <CategoryBadge category={post.category} />
-            <Text className="text-xs font-mono tracking-wide text-muted">
-              {formatDate(post.date, "long")}
+            <Text className="text-[0.68rem] font-mono tracking-wide text-dim">
+              {formatDate(post.date)}
             </Text>
           </View>
           <Text
-            className="mt-3 text-2xl font-bold leading-tight tracking-tight text-foreground"
+            className="mt-3 text-xl font-bold leading-tight tracking-tight text-foreground"
             numberOfLines={3}
           >
             {post.title}
           </Text>
           {post.description && (
             <Text
-              className="mt-2.5 max-w-lg text-sm leading-relaxed text-soft"
+              className="mt-2 text-[0.82rem] leading-relaxed text-soft"
               numberOfLines={2}
             >
               {post.description}
             </Text>
           )}
-          <View className="mt-3 flex-row items-center gap-2">
-            <Text className="font-mono text-[0.7rem] tracking-[0.12em] uppercase text-dim">
-              {SITE.author.name}
-            </Text>
-            <Text className="text-base-content/20">·</Text>
-            <Text className="font-mono text-[0.7rem] tracking-[0.12em] uppercase text-dim">
-              {Math.max(1, Math.ceil((post.description?.split(/\s+/).length ?? 0) / 200))} min read
-            </Text>
-          </View>
         </View>
       )}
     </Pressable>

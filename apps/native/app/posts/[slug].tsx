@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useThemeColor } from "heroui-native";
 import { Image, Linking, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -56,71 +56,97 @@ export default function PostDetailScreen() {
   const shareUrl = postUrl(post.id);
 
   const markdownStyles = {
-    body: { color: foreground, fontSize: 16.5, lineHeight: 32 },
+    body: { color: foreground, fontSize: 16, lineHeight: 28 },
     heading1: {
       color: foreground,
-      fontSize: 28,
-      fontWeight: "600" as const,
-      marginTop: 24,
+      fontSize: 24,
+      fontWeight: "700" as const,
+      marginTop: 28,
       marginBottom: 8,
     },
     heading2: {
       color: foreground,
-      fontSize: 22,
+      fontSize: 20,
       fontWeight: "600" as const,
-      marginTop: 20,
+      marginTop: 24,
       marginBottom: 8,
     },
     heading3: {
       color: foreground,
-      fontSize: 18,
+      fontSize: 17,
       fontWeight: "600" as const,
       marginTop: 16,
       marginBottom: 6,
     },
-    paragraph: { marginTop: 8, marginBottom: 8 },
+    paragraph: { marginTop: 6, marginBottom: 6 },
     bullet_list: { marginTop: 4, marginBottom: 4 },
     ordered_list: { marginTop: 4, marginBottom: 4 },
     code_inline: {
       fontFamily: "monospace",
-      fontSize: 14,
+      fontSize: 13,
       color: foreground,
-      borderWidth: 1,
-      borderColor: `${foreground}20`,
       backgroundColor: surfaceTertiary,
-      paddingHorizontal: 8,
+      paddingHorizontal: 6,
       paddingVertical: 2,
-      borderRadius: 999,
+      borderRadius: 4,
     },
     code_block: {
       fontFamily: "monospace",
-      fontSize: 14,
+      fontSize: 13,
       color: foreground,
       backgroundColor: surfaceTertiary,
-      padding: 12,
-      borderRadius: 8,
-      marginTop: 8,
-      marginBottom: 8,
+      padding: 14,
+      borderRadius: 12,
+      marginTop: 10,
+      marginBottom: 10,
     },
     fence: {
       fontFamily: "monospace",
-      fontSize: 14,
+      fontSize: 13,
       color: foreground,
       backgroundColor: surfaceTertiary,
-      padding: 12,
-      borderRadius: 8,
-      marginTop: 8,
-      marginBottom: 8,
+      padding: 14,
+      borderRadius: 12,
+      marginTop: 10,
+      marginBottom: 10,
     },
     blockquote: {
-      borderLeftWidth: 3,
+      borderLeftWidth: 2,
       borderLeftColor: separator,
       paddingLeft: 12,
       marginTop: 8,
       marginBottom: 8,
     },
-    link: { color: link, textDecorationLine: "underline" as const },
+    link: { color: link },
   };
+
+  function handleMarkdownLink(url: string) {
+    const resolved =
+      url.startsWith("http://") || url.startsWith("https://")
+        ? url
+        : new URL(url, SITE.url).toString();
+
+    try {
+      const parsed = new URL(resolved);
+      const siteHost = new URL(SITE.url).host;
+      if (parsed.host === siteHost) {
+        const path = parsed.pathname;
+        const postMatch = path.match(/^\/posts\/(.+)$/);
+        if (postMatch) { router.push(`/posts/${postMatch[1]}`); return false; }
+        const tagMatch = path.match(/^\/tags\/(.+)$/);
+        if (tagMatch) { router.push(`/tags/${tagMatch[1]}`); return false; }
+        const catMatch = path.match(/^\/category\/(.+)$/);
+        if (catMatch) { router.push(`/category/${catMatch[1]}`); return false; }
+        if (["/explore", "/about", "/contact", "/privacy", "/terms"].includes(path)) {
+          router.push(path as any); return false;
+        }
+        if (path === "/" || path === "") { router.push("/"); return false; }
+      }
+    } catch { /* fall through */ }
+
+    Linking.openURL(resolved).catch(() => {});
+    return false;
+  }
 
   return (
     <Container isScrollable={false}>
@@ -128,73 +154,58 @@ export default function PostDetailScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
       >
-        <View className="px-4 pt-4">
-          <CategoryBadge category={post.category} />
-          <Text className="mt-4 text-4xl font-semibold tracking-tight text-foreground">
+        {/* Post header */}
+        <View className="px-4 pt-2">
+          <View className="flex-row items-center gap-2">
+            <CategoryBadge category={post.category} />
+            <Text className="text-[0.65rem] font-mono tracking-wide text-dim">
+              {formatDate(post.date)} · {readingTime} min
+            </Text>
+          </View>
+          <Text className="mt-3 text-2xl font-bold tracking-tight text-foreground">
             {post.title}
           </Text>
-          <Text className="mt-4 max-w-2xl text-lg leading-8 text-soft">{post.description}</Text>
-          <View className="mt-5 flex-row flex-wrap items-center gap-3">
-            <Text className="font-mono text-xs tracking-[0.08em] uppercase text-muted">
-              {formatDate(post.date, "long")}
+          {post.description && (
+            <Text className="mt-2 text-[0.88rem] leading-6 text-soft">
+              {post.description}
             </Text>
-            <Text className="text-base-content/30">·</Text>
-            <Text className="font-mono text-xs tracking-[0.08em] uppercase text-muted">
-              {readingTime} min read
-            </Text>
-            {post.updated && (
-              <>
-                <Text className="text-base-content/30">·</Text>
-                <Text className="font-mono text-xs tracking-[0.08em] uppercase text-muted">
-                  Updated {formatDate(post.updated, "long")}
-                </Text>
-              </>
-            )}
-          </View>
+          )}
           {post.tags.length > 0 && (
-            <View className="mt-5 flex-row flex-wrap gap-2">
+            <View className="mt-3 flex-row flex-wrap gap-1.5">
               {post.tags.map((tag) => (
-                <TagBadge key={tag} tag={tag} />
+                <TagBadge key={tag} tag={tag} size="sm" />
               ))}
             </View>
           )}
         </View>
 
+        {/* Cover image */}
         {post.cover && (
-          <View className="mt-8 overflow-hidden bg-base-200/55">
+          <View className="mt-5 mx-4 overflow-hidden rounded-2xl bg-base-200">
             <Image
               source={{ uri: post.cover }}
               alt={post.cover_alt ?? post.title}
               className="h-auto w-full"
-              style={{ minHeight: 200 }}
+              style={{ minHeight: 180 }}
               resizeMode="cover"
             />
           </View>
         )}
 
+        {/* Body */}
         <View className="px-4 pt-6">
           <TableOfContents headings={headings} />
-
-          <Markdown
-            onLinkPress={(url) => {
-              const resolved =
-                url.startsWith("http://") || url.startsWith("https://")
-                  ? url
-                  : new URL(url, SITE.url).toString();
-              Linking.openURL(resolved).catch(() => {});
-              return false;
-            }}
-            style={markdownStyles}
-          >
+          <Markdown onLinkPress={handleMarkdownLink} style={markdownStyles}>
             {post.body ?? ""}
           </Markdown>
+        </View>
 
+        {/* Bottom section */}
+        <View className="px-4 pt-6">
           <RelatedPosts posts={related} />
-
-          <View className="my-10 h-px bg-base-content/10" />
+          <View className="mt-8 mb-6 h-px bg-base-content/6" />
           <SharePost title={post.title} url={shareUrl} />
-          <View className="my-10 h-px bg-base-content/10" />
-
+          <View className="mt-6" />
           <AuthorBlock />
         </View>
       </ScrollView>

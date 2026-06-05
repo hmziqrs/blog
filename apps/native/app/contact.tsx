@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ContactMethodRow } from "@/components/contact-method-row";
 import { Container } from "@/components/container";
 import { ErrorState, LoadingState } from "@/components/screen-state";
-import { SiteFooter } from "@/components/site-footer";
 import { getPageConfig } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import type { ContactPageConfig } from "@/lib/types";
@@ -59,8 +58,6 @@ export default function ContactScreen() {
               <ContactMethodRow key={method.label} method={method} />
             ))}
           </View>
-
-          <SiteFooter />
         </View>
       </ScrollView>
     </Container>

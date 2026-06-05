@@ -4,9 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppHeader } from "@/components/app-header";
 import { HeroPostCard } from "@/components/hero-post-card";
 import { PostCard } from "@/components/post-card";
-import { SectionHeader } from "@/components/section-header";
 import { ErrorState, LoadingState } from "@/components/screen-state";
-import { SiteFooter } from "@/components/site-footer";
 import { getPosts } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 
@@ -47,33 +45,26 @@ export default function HomeScreen() {
         ListHeaderComponent={
           <View>
             {heroPost ? (
-              <View className="px-4 pt-4">
+              <View className="px-4 pt-2">
                 <HeroPostCard post={heroPost} />
               </View>
             ) : null}
             {recentPosts.length > 0 ? (
-              <View className="px-4 pt-8 pb-2">
-                <SectionHeader title="Recent Posts" count={recentPosts.length} />
+              <View className="px-4 pt-6 pb-1">
+                <Text className="text-sm font-semibold text-dim">Latest</Text>
               </View>
             ) : null}
           </View>
         }
-        ListFooterComponent={
-          <View className="px-4 pt-4">
-            <SiteFooter />
-          </View>
-        }
+        ListFooterComponent={<View style={{ height: insets.bottom + 24 }} />}
         ListEmptyComponent={
           heroPost ? null : (
             <View className="px-4 pt-4">
-              <Text className="text-sm text-muted">No posts yet. Check back soon.</Text>
+              <Text className="text-sm text-muted">No posts yet.</Text>
             </View>
           )
         }
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingBottom: insets.bottom + 24,
-        }}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
       />
     </View>

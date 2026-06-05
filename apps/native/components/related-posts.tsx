@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
+import { CategoryBadge } from "./category-badge";
 import { formatDate } from "@/lib/format";
 import { triggerSelectionHaptic } from "@/lib/haptics";
 import type { PostSummary } from "@/lib/types";
@@ -13,9 +14,9 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
   if (posts.length === 0) return null;
 
   return (
-    <View className="mt-12 border-t border-base-300/80 pt-8">
-      <Text className="mb-6 text-xl font-semibold text-foreground">Related Posts</Text>
-      <View className="gap-4">
+    <View className="mt-6">
+      <Text className="mb-3 text-sm font-semibold text-dim">Related</Text>
+      <View className="gap-2">
         {posts.map((post) => (
           <Pressable
             key={post.id}
@@ -23,17 +24,19 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
               triggerSelectionHaptic();
               router.push(`/posts/${post.id}`);
             }}
-            className="rounded-lg border border-base-300/80 bg-base-200/55 p-4 active:border-primary/40 active:bg-base-200/80"
+            className="flex-row items-center gap-3 rounded-xl bg-base-200/40 px-3.5 py-3 active:bg-base-200/70"
           >
-            <Text className="font-semibold text-foreground active:text-primary">{post.title}</Text>
-            {post.description && (
-              <Text className="mt-1 text-sm text-soft" numberOfLines={2}>
-                {post.description}
+            <View className="flex-1 gap-1">
+              <Text className="text-[0.88rem] font-semibold leading-snug text-foreground">
+                {post.title}
               </Text>
-            )}
-            <Text className="mt-2 font-mono text-xs text-dim">
-              {formatDate(post.date, "long")}
-            </Text>
+              <View className="flex-row items-center gap-2">
+                <CategoryBadge category={post.category} />
+                <Text className="text-[0.6rem] font-mono text-dim">
+                  {formatDate(post.date)}
+                </Text>
+              </View>
+            </View>
           </Pressable>
         ))}
       </View>

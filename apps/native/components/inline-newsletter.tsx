@@ -16,7 +16,7 @@ export function InlineNewsletter() {
             <Ionicons name="mail-outline" size={20} color={link} />
           </View>
           <View>
-            <Text className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+            <Text className="text-lg font-semibold tracking-tight text-foreground">
               Subscribe to the Newsletter
             </Text>
             <Text className="mt-1 max-w-md text-sm leading-relaxed text-base-content/65">

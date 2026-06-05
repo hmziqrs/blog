@@ -55,7 +55,7 @@ export function DrawerContent({ onClose }: DrawerContentProps) {
           {SITE.name}
         </Text>
         <Text className="mt-1 font-mono text-[0.68rem] tracking-[0.12em] uppercase text-dim">
-          {SITE.description}
+          {SITE.homeDescription}
         </Text>
       </View>
 
