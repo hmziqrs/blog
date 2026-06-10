@@ -4,7 +4,6 @@ import type {
   CategoryPostsResponse,
   PageConfigResponse,
   PostDetail,
-  PostSummary,
   PostsResponse,
   TagsResponse,
   TagPostsResponse,

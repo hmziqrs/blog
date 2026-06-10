@@ -7,7 +7,7 @@ export function getRelatedPosts(
   allPosts: PostSummary[],
   limit = 3,
 ): PostSummary[] {
-  return allPosts
+  const scored = allPosts
     .filter((post) => post.id !== currentId)
     .map((post) => {
       let score = 0;
@@ -17,7 +17,9 @@ export function getRelatedPosts(
       if (post.category === currentCategory) score += 1;
       return { post, score };
     })
-    .filter(({ score }) => score > 0)
+    .filter(({ score }) => score > 0);
+
+  return scored
     .sort(
       (a, b) =>
         b.score - a.score || new Date(b.post.date).getTime() - new Date(a.post.date).getTime(),

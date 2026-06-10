@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 
 import { ButtonLink } from "./button-link";
 

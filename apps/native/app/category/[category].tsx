@@ -38,7 +38,7 @@ export default function CategoryPostsScreen() {
 
   const posts = data?.posts ?? [];
   const categoryNames =
-    categories.data?.categories.map((c) => c.category).sort((a, b) => a.localeCompare(b)) ?? [];
+    (categories.data?.categories.map((c) => c.category) ?? []).sort((a, b) => a.localeCompare(b));
 
   return (
     <Container isScrollable={false}>

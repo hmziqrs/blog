@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
-import { Dimensions, Pressable, View } from "react-native";
+import { Pressable } from "react-native";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
