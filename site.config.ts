@@ -48,9 +48,8 @@ export const siteConfig = defineSiteConfig({
       description:
         "Building software for 9 years. TypeScript, Rust, Flutter. Writing about things I broke and fixed.",
       paragraphs: [
-        "I build software. Have for 9 years. Mostly TypeScript and Rust on the backend, Flutter for cross-platform, whatever gets the job done.",
+        "Building software for 9 years. Mostly TypeScript and Rust on the backend, Flutter for cross-platform, whatever gets the job done.",
         "Shipped vibekit.link, torii.tools, nutter.tools, and this blog. Each one taught me something I would have rather learned by reading someone else's post. So I write about it here.",
-        "Right now I use AI as a junior engineer. It's fast at prototyping and testing. It also gets some obvious things very wrong. The blog covers both sides of that.",
       ],
       focusAreas: [],
       principles: [],
