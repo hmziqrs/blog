@@ -53,7 +53,7 @@ const personSchema = aboutPage
       "@type": "Person",
       name: siteConfig.author.name,
       url: siteConfig.author.url,
-      sameAs: Object.values(siteConfig.author.socials).filter(Boolean),
+      sameAs: Object.values(siteConfig.author.socials ?? {}).filter(Boolean),
       jobTitle: "Full-Stack Software Engineer",
       description: config.description,
     }

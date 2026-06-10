@@ -14,8 +14,7 @@ interface ButtonLinkProps extends Omit<PressableProps, "children"> {
 }
 
 const variantClasses: Record<ButtonLinkVariant, string> = {
-  primary:
-    "border-base-content bg-base-content active:border-primary active:bg-primary",
+  primary: "border-base-content bg-base-content active:border-primary active:bg-primary",
   ghost: "border-base-300 bg-base-100/80 active:border-primary/28 active:bg-primary/18",
   plain: "border-transparent bg-transparent",
 };

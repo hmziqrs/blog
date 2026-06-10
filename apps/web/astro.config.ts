@@ -1,4 +1,4 @@
-import sitemap from "@astrojs/sitemap";
+import sitemap, { ChangeFreqEnum } from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import icon from "astro-icon";
 import { defineConfig } from "astro/config";
@@ -17,21 +17,21 @@ export default defineConfig({
       filter: (page) => {
         // Exclude utility pages that shouldn't be indexed
         const excludePaths = ["/newsletter/unsubscribe", "/advertise"];
-        return !excludePaths.some((path) => page.includes(path));
+        return !excludePaths.some((p) => page.includes(p));
       },
       serialize(item) {
         // Add changefreq and priority based on page type
         if (item.url === siteConfig.publicSiteUrl + "/") {
-          item.changefreq = "daily";
+          item.changefreq = ChangeFreqEnum.DAILY;
           item.priority = 1.0;
         } else if (item.url.includes("/posts/")) {
-          item.changefreq = "weekly";
+          item.changefreq = ChangeFreqEnum.WEEKLY;
           item.priority = 0.8;
         } else if (item.url.includes("/tags/") || item.url.includes("/category/")) {
-          item.changefreq = "weekly";
+          item.changefreq = ChangeFreqEnum.WEEKLY;
           item.priority = 0.6;
         } else {
-          item.changefreq = "monthly";
+          item.changefreq = ChangeFreqEnum.MONTHLY;
           item.priority = 0.5;
         }
         return item;

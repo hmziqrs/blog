@@ -33,10 +33,7 @@ export function SiteFooter() {
     <View className="mt-12 border-t border-base-300/80 pt-8 gap-3">
       <View className="flex-row flex-wrap gap-x-4 gap-y-2">
         {SITE.footerNav.map((link) => (
-          <Pressable
-            key={link.href}
-            onPress={() => navigateFooterLink(link.href)}
-          >
+          <Pressable key={link.href} onPress={() => navigateFooterLink(link.href)}>
             <Text className="font-mono text-[0.72rem] tracking-[0.14em] uppercase text-muted active:text-primary">
               {link.label}
             </Text>

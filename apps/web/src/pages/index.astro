@@ -14,7 +14,7 @@ const structuredData = [
     name: siteConfig.name,
     url: siteConfig.publicSiteUrl,
     logo: `${siteConfig.publicSiteUrl}${siteConfig.routes.ogDefault}`,
-    sameAs: Object.values(siteConfig.author.socials).filter(Boolean),
+    sameAs: Object.values(siteConfig.author.socials ?? {}).filter(Boolean),
   },
   {
     "@context": "https://schema.org",

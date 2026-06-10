@@ -58,7 +58,9 @@ function buildParameters(meta: ApiMeta): Array<Record<string, unknown>> {
 }
 
 /** Assemble the full OpenAPI 3.1 spec from discovered endpoint metadata */
-export function buildOpenApiSpec(entries: Array<{ path: string; meta: ApiMeta }>): Record<string, unknown> {
+export function buildOpenApiSpec(
+  entries: Array<{ path: string; meta: ApiMeta }>,
+): Record<string, unknown> {
   const paths: Record<string, Record<string, unknown>> = {};
 
   for (const { path, meta } of entries) {

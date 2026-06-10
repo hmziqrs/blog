@@ -3,7 +3,7 @@ import { type ApiMeta } from "../../utils/api-schemas";
 import { buildOpenApiSpec, globToOpenApiPath } from "../../utils/openapi";
 
 // Discover all API endpoint modules at build time
-const apiModules = import.meta.glob<{ apiMeta?: ApiMeta}>("./**/*.json.ts", {
+const apiModules = import.meta.glob<{ apiMeta?: ApiMeta }>("./**/*.json.ts", {
   eager: true,
 });
 

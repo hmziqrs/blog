@@ -14,17 +14,33 @@ interface SharePostProps {
 }
 
 const SHARE_ITEMS = [
-  { platform: "X", icon: "logo-twitter" as const, buildUrl: (t: string, u: string) => {
-    const xSocial = SITE.author.socials?.find((s) => s.platform === "x");
-    const via = xSocial?.url.split("/").pop()?.replace("@", "");
-    return `https://x.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}${via ? `&via=${via}` : ""}&ref=blog.hmziq.rs`;
-  }},
-  { platform: "LinkedIn", icon: "logo-linkedin" as const, buildUrl: (_t: string, u: string) =>
-    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(u)}&ref=blog.hmziq.rs` },
-  { platform: "Reddit", icon: "logo-reddit" as const, buildUrl: (t: string, u: string) =>
-    `https://www.reddit.com/submit?url=${encodeURIComponent(u)}&title=${encodeURIComponent(t)}&ref=blog.hmziq.rs` },
-  { platform: "Telegram", icon: "paper-plane" as const, buildUrl: (t: string, u: string) =>
-    `https://t.me/share/url?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}&ref=blog.hmziq.rs` },
+  {
+    platform: "X",
+    icon: "logo-twitter" as const,
+    buildUrl: (t: string, u: string) => {
+      const xSocial = SITE.author.socials?.find((s) => s.platform === "x");
+      const via = xSocial?.url.split("/").pop()?.replace("@", "");
+      return `https://x.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}${via ? `&via=${via}` : ""}&ref=blog.hmziq.rs`;
+    },
+  },
+  {
+    platform: "LinkedIn",
+    icon: "logo-linkedin" as const,
+    buildUrl: (_t: string, u: string) =>
+      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(u)}&ref=blog.hmziq.rs`,
+  },
+  {
+    platform: "Reddit",
+    icon: "logo-reddit" as const,
+    buildUrl: (t: string, u: string) =>
+      `https://www.reddit.com/submit?url=${encodeURIComponent(u)}&title=${encodeURIComponent(t)}&ref=blog.hmziq.rs`,
+  },
+  {
+    platform: "Telegram",
+    icon: "paper-plane" as const,
+    buildUrl: (t: string, u: string) =>
+      `https://t.me/share/url?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}&ref=blog.hmziq.rs`,
+  },
 ];
 
 export function SharePost({ title, url }: SharePostProps) {
@@ -62,9 +78,7 @@ export function SharePost({ title, url }: SharePostProps) {
         >
           <Ionicons name="copy-outline" size={18} color={foreground} style={{ opacity: 0.52 }} />
         </Pressable>
-        {copied && (
-          <Text className="ml-1 font-mono text-xs text-faint">Copied!</Text>
-        )}
+        {copied && <Text className="ml-1 font-mono text-xs text-faint">Copied!</Text>}
       </View>
     </View>
   );

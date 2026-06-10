@@ -32,9 +32,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
               </Text>
               <View className="flex-row items-center gap-2">
                 <CategoryBadge category={post.category} />
-                <Text className="text-[0.6rem] font-mono text-dim">
-                  {formatDate(post.date)}
-                </Text>
+                <Text className="text-[0.6rem] font-mono text-dim">{formatDate(post.date)}</Text>
               </View>
             </View>
           </Pressable>

@@ -48,12 +48,13 @@ export function DrawerContent({ onClose }: DrawerContentProps) {
   }
 
   return (
-    <View className="flex-1" style={{ paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 }}>
+    <View
+      className="flex-1"
+      style={{ paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 }}
+    >
       {/* Header */}
       <View className="px-6 pb-6">
-        <Text className="text-lg font-semibold tracking-tight text-foreground">
-          {SITE.name}
-        </Text>
+        <Text className="text-lg font-semibold tracking-tight text-foreground">{SITE.name}</Text>
         <Text className="mt-1 font-mono text-[0.68rem] tracking-[0.12em] uppercase text-dim">
           {SITE.description}
         </Text>
@@ -79,11 +80,7 @@ export function DrawerContent({ onClose }: DrawerContentProps) {
                 color={foreground}
                 style={{ opacity: active ? 1 : 0.45 }}
               />
-              <Text
-                className={`text-sm font-medium ${
-                  active ? "text-primary" : "text-soft"
-                }`}
-              >
+              <Text className={`text-sm font-medium ${active ? "text-primary" : "text-soft"}`}>
                 {item.label}
               </Text>
             </Pressable>
@@ -112,9 +109,7 @@ export function DrawerContent({ onClose }: DrawerContentProps) {
                 style={{ opacity: active ? 1 : 0.35 }}
               />
               <Text
-                className={`text-[0.82rem] font-medium ${
-                  active ? "text-primary" : "text-dim"
-                }`}
+                className={`text-[0.82rem] font-medium ${active ? "text-primary" : "text-dim"}`}
               >
                 {item.label}
               </Text>

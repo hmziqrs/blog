@@ -32,9 +32,7 @@ export function PostCard({ post }: PostCardProps) {
         />
       ) : (
         <View className="h-[4.5rem] w-[4.5rem] items-center justify-center rounded-lg bg-base-200">
-          <Text className="text-lg font-bold text-dim">
-            {post.title.charAt(0).toUpperCase()}
-          </Text>
+          <Text className="text-lg font-bold text-dim">{post.title.charAt(0).toUpperCase()}</Text>
         </View>
       )}
       <View className="flex-1 justify-center gap-1">
@@ -51,10 +49,7 @@ export function PostCard({ post }: PostCardProps) {
           {post.title}
         </Text>
         {post.description && (
-          <Text
-            className="text-[0.78rem] leading-snug text-soft"
-            numberOfLines={1}
-          >
+          <Text className="text-[0.78rem] leading-snug text-soft" numberOfLines={1}>
             {post.description}
           </Text>
         )}

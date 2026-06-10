@@ -32,7 +32,8 @@ export const siteConfig = defineSiteConfig({
   ],
   blog: {
     homeTitle: "Hmziq blog",
-    homeDescription: "Software, tools, and whatever I learned the hard way. Rust, TypeScript, Flutter, and shipping real things.",
+    homeDescription:
+      "Software, tools, and whatever I learned the hard way. Rust, TypeScript, Flutter, and shipping real things.",
   },
   advertisement: {
     href: "",
@@ -126,8 +127,7 @@ export const siteConfig = defineSiteConfig({
     },
     terms: {
       title: "Terms",
-      description:
-        "Conditions for reading, referencing, and using this site.",
+      description: "Conditions for reading, referencing, and using this site.",
       badgeLabel: "Terms Of Use",
       effectiveDate: "March 31, 2026",
       preamble: [

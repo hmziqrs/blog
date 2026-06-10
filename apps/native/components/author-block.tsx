@@ -18,9 +18,7 @@ export function AuthorBlock() {
   const { isDark } = useAppTheme();
   const socials = SITE.author.socials ?? [];
 
-  const authorImage = isDark
-    ? absoluteUrl("/author-dark.svg")
-    : absoluteUrl("/author-light.svg");
+  const authorImage = isDark ? absoluteUrl("/author-dark.svg") : absoluteUrl("/author-light.svg");
   const foreground = useThemeColor("foreground");
 
   return (

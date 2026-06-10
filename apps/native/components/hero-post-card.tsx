@@ -59,10 +59,7 @@ export function HeroPostCard({ post }: HeroPostCardProps) {
             {post.title}
           </Text>
           {post.description && (
-            <Text
-              className="mt-2 text-[0.82rem] leading-relaxed text-soft"
-              numberOfLines={2}
-            >
+            <Text className="mt-2 text-[0.82rem] leading-relaxed text-soft" numberOfLines={2}>
               {post.description}
             </Text>
           )}

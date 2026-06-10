@@ -47,12 +47,7 @@ export default function PostDetailScreen() {
 
   const readingTime = estimateReadingTime(post.body ?? "");
   const headings = extractHeadings(post.body ?? "");
-  const related = getRelatedPosts(
-    post.id,
-    post.tags,
-    post.category,
-    allPostsData?.posts ?? [],
-  );
+  const related = getRelatedPosts(post.id, post.tags, post.category, allPostsData?.posts ?? []);
   const shareUrl = postUrl(post.id);
 
   const markdownStyles = {
@@ -132,17 +127,32 @@ export default function PostDetailScreen() {
       if (parsed.host === siteHost) {
         const path = parsed.pathname;
         const postMatch = path.match(/^\/posts\/(.+)$/);
-        if (postMatch) { router.push(`/posts/${postMatch[1]}`); return false; }
-        const tagMatch = path.match(/^\/tags\/(.+)$/);
-        if (tagMatch) { router.push(`/tags/${tagMatch[1]}`); return false; }
-        const catMatch = path.match(/^\/category\/(.+)$/);
-        if (catMatch) { router.push(`/category/${catMatch[1]}`); return false; }
-        if (["/explore", "/about", "/contact", "/privacy", "/terms"].includes(path)) {
-          router.push(path as any); return false;
+        if (postMatch) {
+          router.push(`/posts/${postMatch[1]}`);
+          return false;
         }
-        if (path === "/" || path === "") { router.push("/"); return false; }
+        const tagMatch = path.match(/^\/tags\/(.+)$/);
+        if (tagMatch) {
+          router.push(`/tags/${tagMatch[1]}`);
+          return false;
+        }
+        const catMatch = path.match(/^\/category\/(.+)$/);
+        if (catMatch) {
+          router.push(`/category/${catMatch[1]}`);
+          return false;
+        }
+        if (["/explore", "/about", "/contact", "/privacy", "/terms"].includes(path)) {
+          router.push(path as any);
+          return false;
+        }
+        if (path === "/" || path === "") {
+          router.push("/");
+          return false;
+        }
       }
-    } catch { /* fall through */ }
+    } catch {
+      /* fall through */
+    }
 
     Linking.openURL(resolved).catch(() => {});
     return false;
@@ -166,9 +176,7 @@ export default function PostDetailScreen() {
             {post.title}
           </Text>
           {post.description && (
-            <Text className="mt-2 text-[0.88rem] leading-6 text-soft">
-              {post.description}
-            </Text>
+            <Text className="mt-2 text-[0.88rem] leading-6 text-soft">{post.description}</Text>
           )}
           {post.tags.length > 0 && (
             <View className="mt-3 flex-row flex-wrap gap-1.5">

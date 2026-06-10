@@ -14,7 +14,7 @@ export const apiMeta = {
   },
   response: z.object({
     page: z.string(),
-    config: z.record(z.unknown()),
+    config: z.record(z.string(), z.unknown()),
   }),
 } satisfies ApiMeta;
 

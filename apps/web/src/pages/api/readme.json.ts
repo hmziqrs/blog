@@ -28,7 +28,11 @@ export const GET: APIRoute = () => {
   const title = titleMatch?.[1] ?? "README";
 
   return new Response(
-    JSON.stringify({ title, source: "https://github.com/hmziqrs/blog/blob/main/README.md", content }),
+    JSON.stringify({
+      title,
+      source: "https://github.com/hmziqrs/blog/blob/main/README.md",
+      content,
+    }),
     { headers: { "Content-Type": "application/json" } },
   );
 };
