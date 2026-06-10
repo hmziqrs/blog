@@ -1,6 +1,22 @@
+import { z } from "zod";
 import { siteConfig } from "../../config/site";
 import type { GetStaticPaths, APIRoute } from "astro";
 import type { AboutPageConfig, ContactPageConfig, LegalPageConfig } from "@blog/site";
+import { type ApiMeta } from "../../utils/api-schemas";
+
+export const apiMeta = {
+  operationId: "getPageConfig",
+  summary: "Page configuration",
+  description: "Returns the configuration for an optional page (about, contact, privacy, terms).",
+  tags: ["pages"],
+  parameters: {
+    page: z.enum(["about", "contact", "privacy", "terms"]).describe("Page identifier."),
+  },
+  response: z.object({
+    page: z.string(),
+    config: z.record(z.unknown()),
+  }),
+} satisfies ApiMeta;
 
 type OptionalPageEntry =
   | { page: "about"; config: AboutPageConfig }

@@ -1,6 +1,16 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { z } from "zod";
 import { normalizeCover } from "../../utils/cover-image";
+import { type ApiMeta, PostSummarySchema } from "../../utils/api-schemas";
+
+export const apiMeta = {
+  operationId: "getAllPosts",
+  summary: "List all posts",
+  description: "Returns all published posts sorted by date (newest first).",
+  tags: ["posts"],
+  response: z.object({ posts: z.array(PostSummarySchema) }),
+} satisfies ApiMeta;
 
 export const GET: APIRoute = async () => {
   const posts = await getCollection("posts", ({ data }) => !data.draft);

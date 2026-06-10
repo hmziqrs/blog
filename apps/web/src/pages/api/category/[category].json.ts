@@ -1,6 +1,22 @@
 import { getCollection } from "astro:content";
 import type { GetStaticPaths, APIRoute, ImageMetadata } from "astro";
+import { z } from "zod";
 import { normalizeCover } from "@/src/utils/cover-image";
+import { type ApiMeta, PostSummarySchema } from "../../../utils/api-schemas";
+
+export const apiMeta = {
+  operationId: "getPostsByCategory",
+  summary: "Posts in a category",
+  description: "Returns all published posts in the given category.",
+  tags: ["categories"],
+  parameters: {
+    category: z.string().describe("Category name (URL-encoded)."),
+  },
+  response: z.object({
+    category: z.string(),
+    posts: z.array(PostSummarySchema),
+  }),
+} satisfies ApiMeta;
 
 export const getStaticPaths = (async () => {
   const posts = await getCollection("posts", ({ data }) => !data.draft);

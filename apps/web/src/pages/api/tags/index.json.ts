@@ -1,5 +1,15 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { z } from "zod";
+import { type ApiMeta, TagSchema } from "../../../utils/api-schemas";
+
+export const apiMeta = {
+  operationId: "getTags",
+  summary: "List tags",
+  description: "Returns all tags with post counts, sorted alphabetically.",
+  tags: ["tags"],
+  response: z.object({ tags: z.array(TagSchema) }),
+} satisfies ApiMeta;
 
 export const GET: APIRoute = async () => {
   const posts = await getCollection("posts", ({ data }) => !data.draft);

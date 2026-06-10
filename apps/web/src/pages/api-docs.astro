@@ -1,0 +1,27 @@
+---
+import { pageTitle } from "../config/site";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title={pageTitle("API Docs")} noindex={true}>
+  <div id="scalar-api-reference"></div>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  <script is:inline>
+    Scalar.createApiReference("#scalar-api-reference", {
+      url: "/api/openapi.json",
+      darkMode: true,
+      hideDarkModeToggle: true,
+      proxyUrl: "https://proxy.scalar.com",
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  :global(#scalar-api-reference) {
+    height: calc(100vh - 4rem);
+  }
+
+  :global(.scalar-app) {
+    --scalar-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  }
+</style>

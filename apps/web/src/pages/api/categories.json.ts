@@ -1,5 +1,15 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { z } from "zod";
+import { type ApiMeta, CategorySchema } from "../../utils/api-schemas";
+
+export const apiMeta = {
+  operationId: "getCategories",
+  summary: "List categories",
+  description: "Returns all categories with post counts, sorted by count descending.",
+  tags: ["categories"],
+  response: z.object({ categories: z.array(CategorySchema) }),
+} satisfies ApiMeta;
 
 export const GET: APIRoute = async () => {
   const posts = await getCollection("posts", ({ data }) => !data.draft);

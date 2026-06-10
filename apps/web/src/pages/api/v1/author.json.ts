@@ -2,6 +2,15 @@ import type { APIRoute } from "astro";
 import { siteConfig } from "../../../config/site";
 import { toAbsoluteUrl, withBasePath } from "@blog/site";
 import { extractTwitterHandle } from "../../../utils/meta";
+import { type ApiMeta, AuthorSchema } from "../../../utils/api-schemas";
+
+export const apiMeta = {
+  operationId: "getAuthor",
+  summary: "Author profile",
+  description: "Returns the site author's profile, socials, and avatar URLs.",
+  tags: ["meta"],
+  response: AuthorSchema,
+} satisfies ApiMeta;
 
 export const GET: APIRoute = () => {
   const avatarLight = withBasePath(siteConfig.basePath, "/author-light.svg");
