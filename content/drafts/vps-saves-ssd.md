@@ -187,7 +187,7 @@ Every session is rooted at the repo (via -c "$root"), so you never have to cd ba
 Things I did on my MacBook:
 Created a ssh config alias to easily connect to the VPS.
 
-
+Also I installed termius on my mobile to manage my agents via mobile. This was such a breeze to set it up. Now I don't even require my laptop to manage agents. Only thing which annoys me is I can't use voice to text via my google keyboard on my mobile. not sure why it's disabled probably a paywall feature. 
 
 
 Conclusion:
