@@ -63,3 +63,5 @@ apps/web/public/web-components/
 *.db
 
 .playwright-mcp/
+
+.commandcode

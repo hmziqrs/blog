@@ -198,3 +198,7 @@ And what about my MacBook?
 Doing all of this and shifting my development env to VPS has darastically improved my quality of life so much as I don't have to sit with power brick. It's the same experience when I first got my Macbook M1 It was such a strong nostalgic feeling for charging my Macbook only once a day. and Now it's back I had to only charge my macbook once a day. and don't have to worry about it going to sleep and pausing my AI agents and final won't have to worry about rust killing my SSD.
 
 Again is this a perfect solution? Definitely not. it's a compromise. sshing into vps isn't a good experience as my closest vps is in germany and it has 120ms and my US vps go as far as 300ms. So I picked my poison to be ping, instead of burnning hot mac with less battery than a 8 year old laptop.
+
+During this whole journey I also developed two new tools to help with on my agentic journey.
+wake (wake.freeoxide.com): Prevents your laptop from sleeping so your agents can run without interruption.
+tunnel (tunnel.freeoxide.com): A simple wrapper tool over cloudflared to create a secure tunnel to your VPS without having to remember all the ssh commands and configurations. Runs on background on default so your terminal is always clean and a built in axum server.
