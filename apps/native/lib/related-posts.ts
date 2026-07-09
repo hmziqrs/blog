@@ -20,7 +20,7 @@ export function getRelatedPosts(
     .filter(({ score }) => score > 0);
 
   return scored
-    .sort(
+    .toSorted(
       (a, b) =>
         b.score - a.score || new Date(b.post.date).getTime() - new Date(a.post.date).getTime(),
     )

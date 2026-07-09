@@ -59,7 +59,7 @@ const { siteKey = "", uid = "modal-newsletter" } = Astro.props;
   </div>
 </Modal>
 
-<script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "", siteKey }}>
+<script is:inline define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "", siteKey }}>
   const modal = document.getElementById(uid);
   const form = document.getElementById(`${uid}-form`);
   const submitBtn = document.getElementById(`${uid}-submit`);

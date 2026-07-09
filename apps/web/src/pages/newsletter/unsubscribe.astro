@@ -47,7 +47,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE ?? "";
   </PageContainer>
 </BaseLayout>
 
-<script define:vars={{ apiBase }}>
+<script is:inline define:vars={{ apiBase }}>
   (async () => {
     const token = new URLSearchParams(location.search).get("token");
     const $loading = document.getElementById("loading");

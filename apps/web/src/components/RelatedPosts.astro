@@ -34,7 +34,7 @@ const related = allPosts
     return { post, score };
   })
   .filter(({ score }) => score > 0)
-  .sort(
+  .toSorted(
     (a, b) =>
       b.score - a.score ||
       b.post.data.date.getTime() - a.post.data.date.getTime(),

@@ -37,8 +37,8 @@ export default function CategoryPostsScreen() {
   }
 
   const posts = data?.posts ?? [];
-  const categoryNames = (categories.data?.categories.map((c) => c.category) ?? []).sort((a, b) =>
-    a.localeCompare(b),
+  const categoryNames = (categories.data?.categories.map((c) => c.category) ?? []).toSorted(
+    (a, b) => a.localeCompare(b),
   );
 
   return (

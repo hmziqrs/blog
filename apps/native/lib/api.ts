@@ -35,7 +35,7 @@ export function getPosts() {
   return fetchApi<PostsResponse>("/api/index.json").then((r) => ({
     posts: r.posts
       .map(normalizePost)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+      .toSorted((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
   }));
 }
 

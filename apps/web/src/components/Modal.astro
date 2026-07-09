@@ -21,7 +21,7 @@ const { uid = "modal" } = Astro.props;
   <slot />
 </div>
 
-<script define:vars={{ uid }}>
+<script is:inline define:vars={{ uid }}>
   let closeTimer;
 
   function getEls() {

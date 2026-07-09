@@ -29,7 +29,7 @@ import Modal from "./Modal.astro";
   </div>
 </Modal>
 
-<script define:vars={{}}>
+<script is:inline define:vars={{}}>
   const lightWarningKey = "theme-light-warning-dismissed";
 
   document.getElementById("light-mode-confirm")?.addEventListener("click", () => {

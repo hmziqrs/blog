@@ -34,7 +34,7 @@ const { siteKey = "", uid = "newsletter" } = Astro.props;
   <div id={`${uid}-message`} class="text-sm hidden"></div>
 </form>
 
-<script define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "" }}>
+<script is:inline define:vars={{ uid, apiBase: import.meta.env.PUBLIC_API_BASE ?? "" }}>
   import { isEmail } from "validator";
 
   const form = document.getElementById(`${uid}-form`);

@@ -5,6 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
+    "dev:bg": "astro dev --background",
+    "dev:status": "astro dev status",
+    "dev:logs": "astro dev logs",
+    "dev:logs:follow": "astro dev logs --follow",
+    "dev:stop": "astro dev stop",
     "build": "astro build",
     "build:staging": "astro build --mode staging",
     "build:prod": "astro build --mode production",
