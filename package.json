@@ -69,10 +69,10 @@
       "packages/*"
     ],
     "catalog": {
-      "zod": "^4.1.13",
+      "zod": "^4.4.3",
       "typescript": "^5",
       "@cloudflare/workers-types": "^4.20251213.0",
-      "tailwindcss": "^4.1.18"
+      "tailwindcss": "^4.3.2"
     }
   }
 }
