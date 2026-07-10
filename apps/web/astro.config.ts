@@ -15,9 +15,13 @@ export default defineConfig({
   integrations: [
     sitemap({
       filter: (page) => {
-        // Exclude utility pages that shouldn't be indexed
-        const excludePaths = ["/newsletter/unsubscribe", "/advertise"];
-        return !excludePaths.some((p) => page.includes(p));
+        // Exclude utility/noindexed pages that shouldn't be in the sitemap
+        const excludePaths = ["/newsletter/unsubscribe", "/advertise", "/api-docs"];
+        if (excludePaths.some((p) => page.includes(p))) return false;
+        // Exclude the newsletter hub itself (noindexed while there are no issues to
+        // list), but keep future /newsletter/<slug> issue pages sitemap-eligible.
+        if (/\/newsletter\/?$/.test(new URL(page).pathname)) return false;
+        return true;
       },
       serialize(item) {
         // Add changefreq and priority based on page type
