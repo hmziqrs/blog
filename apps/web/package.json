@@ -15,6 +15,7 @@
     "build:prod": "astro build --mode production",
     "preview": "astro preview",
     "check": "astro check",
+    "check-types": "astro check",
     "test": "bun test",
     "test:coverage": "bun test --coverage",
     "astro": "astro"

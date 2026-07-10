@@ -3,5 +3,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.oxfmt": "always"
   },
-  "oxc.fmt.experimental": true
+  "oxc.fmt.experimental": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }

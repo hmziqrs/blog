@@ -9,7 +9,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "prebuild": "expo prebuild",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@blog/site": "workspace:*",
@@ -48,6 +49,6 @@
     "@blog/config": "workspace:*",
     "@types/node": "^24.10.0",
     "@types/react": "~19.2.14",
-    "typescript": "~6.0.3"
+    "typescript": "catalog:"
   }
 }

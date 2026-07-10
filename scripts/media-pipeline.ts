@@ -56,14 +56,14 @@ async function queryD1<T = Record<string, unknown>>(
     throw new Error(`D1 query failed (${response.status}): ${body}`);
   }
 
-  const data = await response.json<{
+  const data = (await response.json()) as {
     success: boolean;
     errors: Array<{ message: string }>;
     result: Array<{ results: T[] }>;
-  }>();
-  if (!data.success) throw new Error(`D1 error: ${data.errors[0].message}`);
+  };
+  if (!data.success) throw new Error(`D1 error: ${data.errors[0]!.message}`);
 
-  return data.result[0].results;
+  return data.result[0]!.results;
 }
 
 // ─── Hashing ───────────────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ export function reverseR2Key(r2Key: string): string | null {
   const m = withoutExt.match(/^(.*)-([0-9a-f]{8})$/);
   if (!m) return null;
   const [_, prefix, _hash] = m;
-  const parts = prefix.split("/");
+  const parts = prefix!.split("/");
   const filename = parts.pop()!;
   const dir = parts.join("/");
   return `content/${dir}/media/${filename}${ext}`;
@@ -113,7 +113,7 @@ export function reverseR2Key(r2Key: string): string | null {
 
 async function syncD1FromR2(client: S3Client): Promise<void> {
   const [row] = await queryD1<{ n: number }>("SELECT COUNT(*) as n FROM media");
-  if (row.n > 0) return;
+  if (row!.n > 0) return;
 
   console.log("  media table is empty — rebuilding from R2 listing...");
 
@@ -233,7 +233,7 @@ async function upload() {
     let width: number | null = null;
     let height: number | null = null;
     try {
-      const dims = imageSize(filePath);
+      const dims = imageSize(new Uint8Array(body));
       width = dims.width ?? null;
       height = dims.height ?? null;
     } catch {
@@ -360,7 +360,7 @@ export function rewriteImageRefs(content: string, replacements: Map<string, stri
   const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
   if (!fmMatch) return content;
 
-  const frontmatter = fmMatch[1];
+  const frontmatter = fmMatch[1]!;
   const body = content.slice(fmMatch[0].length);
 
   let newFm = frontmatter;

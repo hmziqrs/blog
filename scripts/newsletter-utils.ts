@@ -24,16 +24,16 @@ export function parseNewsletterIssue(slug: string, dir = NEWSLETTERS_DIR): Newsl
   const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
   if (!fmMatch) return null;
 
-  const fm = fmMatch[1];
+  const fm = fmMatch[1]!;
   const titleMatch = fm.match(/title:\s*["'](.+?)["']/);
   const subjectMatch = fm.match(/subject:\s*["'](.+?)["']/);
   const dateMatch = fm.match(/date:\s*["']?(.+?)["']?(?:\n|$)/);
   const postsMatch = fm.match(/posts:\s*\n((?:\s+-\s+.+\n?)+)/);
 
   const title = titleMatch?.[1] ?? "Newsletter";
-  const date = dateMatch ? new Date(dateMatch[1].trim()) : new Date();
+  const date = dateMatch ? new Date(dateMatch[1]!.trim()) : new Date();
   const posts = postsMatch
-    ? [...postsMatch[1].matchAll(/-\s+"?([^"\n]+)"?/g)].map((m) => m[1].trim())
+    ? [...postsMatch[1]!.matchAll(/-\s+"?([^"\n]+)"?/g)].map((m) => m[1]!.trim())
     : [];
 
   const body = content.slice(fmMatch[0].length).trim();
@@ -85,14 +85,14 @@ export async function queryD1<T = Record<string, unknown>>(
     throw new Error(`D1 query failed (${response.status}): ${response.statusText} — ${body}`);
   }
 
-  const data = await response.json<{
+  const data = (await response.json()) as {
     success: boolean;
     errors: Array<{ message: string }>;
     result: Array<{ results: T[] }>;
-  }>();
-  if (!data.success) throw new Error(`D1 error: ${data.errors[0].message}`);
+  };
+  if (!data.success) throw new Error(`D1 error: ${data.errors[0]!.message}`);
 
-  return data.result[0].results;
+  return data.result[0]!.results;
 }
 
 export function listNewsletterIssues(dir = NEWSLETTERS_DIR): NewsletterIssue[] {

@@ -126,8 +126,8 @@ describe("listNewsletterIssues", () => {
     try {
       const issues = listNewsletterIssues(dir);
       expect(issues).toHaveLength(2);
-      expect(issues[0].slug).toBe("earlier");
-      expect(issues[1].slug).toBe("later");
+      expect(issues[0]!.slug).toBe("earlier");
+      expect(issues[1]!.slug).toBe("later");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -143,7 +143,7 @@ describe("listNewsletterIssues", () => {
     try {
       const issues = listNewsletterIssues(dir);
       expect(issues).toHaveLength(1);
-      expect(issues[0].slug).toBe("good");
+      expect(issues[0]!.slug).toBe("good");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

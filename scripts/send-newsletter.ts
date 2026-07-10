@@ -63,7 +63,7 @@ async function main() {
   }
 
   if (force) {
-    const latest = issues[issues.length - 1];
+    const latest = issues[issues.length - 1]!;
     console.log(`Force-sending latest issue: "${latest.subject}" (${latest.slug})`);
     await sendIssue(latest.slug);
     return;
@@ -78,7 +78,7 @@ async function main() {
     process.exit(0);
   }
 
-  const next = unsent[0];
+  const next = unsent[0]!;
   console.log(
     `Found unsent issue: "${next.subject}" (${next.slug}) from ${next.date.toISOString().slice(0, 10)}`,
   );
